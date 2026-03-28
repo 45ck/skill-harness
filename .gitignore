@@ -1,5 +1,6 @@
 .DS_Store
 Thumbs.db
-skill-harness
-skill-harness.exe
+/skill-harness
+/skill-harness.exe
 social-preview.png
+dist/
