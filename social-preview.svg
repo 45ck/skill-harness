@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title>skill-harness social preview</title>
+  <desc>Social preview image for the skill-harness repository.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="45%" stop-color="#1d4ed8" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+    <linearGradient id="panel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0b1223" stop-opacity="0.92" />
+      <stop offset="100%" stop-color="#111c35" stop-opacity="0.84" />
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" rx="36" fill="url(#bg)" />
+  <rect x="58" y="56" width="1164" height="528" rx="30" fill="url(#panel)" stroke="#93c5fd" stroke-opacity="0.24" />
+
+  <circle cx="156" cy="182" r="22" fill="#ffffff" />
+  <circle cx="156" cy="308" r="22" fill="#bfdbfe" />
+  <circle cx="368" cy="246" r="26" fill="#ffffff" />
+  <path d="M182 182h98a42 42 0 0 1 42 42v0a42 42 0 0 0 42 42" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" />
+  <path d="M182 308h74a42 42 0 0 0 42-42v0a42 42 0 0 1 42-42h28" fill="none" stroke="#bfdbfe" stroke-width="14" stroke-linecap="round" />
+
+  <text x="454" y="206" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="68" font-weight="700">skill-harness</text>
+  <text x="454" y="268" fill="#dbeafe" font-family="Segoe UI, Arial, sans-serif" font-size="28">Install the skill-pack suite and shared agents for Claude and Codex.</text>
+
+  <rect x="458" y="332" width="236" height="64" rx="18" fill="#0f172a" stroke="#60a5fa" />
+  <text x="494" y="374" fill="#e0f2fe" font-family="Consolas, 'Courier New', monospace" font-size="28">install --all</text>
+
+  <rect x="718" y="332" width="256" height="64" rx="18" fill="#0f172a" stroke="#60a5fa" />
+  <text x="753" y="374" fill="#e0f2fe" font-family="Consolas, 'Courier New', monospace" font-size="28">install --interactive</text>
+
+  <rect x="458" y="430" width="516" height="92" rx="20" fill="#09111f" stroke="#1e3a8a" />
+  <text x="492" y="472" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="600">What it bootstraps</text>
+  <text x="492" y="510" fill="#bfdbfe" font-family="Segoe UI, Arial, sans-serif" font-size="24">26 pack repos, shared skills, Claude agents, Codex agents</text>
+</svg>
