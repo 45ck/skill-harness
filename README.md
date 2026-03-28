@@ -10,8 +10,8 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
-  <img src="https://img.shields.io/badge/claude_agents-13-2563eb" alt="13 Claude agents" />
-  <img src="https://img.shields.io/badge/codex_agents-13-1d4ed8" alt="13 Codex agents" />
+  <img src="https://img.shields.io/badge/claude_agents-19-2563eb" alt="19 Claude agents" />
+  <img src="https://img.shields.io/badge/codex_agents-19-1d4ed8" alt="19 Codex agents" />
 </p>
 
 A workflow-oriented agent layer built on top of the skill-pack repositories. It ships role-based Claude and Codex agents with curated loadouts rather than one agent per pack.
@@ -19,17 +19,23 @@ A workflow-oriented agent layer built on top of the skill-pack repositories. It 
 ## Included agents
 
 - `requirements-analyst`
+- `requirements-analyst-beads`
 - `ux-researcher`
 - `system-modeler`
+- `system-modeler-beads`
 - `software-architect`
+- `software-architect-beads`
 - `web-engineer`
 - `backend-engineer`
 - `test-designer`
+- `test-designer-beads`
 - `qa-automation-engineer`
 - `quality-reviewer`
 - `security-reviewer`
+- `security-reviewer-beads`
 - `pentest-reviewer`
 - `delivery-manager`
+- `delivery-manager-beads`
 - `research-writer`
 
 ## Structure
@@ -81,6 +87,7 @@ The installer is dependency-aware:
 - Agents are thin workflow workers with curated loadouts.
 - Claude agents preload only a tight skill list because those skills are injected into context at startup.
 - Codex agents stay role-scoped and can be rendered with explicit `skills.config` entries for local installations.
+- Beads variants keep the same core loadout but change the output contract toward trackable work items when `bd` is available.
 
 ## Placement
 

@@ -86,6 +86,12 @@
         "documentation-evidence-skills"
       ]
     },
+    "requirements-analyst-beads": {
+      "repos": [
+        "business-analysis-skills",
+        "documentation-evidence-skills"
+      ]
+    },
     "ux-researcher": {
       "repos": [
         "hci-review-skill",
@@ -100,7 +106,21 @@
         "software-architecture-skills"
       ]
     },
+    "system-modeler-beads": {
+      "repos": [
+        "uml-analysis-modelling-skills",
+        "business-analysis-skills",
+        "software-architecture-skills"
+      ]
+    },
     "software-architect": {
+      "repos": [
+        "software-architecture-skills",
+        "enterprise-architecture-integration-skills",
+        "documentation-evidence-skills"
+      ]
+    },
+    "software-architect-beads": {
       "repos": [
         "software-architecture-skills",
         "enterprise-architecture-integration-skills",
@@ -128,6 +148,13 @@
         "design-for-testability-skills"
       ]
     },
+    "test-designer-beads": {
+      "repos": [
+        "verification-test-design-skills",
+        "non-functional-testing-skills",
+        "design-for-testability-skills"
+      ]
+    },
     "qa-automation-engineer": {
       "repos": [
         "automation-testing-skills",
@@ -149,6 +176,13 @@
         "llm-agent-security-skills"
       ]
     },
+    "security-reviewer-beads": {
+      "repos": [
+        "security-engineering-skills",
+        "authentication-cryptography-skills",
+        "llm-agent-security-skills"
+      ]
+    },
     "pentest-reviewer": {
       "repos": [
         "pentest-security-testing-skills",
@@ -156,6 +190,14 @@
       ]
     },
     "delivery-manager": {
+      "repos": [
+        "agile-delivery-skills",
+        "project-management-skills",
+        "deployment-release-skills",
+        "maintenance-evolution-skills"
+      ]
+    },
+    "delivery-manager-beads": {
       "repos": [
         "agile-delivery-skills",
         "project-management-skills",
