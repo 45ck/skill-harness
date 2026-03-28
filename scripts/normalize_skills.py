@@ -7,6 +7,10 @@ def escape_double_quotes(text: str) -> str:
     return text.replace("\\", "\\\\").replace('"', '\\"')
 
 
+def yaml_quote(text: str) -> str:
+    return f'"{escape_double_quotes(text)}"'
+
+
 def find_section_line(body: str, heading: str) -> str | None:
     pattern = rf"(?im)^##\s+{re.escape(heading)}\s*$"
     match = re.search(pattern, body)
@@ -47,11 +51,33 @@ def normalize_file(path: Path) -> bool:
         if end != -1:
             frontmatter = text[4:end]
             body = text[end + 5 :]
+            desired_name_line = f"name: {yaml_quote(skill_name)}"
+            if re.search(r"(?im)^name:\s*", frontmatter):
+                updated_frontmatter = re.sub(
+                    r"(?im)^name:\s*.*$",
+                    desired_name_line,
+                    frontmatter,
+                    count=1,
+                )
+                if updated_frontmatter != frontmatter:
+                    frontmatter = updated_frontmatter
+                    changed = True
             if not re.search(r"(?im)^description:\s*", frontmatter):
                 description = derive_description(skill_name, body, frontmatter)
-                frontmatter = frontmatter.rstrip() + f'\ndescription: "{escape_double_quotes(description)}"\n'
-                text = f"---\n{frontmatter}---\n{body.lstrip()}"
+                frontmatter = frontmatter.rstrip() + f"\ndescription: {yaml_quote(description)}\n"
                 changed = True
+            else:
+                description = derive_description(skill_name, body, frontmatter)
+                updated_frontmatter = re.sub(
+                    r"(?im)^description:\s*.*$",
+                    f"description: {yaml_quote(description)}",
+                    frontmatter,
+                    count=1,
+                )
+                if updated_frontmatter != frontmatter:
+                    frontmatter = updated_frontmatter
+                    changed = True
+            text = f"---\n{frontmatter.rstrip()}\n---\n{body.lstrip()}"
         else:
             frontmatter = None
             body = text
@@ -62,7 +88,7 @@ def normalize_file(path: Path) -> bool:
     if frontmatter is None:
         description = derive_description(skill_name, body, None)
         normalized = (
-            f'---\nname: "{skill_name}"\ndescription: "{escape_double_quotes(description)}"\n---\n\n'
+            f"---\nname: {yaml_quote(skill_name)}\ndescription: {yaml_quote(description)}\n---\n\n"
             + text.lstrip()
         )
         text = normalized
