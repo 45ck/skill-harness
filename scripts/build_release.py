@@ -109,14 +109,14 @@ def write_quickstart(bundle_root: Path, binary_name: str, goos: str) -> None:
 
 
 def make_archives(bundle_root: Path, archive_base: Path, goos: str) -> None:
-    zip_path = archive_base.with_suffix(".zip")
+    zip_path = archive_base.parent / f"{archive_base.name}.zip"
     with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         for file in bundle_root.rglob("*"):
             if file.is_file():
                 zf.write(file, file.relative_to(bundle_root.parent))
 
     if goos != "windows":
-        tar_path = archive_base.with_suffix(".tar.gz")
+        tar_path = archive_base.parent / f"{archive_base.name}.tar.gz"
         with tarfile.open(tar_path, "w:gz") as tf:
             tf.add(bundle_root, arcname=bundle_root.name)
 
