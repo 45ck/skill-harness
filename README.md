@@ -24,9 +24,9 @@ It does four jobs:
 
 ### Project tooling
 
-- `@45ck/noslop`
-- `45ck/agent-docs`
-- `bd` / Beads
+- [`45ck/noslop`](https://github.com/45ck/noslop)
+- [`45ck/agent-docs`](https://github.com/45ck/agent-docs)
+- [`steveyegge/beads`](https://github.com/steveyegge/beads)
 
 Use the project setup command when you want a repo scaffolded with the 45ck tooling stack:
 
@@ -160,32 +160,39 @@ Agent-to-skill mapping lives in [docs/agent-loadouts.md](docs/agent-loadouts.md)
 
 ## Included pack repos
 
-- `agile-delivery-skills`
-- `authentication-cryptography-skills`
-- `automation-testing-skills`
-- `backend-persistence-skills`
-- `business-analysis-skills`
-- `code-review-inspection-skills`
-- `data-structures-algorithmic-reasoning-skills`
-- `deployment-release-skills`
-- `design-for-testability-skills`
-- `documentation-evidence-skills`
-- `enterprise-architecture-integration-skills`
-- `hci-review-skill`
-- `llm-agent-security-skills`
-- `maintenance-evolution-skills`
-- `non-functional-testing-skills`
-- `oop-code-structure-skills`
-- `pentest-security-testing-skills`
-- `project-management-skills`
-- `refactoring-code-smells-skills`
-- `research-literature-review-skills`
-- `security-engineering-skills`
-- `software-architecture-skills`
-- `software-quality-skills`
-- `uml-analysis-modelling-skills`
-- `verification-test-design-skills`
-- `web-engineering-skills`
+- [`45ck/agile-delivery-skills`](https://github.com/45ck/agile-delivery-skills)
+- [`45ck/authentication-cryptography-skills`](https://github.com/45ck/authentication-cryptography-skills)
+- [`45ck/automation-testing-skills`](https://github.com/45ck/automation-testing-skills)
+- [`45ck/backend-persistence-skills`](https://github.com/45ck/backend-persistence-skills)
+- [`45ck/business-analysis-skills`](https://github.com/45ck/business-analysis-skills)
+- [`45ck/code-review-inspection-skills`](https://github.com/45ck/code-review-inspection-skills)
+- [`45ck/data-structures-algorithmic-reasoning-skills`](https://github.com/45ck/data-structures-algorithmic-reasoning-skills)
+- [`45ck/deployment-release-skills`](https://github.com/45ck/deployment-release-skills)
+- [`45ck/design-for-testability-skills`](https://github.com/45ck/design-for-testability-skills)
+- [`45ck/documentation-evidence-skills`](https://github.com/45ck/documentation-evidence-skills)
+- [`45ck/enterprise-architecture-integration-skills`](https://github.com/45ck/enterprise-architecture-integration-skills)
+- [`45ck/hci-review-skill`](https://github.com/45ck/hci-review-skill)
+- [`45ck/llm-agent-security-skills`](https://github.com/45ck/llm-agent-security-skills)
+- [`45ck/maintenance-evolution-skills`](https://github.com/45ck/maintenance-evolution-skills)
+- [`45ck/non-functional-testing-skills`](https://github.com/45ck/non-functional-testing-skills)
+- [`45ck/oop-code-structure-skills`](https://github.com/45ck/oop-code-structure-skills)
+- [`45ck/pentest-security-testing-skills`](https://github.com/45ck/pentest-security-testing-skills)
+- [`45ck/project-management-skills`](https://github.com/45ck/project-management-skills)
+- [`45ck/refactoring-code-smells-skills`](https://github.com/45ck/refactoring-code-smells-skills)
+- [`45ck/research-literature-review-skills`](https://github.com/45ck/research-literature-review-skills)
+- [`45ck/security-engineering-skills`](https://github.com/45ck/security-engineering-skills)
+- [`45ck/software-architecture-skills`](https://github.com/45ck/software-architecture-skills)
+- [`45ck/software-quality-skills`](https://github.com/45ck/software-quality-skills)
+- [`45ck/uml-analysis-modelling-skills`](https://github.com/45ck/uml-analysis-modelling-skills)
+- [`45ck/verification-test-design-skills`](https://github.com/45ck/verification-test-design-skills)
+- [`45ck/web-engineering-skills`](https://github.com/45ck/web-engineering-skills)
+
+## Tooling repos used here
+
+- [`45ck/skill-harness`](https://github.com/45ck/skill-harness)
+- [`45ck/noslop`](https://github.com/45ck/noslop)
+- [`45ck/agent-docs`](https://github.com/45ck/agent-docs)
+- [`steveyegge/beads`](https://github.com/steveyegge/beads)
 
 ## For other agents
 
@@ -195,7 +202,9 @@ If another agent needs to install this repo or use it as the setup entrypoint, p
 
 - [cmd/skill-harness/main.go](cmd/skill-harness/main.go)
 - [AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md)
+- [docs/third-party-skill-intake.md](docs/third-party-skill-intake.md)
 - [scripts/dependencies.json](scripts/dependencies.json)
+- [scripts/external_skill_intake.py](scripts/external_skill_intake.py)
 - [scripts/build_release.py](scripts/build_release.py)
 
 ## License
