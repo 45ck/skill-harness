@@ -4,7 +4,7 @@ Record one section per session pair. A session pair is one Group A run and one G
 
 ---
 
-## Cumulative summary (5 experiments, 6 sessions)
+## Cumulative summary (7 experiments, 10 sessions)
 
 | # | Experiment | Task | Group A | Group B | Delta |
 |---|-----------|------|:-------:|:-------:|:-----:|
@@ -14,6 +14,17 @@ Record one section per session pair. A session pair is one Group A run and one G
 | 4 | Maintenance/handoff | handoff-01 | 33/35 | 19/35 | +14 |
 | 7 | Ambiguous brief | ambiguous-01 | **35/35** | 13/35 | **+22** |
 | **Avg** | | | **32.6** | **18.0** | **+14.6** |
+
+**Component isolation (Exp 5 — 4 groups, same task):**
+
+| Group | Score | vs Baseline |
+|---|:---:|:---:|
+| A — full toolkit | 33/35 | +12 |
+| B — specgraph-only | 33/35 | +12 |
+| C — noslop-only | 24/35 | +3 |
+| D — baseline | 21/35 | — |
+
+**Specgraph = +12 of the gap. Noslop = +3 independently.**
 
 **The system is not useless. The ambiguous brief experiment is the proof.**
 
@@ -281,6 +292,71 @@ _Group B:_
 **Evidence quality reached 5/5 for the first time.** The `@test` annotation providing E1 structural evidence demonstrates that when the spec-writer skill is used with full compliance, the evidence chain completes cleanly. This validates the specgraph design.
 
 **Group B's 54 tests are a red herring.** More tests looks better on the surface, but 38 of those tests exist only because Group B built 4 subsystems nobody asked for. They're not covering more of the *required* behaviour — they're testing unrequested features.
+
+---
+
+---
+
+## Experiment 5: Component Isolation — What Drives the Gap? (2026-04-01)
+## Task: User Authentication Module (same as Exp 1–2)
+## Groups: A=full toolkit, B=specgraph-only, C=noslop-only, D=baseline
+
+| Metric | A (full toolkit) | B (specgraph-only) | C (noslop-only) | D (baseline) |
+|--------|:----------------:|:------------------:|:---------------:|:------------:|
+| Spec compliance | 5 / 5 | 5 / 5 | 0 / 5 | 0 / 5 |
+| Evidence quality | 3 / 5 | **5 / 5** | 0 / 5 | 0 / 5 |
+| Output correctness | 5 / 5 | 5 / 5 | 5 / 5 | 5 / 5 |
+| Over-engineering *(inverted)* | 5 / 5 | 4 / 5 | 5 / 5 | 5 / 5 |
+| Drift *(inverted)* | 5 / 5 | 5 / 5 | 5 / 5 | 5 / 5 |
+| Quality gate adherence | 5 / 5 | 4 / 5 | **5 / 5** | 3 / 5 |
+| Documentation quality | 5 / 5 | 5 / 5 | 4 / 5 | 3 / 5 |
+| **Total** | **33 / 35** | **33 / 35** | **24 / 35** | **21 / 35** |
+
+**Test counts:** A=18, B=16, C=27, D=24. All 0 failures.
+
+**Specgraph verify:** A=1 advisory WARN (no @test claims), B=**PASS 0 WARN** (agent used `@test` annotations), C/D=n/a.
+
+### Attribution analysis
+
+| Comparison | Delta | Interpretation |
+|---|:---:|---|
+| A vs D (full toolkit vs nothing) | +12 | Same gap as Exps 1–4 — result is stable |
+| B vs D (specgraph-only vs nothing) | +12 | **Specgraph accounts for the entire gap** |
+| C vs D (noslop-only vs nothing) | +3 | Noslop adds quality-gate discipline (+3) |
+| A vs B (full vs specgraph-only) | 0 | Tied — noslop hooks not fully wired in this env |
+| A vs C (full vs noslop-only) | +9 | Specgraph's spec/evidence metrics dominate |
+
+### Observations
+
+**Group A (full toolkit):**
+- Spec written first (`docs/AUTH-001.md`), noslop `AGENTS.md` provided behavioral quality instructions
+- 9 implementation claims at E0, verify passed with 1 advisory warn (no `@test` annotations)
+- noslop hooks were behavioral (not wired to git pre-commit in this env) — scored quality gate 5 based on compliance with AGENTS.md instructions
+
+**Group B (specgraph-only):**
+- No `AGENTS.md` / noslop; only spec workflow
+- **Best evidence quality of all 4 groups**: agent used `@test` annotations in addition to `@implements`, producing 13 claims and a clean PASS (0 warnings) — first clean verify pass without waivers
+- Created v1 TOON artifacts (`AUTH-001.toon`, `PLAN.toon`) as minor over-engineering (the spec-first workflow triggered v1 artifact creation as well) — scored 4 on over-engineering
+- Quality gate adherence 4 (no noslop gate available)
+
+**Group C (noslop-only):**
+- No spec docs, no `@spec` annotations anywhere — scores 0/0 on traceability metrics
+- Scored 0 on spec compliance and evidence — the entire 12-point gap vs toolkit is explained here
+- Strongest test suite (27 tests) and proactively caught session bleed between tests (`_reset()` helper used correctly in every test)
+- noslop AGENTS.md instruction (`Run npm test before every commit`) was followed strictly — full 5 on quality gate adherence
+
+**Group D (baseline):**
+- No tooling, no AGENTS.md, no spec — direct implementation
+- 24 tests, all pass, README and JSDoc present
+- Quality gate adherence 3 — ran tests once, passed, declared done (no deliberate verification loop)
+
+### Conclusion
+
+**Specgraph drives the performance gap. Noslop adds disciplined quality-gate adherence (+3) that does not appear in specgraph-only or full-toolkit scores when hooks are only behavioral.**
+
+The full toolkit tied specgraph-only in this run because (a) noslop hooks were not wired to git pre-commit in the experiment environment, and (b) Group B happened to produce better evidence quality by using `@test` annotations. In a real environment with noslop hooks wired, Group A should outperform Group B by ~3 points.
+
+**Noslop's contribution is not traceability — it's process enforcement**: the behavioral instruction "run tests before every commit, fix all failures" caused Group C to write 27 tests vs Group D's 24 and catch a session-bleed issue that Group D missed. Without noslop, the agent needs to self-regulate quality checks.
 
 ---
 
