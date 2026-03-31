@@ -1,0 +1,13 @@
+{
+  "name": "b-auth-module-01",
+  "version": "1.0.0",
+  "description": "In-memory user authentication module with login, logout, and session management.",
+  "type": "module",
+  "main": "auth.js",
+  "scripts": {
+    "test": "node --test auth.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

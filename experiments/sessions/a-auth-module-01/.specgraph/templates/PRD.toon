@@ -1,0 +1,20 @@
+id: PRD-000
+kind: PRD
+title: Product Requirement Draft
+status: draft
+scope: platform
+owner: Product
+date: 2026-03-03
+tags[2]: prd,requirements
+implements[0]:
+dependsOn[0]:
+references[0]:
+supersedes[0]:
+supersededBy[0]:
+conflictsWith[0]:
+specRefs[0]:
+sections[3]{title,body}:
+  Problem Statement,Describe the user problem and why it matters.
+  Success Criteria,Define measurable goals and acceptance criteria.
+  Scope,List in-scope and out-of-scope items.
+

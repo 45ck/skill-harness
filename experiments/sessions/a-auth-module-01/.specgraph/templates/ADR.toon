@@ -1,0 +1,21 @@
+id: ADR-000
+kind: ADR
+title: Technology Decision Record Template
+status: draft
+scope: platform
+owner: Architecture
+date: 2026-03-03
+tags[2]: adr,decision
+implements[0]:
+dependsOn[0]:
+references[0]:
+supersedes[0]:
+supersededBy[0]:
+conflictsWith[0]:
+specRefs[0]:
+sections[4]{title,body}:
+  Context,"State the problem, constraints, and decision drivers."
+  Decision,Describe the selected approach and rationale.
+  Alternatives,List rejected alternatives and why they were rejected.
+  Consequences,Describe operational and implementation impacts.
+

@@ -1,0 +1,35 @@
+{
+  "id": "ADR-000",
+  "kind": "ADR",
+  "title": "Technology Decision Record Template",
+  "status": "draft",
+  "scope": "platform",
+  "owner": "Architecture",
+  "date": "2026-03-03",
+  "tags": ["adr", "decision"],
+  "implements": [],
+  "dependsOn": [],
+  "references": [],
+  "supersedes": [],
+  "supersededBy": [],
+  "conflictsWith": [],
+  "specRefs": [],
+  "sections": [
+    {
+      "title": "Context",
+      "body": "State the problem, constraints, and decision drivers."
+    },
+    {
+      "title": "Decision",
+      "body": "Describe the selected approach and rationale."
+    },
+    {
+      "title": "Alternatives",
+      "body": "List rejected alternatives and why they were rejected."
+    },
+    {
+      "title": "Consequences",
+      "body": "Describe operational and implementation impacts."
+    }
+  ]
+}

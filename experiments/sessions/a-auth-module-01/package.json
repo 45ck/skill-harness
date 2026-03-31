@@ -1,0 +1,20 @@
+{
+  "name": "a-auth-module-01",
+  "version": "1.0.0",
+  "description": "In-memory user authentication module — login, logout, session management",
+  "main": "auth.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --test auth.test.js",
+    "docs:check": "agent-docs check",
+    "docs:generate": "agent-docs generate --format both",
+    "docs:report": "agent-docs report --all"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@45ck/agent-docs": "file:../../../../agent-docs",
+    "@45ck/noslop": "file:../../../../noslop"
+  }
+}

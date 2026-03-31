@@ -1,0 +1,22 @@
+id: CMP-000
+kind: COMPONENT
+title: Component Design Template
+status: draft
+scope: platform
+owner: Engineering
+date: 2026-03-03
+tags[2]: component,design
+metadata.parentComponent:
+implements[0]:
+dependsOn[0]:
+references[0]:
+supersedes[0]:
+supersededBy[0]:
+conflictsWith[0]:
+specRefs[0]:
+sections[4]{title,body}:
+  Responsibilities,Define what this component owns and does.
+  Dependencies,List internal and external dependencies.
+  Boundaries,Define input/output boundaries and invariants.
+  Deployment,Describe deployment topology and scaling considerations.
+

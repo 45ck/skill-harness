@@ -1,0 +1,19 @@
+id: PLAN-000
+kind: OTHER
+title: Project Plan Index
+status: draft
+scope: platform
+owner: Engineering Lead
+date: 2026-03-03
+tags[2]: bootstrap,plan
+implements[0]:
+dependsOn[0]:
+references[0]:
+supersedes[0]:
+supersededBy[0]:
+conflictsWith[0]:
+specRefs[0]:
+sections[2]{title,body}:
+  Objective,Capture initial project goals and constraints before adding implementation details.
+  Status,Draft
+

@@ -1,0 +1,25 @@
+id: DEF-000
+kind: DEFECT
+title: Defect Report Template
+status: open
+scope: platform
+owner: Engineering
+date: 2026-03-03
+tags[2]: defect,bug
+metadata.severity: medium
+metadata.priority: P2
+metadata.affectedArtifacts[0]:
+implements[0]:
+dependsOn[0]:
+references[0]:
+supersedes[0]:
+supersededBy[0]:
+conflictsWith[0]:
+specRefs[0]:
+sections[5]{title,body}:
+  Description,Describe the defect clearly and concisely.
+  Steps to Reproduce,List exact steps to reproduce the issue.
+  Expected vs Actual,"Expected: describe expected behavior. Actual: describe observed behavior."
+  Root Cause,Identify the root cause once investigated.
+  Resolution,Describe the fix or workaround applied.
+
