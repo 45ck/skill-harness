@@ -4,3 +4,8 @@ Thumbs.db
 /skill-harness.exe
 social-preview.png
 dist/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key

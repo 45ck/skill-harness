@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "skill_harness",
+  "project_id": "44e25b99-a315-4171-9628-64a28d6fe161"
+}
