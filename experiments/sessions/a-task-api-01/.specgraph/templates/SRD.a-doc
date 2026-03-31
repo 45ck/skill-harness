@@ -1,0 +1,27 @@
+{
+  "id": "SRD-000",
+  "kind": "SRD",
+  "title": "System Requirements Draft",
+  "status": "draft",
+  "scope": "platform",
+  "owner": "Engineering",
+  "date": "2026-03-03",
+  "tags": ["srd", "architecture", "requirements"],
+  "implements": [],
+  "dependsOn": [],
+  "references": [],
+  "supersedes": [],
+  "supersededBy": [],
+  "conflictsWith": [],
+  "specRefs": [],
+  "sections": [
+    {
+      "title": "Functional Requirements",
+      "body": "Document expected feature behavior and API-level contracts."
+    },
+    {
+      "title": "Non-Functional Requirements",
+      "body": "Document performance, security, and reliability requirements."
+    }
+  ]
+}

@@ -4,15 +4,18 @@ Record one section per session pair. A session pair is one Group A run and one G
 
 ---
 
-## Cumulative summary (2 sessions)
+## Cumulative summary (6 sessions)
 
-| Session | Task | Group A | Group B | Delta |
-|---------|------|:-------:|:-------:|:-----:|
-| 1 | auth-module-01 | 32/35 | 20/35 | +12 |
-| 2 | auth-module-02 | 31/35 | 19/35 | +12 |
-| **Average** | | **31.5** | **19.5** | **+12** |
+| # | Experiment | Task | Group A | Group B | Delta |
+|---|-----------|------|:-------:|:-------:|:-----:|
+| 1 | Greenfield small (rep 1) | auth-module-01 | 32/35 | 20/35 | +12 |
+| 2 | Greenfield small (rep 2) | auth-module-02 | 31/35 | 19/35 | +12 |
+| 3 | Greenfield large | task-api-01 | 32/35 | 19/35 | +13 |
+| 4 | Maintenance/handoff | handoff-01 | 33/35 | 19/35 | +14 |
+| 7 | Ambiguous brief | ambiguous-01 | TBD | TBD | TBD |
+| **Avg (1-4)** | | | **32** | **19.25** | **+12.75** |
 
-**Consistent signal.** Two sessions, identical delta. The gap is driven entirely by spec compliance (5 vs 0) and evidence quality (3 vs 0). All other metrics are within 1 point. Functional output quality is equal in both sessions.
+**Signal is consistent and strengthening.** The gap is stable at +12–14 across all task types. Largest gap on the maintenance/handoff experiment — the toolkit's paper trail had measurable utility for a fresh agent. Exp 7 (ambiguous brief) pending.
 
 ---
 
@@ -136,5 +139,91 @@ _Group B notable behaviors:_
 Full rubric: `experiments/methodology.md`
 
 ---
+
+---
+
+## Experiment 3: Greenfield Large Project (2026-04-01)
+## Task: Task Management REST API (3 modules, 6 HTTP routes)
+
+| Metric | Group A (toolkit) | Group B (baseline) |
+|--------|:----------------:|:-----------------:|
+| Spec compliance | 5 / 5 | 0 / 5 |
+| Evidence quality | 3 / 5 | 0 / 5 |
+| Output correctness | 5 / 5 | 5 / 5 |
+| Over-engineering *(inverted)* | 5 / 5 | 4 / 5 |
+| Drift *(inverted)* | 5 / 5 | 5 / 5 |
+| Quality gate adherence | 4 / 5 | 3 / 5 |
+| Documentation quality | 5 / 5 | 2 / 5 |
+| **Total** | **32 / 35** | **19 / 35** |
+
+**Delta: +13** (highest gap on a greenfield task; gap held and widened vs small tasks).
+
+## Observations
+
+_Group A:_
+- 3 specs written and committed before a single line of implementation: `AUTH-001.md`, `TASKS-001.md`, `API-001.md` — one per component.
+- 16 implementation claims registered at E0 across all 3 modules.
+- `specgraph verify`: `3 WARN` (advisory, all waived — one per spec, same Beads-unavailable condition). 0 FAIL. Waivers recorded in each spec's frontmatter.
+- `npm test`: **28/28 pass** covering all 6 routes, auth, scoping, 401/404/400 cases.
+- README with full curl examples for every endpoint.
+- Two-commit workflow: specs first, then all implementation.
+
+_Group B:_
+- Direct implementation from task prompt. No specs.
+- `getUsernameFromToken` extra export (minor), `pruneExpiredSessions` lazy call on every login/check.
+- **27/27 pass** — one fewer test than Group A despite no spec overhead.
+- README present. Strong JSDoc. No spec docs.
+- Ran tests once, clean pass, declared done (no deliberate final verification).
+
+## Reviewer notes
+
+**Gap widened slightly on larger scope (+13 vs +12).** The additional modules and spec docs mean Group A's structural advantage compounds. Three spec docs with clear requirements lists means every design decision is recorded; Group B's three-module implementation has no documented rationale anywhere.
+
+**Group B test count was lower (27 vs 28) on the larger task** — opposite of small tasks where Group B wrote more tests. Hypothesis: at higher complexity, the spec-first workflow gives Group A a structured test target list (one test per acceptance criterion), while Group B is working from memory of what it built.
+
+**Quality gate discipline diverged more (+4 vs +3).** Group A ran specgraph verify + npm test with documented waivers. Group B ran tests once and stopped.
+
+---
+
+## Experiment 4: Maintenance / Handoff Test (2026-04-01)
+## Task: Add password reset to existing auth module (fresh agent, no prior context)
+
+| Metric | Group A (toolkit) | Group B (baseline) |
+|--------|:----------------:|:-----------------:|
+| Spec compliance | 5 / 5 | 0 / 5 |
+| Evidence quality | 4 / 5 | 0 / 5 |
+| Output correctness | 5 / 5 | 5 / 5 |
+| Over-engineering *(inverted)* | 5 / 5 | 3 / 5 |
+| Drift *(inverted)* | 5 / 5 | 5 / 5 |
+| Quality gate adherence | 4 / 5 | 4 / 5 |
+| Documentation quality | 5 / 5 | 2 / 5 |
+| **Total** | **33 / 35** | **19 / 35** |
+
+**Delta: +14** — largest gap across all experiments. The paper trail proved its value on first use.
+
+## Observations
+
+_Group A:_
+- Agent explicitly reported: *"The spec doc was genuinely useful — it covered requirements, acceptance criteria, out-of-scope items, and assumptions in enough detail that I needed no guesswork about intent."*
+- Navigated the codebase via `docs/AUTH-001.md` + existing annotations. No surprises.
+- Added requirements 8–12 to spec before adding code. Annotated new functions.
+- `specgraph verify`: same pre-existing advisory warn, pre-existing waiver still valid. 0 new FAIL.
+- **26/26 pass** (19 original + 7 new tests).
+- Evidence quality scored **4** (highest across all experiments) — starting from an established E0 claim chain means the evidence dimension was already partially satisfied.
+
+_Group B:_
+- Agent navigated by reading `auth.js` and `auth.test.js` directly — no spec to consult.
+- Hit a **hidden shared-mutable-state trap**: `USER_STORE` is module-level. `resetPassword` mutates it. Existing tests did not reset it in `beforeEach` (never needed to before). First `npm test` run failed.
+- Had to add `_resetUserStore` helper, extract `DEFAULT_USERS` constant, update `beforeEach` — extra discovery and remediation work not needed by Group A.
+- **36/36 pass** (25 original + 11 new tests) — more tests than Group A's 7 new, but 4 of those extra tests were specifically to cover the trap they discovered.
+- Over-engineering score: **3** (forced to add `_resetUserStore` + `DEFAULT_USERS` refactor due to undocumented state — not bloat by choice, but undocumented complexity that compelled extra scaffolding).
+
+## Reviewer notes
+
+**The paper trail proved useful on first actual use.** This is the most important result across all experiments. Both agents succeeded, but Group A had zero friction; Group B spent non-trivial effort discovering a hidden implementation detail that a spec document, a comment, or even a README note would have prevented.
+
+**The hidden-state trap is a proxy for real maintenance cost.** In a production codebase with tens of modules, undocumented mutable state is a major source of bugs. Group A's annotations pointed new agents to the spec; Group B's code provided no such guidance. The discovery cost here was a few extra functions and a test rewrite — at larger scale it would be a bug.
+
+**Evidence quality reached 4/5 for the first time** in Group A. The maintenance context means starting from a working evidence chain rather than zero — iterative spec maintenance compounds positively.
 
 <!-- Copy the session block above for each new session pair -->

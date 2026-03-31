@@ -1,0 +1,19 @@
+id: POLICY-000
+kind: POLICY
+title: Policy Template
+status: draft
+scope: platform
+owner: Governance
+date: 2026-03-03
+tags[2]: policy,governance
+implements[0]:
+dependsOn[0]:
+references[0]:
+supersedes[0]:
+supersededBy[0]:
+conflictsWith[0]:
+specRefs[0]:
+sections[2]{title,body}:
+  Policy Statement,Define the rule and who it applies to.
+  Compliance,Define evidence and audit expectations.
+

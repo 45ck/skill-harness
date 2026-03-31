@@ -1,0 +1,27 @@
+{
+  "id": "PLAN-000",
+  "kind": "OTHER",
+  "title": "Project Plan Index",
+  "status": "draft",
+  "scope": "platform",
+  "owner": "Engineering Lead",
+  "date": "2026-03-03",
+  "tags": ["bootstrap", "plan"],
+  "implements": [],
+  "dependsOn": [],
+  "references": [],
+  "supersedes": [],
+  "supersededBy": [],
+  "conflictsWith": [],
+  "specRefs": [],
+  "sections": [
+    {
+      "title": "Objective",
+      "body": "Capture initial project goals and constraints before adding implementation details."
+    },
+    {
+      "title": "Status",
+      "body": "Draft"
+    }
+  ]
+}

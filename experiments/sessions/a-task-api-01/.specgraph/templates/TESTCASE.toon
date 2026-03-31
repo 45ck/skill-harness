@@ -1,0 +1,23 @@
+id: TC-000
+kind: TESTCASE
+title: Test Case Template
+status: draft
+scope: platform
+owner: QA
+date: 2026-03-03
+tags[2]: test,quality
+metadata.testType: unit
+metadata.verifies[0]:
+implements[0]:
+dependsOn[0]:
+references[0]:
+supersedes[0]:
+supersededBy[0]:
+conflictsWith[0]:
+specRefs[0]:
+sections[4]{title,body}:
+  Preconditions,Define required state before test execution.
+  Steps,List test steps in order.
+  Expected Result,Describe the expected outcome of the test.
+  Postconditions,Define expected state after test execution.
+

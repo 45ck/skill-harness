@@ -1,0 +1,21 @@
+id: DOMAINTREE-000
+kind: DOMAINTREE
+title: Domain Tree Template
+status: draft
+scope: platform
+owner: Architecture
+date: 2026-03-03
+tags[2]: domain,model
+implements[0]:
+dependsOn[0]:
+references[0]:
+supersedes[0]:
+supersededBy[0]:
+conflictsWith[0]:
+specRefs[0]:
+metadata:
+  terms[8]: task,notes,priority,dueDate,completed,overdue,tag,story
+sections[2]{title,body}:
+  Root Domain,Define top-level domain and owner.
+  Sub-Domains,List child domains and boundaries.
+

@@ -1,0 +1,31 @@
+{
+  "id": "JOURNEY-000",
+  "kind": "JOURNEY",
+  "title": "User Journey Template",
+  "status": "draft",
+  "scope": "platform",
+  "owner": "Experience",
+  "date": "2026-03-03",
+  "tags": ["journey", "ux"],
+  "implements": [],
+  "dependsOn": [],
+  "references": [],
+  "supersedes": [],
+  "supersededBy": [],
+  "conflictsWith": [],
+  "specRefs": [],
+  "sections": [
+    {
+      "title": "Actors",
+      "body": "Identify the actor and their goals."
+    },
+    {
+      "title": "Steps",
+      "body": "Document each step in the journey with preconditions and expected outcomes."
+    },
+    {
+      "title": "Exceptions",
+      "body": "Capture known error/exception flows and fallback handling."
+    }
+  ]
+}

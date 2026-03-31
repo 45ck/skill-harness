@@ -1,0 +1,21 @@
+id: RB-000
+kind: RUNBOOK
+title: Operational Runbook Template
+status: draft
+scope: platform
+owner: Operations
+date: 2026-03-03
+tags[2]: runbook,operations
+implements[0]:
+dependsOn[0]:
+references[0]:
+supersedes[0]:
+supersededBy[0]:
+conflictsWith[0]:
+specRefs[0]:
+sections[4]{title,body}:
+  Prerequisites,List required access and tools before starting.
+  Steps,List operational steps in order.
+  Rollback,Describe how to revert if something goes wrong.
+  Verification,Describe how to confirm the operation succeeded.
+

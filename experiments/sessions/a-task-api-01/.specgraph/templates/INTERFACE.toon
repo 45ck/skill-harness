@@ -1,0 +1,23 @@
+id: IF-000
+kind: INTERFACE
+title: Interface Specification Template
+status: draft
+scope: platform
+owner: Engineering
+date: 2026-03-03
+tags[2]: interface,api
+metadata.protocol: REST
+implements[0]:
+dependsOn[0]:
+references[0]:
+supersedes[0]:
+supersededBy[0]:
+conflictsWith[0]:
+specRefs[0]:
+sections[5]{title,body}:
+  Overview,Describe the interface purpose and consumers.
+  Endpoints,List available endpoints or operations.
+  Request/Response,Define request and response schemas.
+  Authentication,Describe authentication and authorization requirements.
+  Versioning,Describe versioning strategy and backward compatibility.
+

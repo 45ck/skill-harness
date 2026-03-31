@@ -1,0 +1,24 @@
+id: RISK-000
+kind: RISK
+title: Risk Register Entry Template
+status: open
+scope: platform
+owner: Engineering
+date: 2026-03-03
+tags[2]: risk,governance
+metadata.probability: 3
+metadata.impact: 3
+metadata.mitigations[0]:
+implements[0]:
+dependsOn[0]:
+references[0]:
+supersedes[0]:
+supersededBy[0]:
+conflictsWith[0]:
+specRefs[0]:
+sections[4]{title,body}:
+  Description,Describe the risk and its potential consequences.
+  Triggers,Identify conditions that would cause this risk to materialize.
+  Mitigations,List actions to reduce probability or impact.
+  Contingency,Describe fallback plans if the risk materializes.
+

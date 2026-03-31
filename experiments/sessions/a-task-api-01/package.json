@@ -1,0 +1,13 @@
+{
+  "name": "task-api",
+  "version": "1.0.0",
+  "description": "Task Management REST API using Node.js built-in http",
+  "type": "module",
+  "scripts": {
+    "test": "node --test server.test.js"
+  },
+  "dependencies": {
+    "@45ck/agent-docs": "file:../../../../agent-docs",
+    "@45ck/noslop": "file:../../../../noslop"
+  }
+}

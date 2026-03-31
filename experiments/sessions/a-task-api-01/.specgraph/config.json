@@ -1,0 +1,261 @@
+{
+  "version": "1.0",
+  "sourceExtension": ".toon",
+  "sourceRoots": [
+    "docs"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    ".git",
+    ".beads",
+    ".claude",
+    ".husky",
+    ".vscode",
+    "dist",
+    "coverage",
+    ".specgraph",
+    ".agent-docs",
+    ".githooks",
+    ".idea",
+    "generated",
+    "docs/generated",
+    "reports"
+  ],
+  "generated": {
+    "markdownRoot": "generated",
+    "allowMdOnlyWhenGenerated": true,
+    "indexTitle": "Agent Docs Index",
+    "manifestPath": ".specgraph/manifest.json",
+    "markdownHeaderPrefix": "# "
+  },
+  "markdownPolicy": {
+    "mode": "deny",
+    "allowInGeneratedPaths": [
+      "generated",
+      "docs/generated"
+    ]
+  },
+  "kindDefaults": {
+    "ADR": {
+      "requiredStatus": [
+        "accepted",
+        "draft",
+        "proposed",
+        "superseded",
+        "rejected",
+        "deprecated",
+        "deferred",
+        "open"
+      ]
+    },
+    "PRD": {
+      "requiredStatus": [
+        "accepted",
+        "draft",
+        "proposed",
+        "rejected",
+        "open"
+      ]
+    },
+    "SRD": {
+      "requiredStatus": [
+        "accepted",
+        "draft",
+        "proposed",
+        "rejected",
+        "open"
+      ]
+    },
+    "JOURNEY": {
+      "requiredStatus": [
+        "accepted",
+        "draft",
+        "proposed",
+        "rejected",
+        "open"
+      ]
+    },
+    "POLICY": {
+      "requiredStatus": [
+        "accepted",
+        "draft",
+        "proposed",
+        "rejected",
+        "open"
+      ]
+    },
+    "DOMAINTREE": {
+      "requiredStatus": [
+        "accepted",
+        "draft",
+        "proposed",
+        "rejected",
+        "open"
+      ]
+    },
+    "OTHER": {
+      "requiredStatus": [
+        "accepted",
+        "draft",
+        "proposed",
+        "rejected",
+        "open"
+      ]
+    },
+    "TESTCASE": {
+      "requiredStatus": [
+        "draft",
+        "proposed",
+        "accepted",
+        "blocked",
+        "passed",
+        "failed",
+        "deprecated"
+      ]
+    },
+    "DEFECT": {
+      "requiredStatus": [
+        "draft",
+        "open",
+        "triaged",
+        "in-progress",
+        "resolved",
+        "verified",
+        "closed",
+        "rejected"
+      ]
+    },
+    "RISK": {
+      "requiredStatus": [
+        "draft",
+        "open",
+        "mitigated",
+        "accepted",
+        "closed",
+        "rejected"
+      ]
+    },
+    "INTERFACE": {
+      "requiredStatus": [
+        "draft",
+        "proposed",
+        "accepted",
+        "deprecated",
+        "superseded",
+        "rejected"
+      ]
+    },
+    "COMPONENT": {
+      "requiredStatus": [
+        "draft",
+        "proposed",
+        "accepted",
+        "deprecated",
+        "superseded",
+        "rejected"
+      ]
+    },
+    "RUNBOOK": {
+      "requiredStatus": [
+        "draft",
+        "proposed",
+        "accepted",
+        "deprecated",
+        "open"
+      ]
+    },
+    "DECISION": {
+      "requiredStatus": [
+        "draft",
+        "proposed",
+        "accepted",
+        "superseded",
+        "rejected",
+        "deprecated"
+      ]
+    }
+  },
+  "strict": {
+    "requireGeneratedFreshness": true,
+    "failOnDuplicateCanonicalKey": true,
+    "requireConflictSymmetry": true,
+    "requireCodeTraceability": false,
+    "requireCodeSymbols": false
+  },
+  "references": {
+    "enabled": false,
+    "rules": []
+  },
+  "terminology": {
+    "enabled": false,
+    "sourceKinds": [
+      "DOMAINTREE"
+    ],
+    "termMetadataKeys": [
+      "terms"
+    ],
+    "aliasMetadataKey": "termAliases",
+    "termRegex": "\\{\\{\\s*([^}]+?)\\s*\\}\\}",
+    "includeTitle": true,
+    "includeSectionTitles": false,
+    "includeSectionBodies": true,
+    "unknownTermSeverity": "warning"
+  },
+  "contracts": {
+    "enabled": false,
+    "check": null,
+    "generate": null
+  },
+  "beads": {
+    "enabled": false,
+    "file": ".beads/issues.jsonl",
+    "issueIdPattern": "^bead-\\d{4}$",
+    "allowedStatuses": [
+      "open",
+      "closed"
+    ],
+    "validateBlockedRefs": true
+  },
+  "codeTraceability": {
+    "requireForKinds": [
+      "ADR",
+      "PRD",
+      "SRD",
+      "JOURNEY",
+      "POLICY",
+      "DOMAINTREE",
+      "TESTCASE",
+      "DEFECT",
+      "RISK",
+      "INTERFACE",
+      "COMPONENT",
+      "RUNBOOK",
+      "DECISION",
+      "OTHER"
+    ],
+    "allowedExtensions": [
+      "*"
+    ],
+    "ignorePaths": [
+      "node_modules",
+      "dist",
+      "coverage",
+      ".specgraph",
+      ".agent-docs",
+      ".beads",
+      ".claude",
+      ".githooks",
+      ".husky",
+      ".vscode",
+      ".idea",
+      "generated",
+      "reports"
+    ]
+  },
+  "reportPath": ".specgraph/reports/check-report.json",
+  "hooks": {
+    "preCommitPath": ".specgraph/hooks/pre-commit",
+    "prePushPath": ".specgraph/hooks/pre-push",
+    "installGitHooks": false
+  }
+}

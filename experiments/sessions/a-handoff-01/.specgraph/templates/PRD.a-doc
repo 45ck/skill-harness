@@ -1,0 +1,31 @@
+{
+  "id": "PRD-000",
+  "kind": "PRD",
+  "title": "Product Requirement Draft",
+  "status": "draft",
+  "scope": "platform",
+  "owner": "Product",
+  "date": "2026-03-03",
+  "tags": ["prd", "requirements"],
+  "implements": [],
+  "dependsOn": [],
+  "references": [],
+  "supersedes": [],
+  "supersededBy": [],
+  "conflictsWith": [],
+  "specRefs": [],
+  "sections": [
+    {
+      "title": "Problem Statement",
+      "body": "Describe the user problem and why it matters."
+    },
+    {
+      "title": "Success Criteria",
+      "body": "Define measurable goals and acceptance criteria."
+    },
+    {
+      "title": "Scope",
+      "body": "List in-scope and out-of-scope items."
+    }
+  ]
+}

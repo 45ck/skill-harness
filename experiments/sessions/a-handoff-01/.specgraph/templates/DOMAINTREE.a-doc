@@ -1,0 +1,30 @@
+{
+  "id": "DOMAINTREE-000",
+  "kind": "DOMAINTREE",
+  "title": "Domain Tree Template",
+  "status": "draft",
+  "scope": "platform",
+  "owner": "Architecture",
+  "date": "2026-03-03",
+  "tags": ["domain", "model"],
+  "implements": [],
+  "dependsOn": [],
+  "references": [],
+  "supersedes": [],
+  "supersededBy": [],
+  "conflictsWith": [],
+  "specRefs": [],
+  "metadata": {
+    "terms": ["task", "notes", "priority", "dueDate", "completed", "overdue", "tag", "story"]
+  },
+  "sections": [
+    {
+      "title": "Root Domain",
+      "body": "Define top-level domain and owner."
+    },
+    {
+      "title": "Sub-Domains",
+      "body": "List child domains and boundaries."
+    }
+  ]
+}

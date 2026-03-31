@@ -1,0 +1,11 @@
+{
+  "files.associations": {
+    "*.toon": "plaintext",
+    "*.a-doc": "plaintext"
+  },
+  "editor.wordWrap": "on",
+  "editor.formatOnSave": false,
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2
+}

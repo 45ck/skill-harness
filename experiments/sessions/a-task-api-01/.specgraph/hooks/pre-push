@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+set -euo pipefail
+if [ -n "${SKIP_AGENT_DOCS_CHECK:-}" ]; then
+  exit 0
+fi
+
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
+if [ -x "${ROOT_DIR}/node_modules/.bin/agent-docs" ]; then
+  exec "${ROOT_DIR}/node_modules/.bin/agent-docs" check --strict "${ROOT_DIR}"
+elif command -v agent-docs >/dev/null 2>&1; then
+  exec agent-docs check --strict "${ROOT_DIR}"
+elif command -v npx >/dev/null 2>&1; then
+  exec npx --yes --quiet agent-docs check --strict "${ROOT_DIR}"
+else
+  echo "[agent-docs] No agent-docs executable available."
+  exit 1
+fi

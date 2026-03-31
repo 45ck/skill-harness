@@ -1,0 +1,14 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "Task Management REST API using Node.js built-in modules",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test server.test.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
