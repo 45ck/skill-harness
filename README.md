@@ -4,7 +4,7 @@
   <img src="logo.svg" alt="skill-harness logo" width="128" height="128" />
 </p>
 
-`skill-harness` is the setup repo for the 45ck agent workflow stack.
+`skill-harness` is the setup repo for the 45ck agent workflow stack. It is primarily an installer and generator: most downstream repos receive copied Claude/Codex agent definitions or project setup changes rather than importing `skill-harness` as an application runtime.
 
 It does five jobs:
 
@@ -51,7 +51,7 @@ That command:
 
 ## Benchmark results
 
-Five controlled experiments measured the toolkit (specgraph + noslop + skills) against raw Claude Code. Full data in [`experiments/RESULTS.md`](experiments/RESULTS.md).
+Controlled experiments measured the toolkit (specgraph + noslop + skills) against raw Claude Code. Full data in [`experiments/RESULTS.md`](experiments/RESULTS.md). Current adoption audit notes are in [`docs/adoption-audit-2026-04-29.md`](docs/adoption-audit-2026-04-29.md).
 
 | Experiment | Toolkit | Baseline | Delta |
 |---|:---:|:---:|:---:|
@@ -60,7 +60,7 @@ Five controlled experiments measured the toolkit (specgraph + noslop + skills) a
 | Maintenance / handoff | 33 / 35 | 19 / 35 | +14 |
 | Ambiguous brief | **35 / 35** | **13 / 35** | **+22** |
 
-The gap is driven by scope enforcement and traceability — not code quality (functional output was equal in every experiment). The largest signal came from the ambiguous brief: the toolkit forced scope decisions before code was written; the baseline built a 4-class framework for a task that needed a 3-function library.
+The gap is driven by scope enforcement and traceability — not code quality (functional output was equal in every experiment). The largest signal came from the ambiguous brief: the toolkit forced scope decisions before code was written; the baseline built a 4-class framework for a task that needed a 3-function library. Treat these as controlled workflow results; downstream repos still need active hook, CI, and agent wiring before those practices are enforced.
 
 ## Install the CLI
 
