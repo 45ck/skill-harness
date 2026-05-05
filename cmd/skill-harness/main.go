@@ -92,13 +92,15 @@ func main() {
 	case "install":
 		runInstall(root, deps, loadouts, os.Args[2:])
 	case "setup-project":
-		runSetupProject(os.Args[2:])
+		runSetupProject(root, os.Args[2:])
 	case "update":
 		runUpdate(root)
 	case "check":
 		runCheck(root, loadouts, os.Args[2:])
 	case "render":
 		runRender(root, loadouts, os.Args[2:])
+	case "beads-worktrees":
+		runBeadsWorktrees(root, os.Args[2:])
 	case "uninstall":
 		runUninstall(root, loadouts, os.Args[2:])
 	case "help", "-h", "--help":
@@ -179,12 +181,13 @@ func runInstall(root string, deps dependencyConfig, loadouts loadoutConfig, args
 	fmt.Printf("Installed %d dependency repo(s) and %d agent(s)\n", len(repos), len(agents))
 }
 
-func runSetupProject(args []string) {
+func runSetupProject(root string, args []string) {
 	fs := flag.NewFlagSet("setup-project", flag.ExitOnError)
 	targetDir := fs.String("dir", ".", "Target project directory.")
 	skipNoslop := fs.Bool("skip-noslop", false, "Do not install @45ck/noslop.")
 	skipAgentDocs := fs.Bool("skip-agent-docs", false, "Do not install 45ck/agent-docs.")
 	skipBeads := fs.Bool("skip-beads", false, "Do not install or initialize Beads.")
+	beadsWorktrees := fs.Bool("beads-worktrees", true, "Install repo-local Beads worktree wrapper script.")
 	skipClaudeSettings := fs.Bool("skip-claude-settings", false, "Do not write .claude/settings.json.")
 	installOnly := fs.Bool("install-only", false, "Install packages only; skip initialization commands.")
 	scopeValue := fs.String("scope", string(projectScopeAuto), "Setup scope: auto, root, or workspace.")
@@ -237,12 +240,28 @@ func runSetupProject(args []string) {
 	}
 	if beadsMode != beadsDisabled {
 		exitOnErr(initBeads(ctx.OperationDir, beadsMode))
+		if *beadsWorktrees {
+			exitOnErr(installBeadsWorktreeWrapper(root, ctx.OperationDir, false))
+		}
 	}
 	if !*skipAgentDocs {
 		exitOnErr(runLocalTool(ctx.OperationDir, ctx.PackageManager, "agent-docs", "install-gates", "--quality"))
 	}
 
 	fmt.Println(projectSetupSummary("Project setup complete", ctx))
+}
+
+func runBeadsWorktrees(root string, args []string) {
+	fs := flag.NewFlagSet("beads-worktrees", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory (repo root).")
+	force := fs.Bool("force", false, "Overwrite existing scripts/beads/bd.mjs if present.")
+	fs.Parse(args)
+
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+
+	exitOnErr(installBeadsWorktreeWrapper(root, projectDir, *force))
+	fmt.Printf("Installed Beads worktree wrapper in %s\n", projectDir)
 }
 
 // allowAgentTeams writes or updates .claude/settings.json to permit the Agent
@@ -283,6 +302,52 @@ func allowAgentTeams(projectDir string) error {
 	}
 	data = append(data, '\n')
 	return os.WriteFile(settingsPath, data, 0o644)
+}
+
+func installBeadsWorktreeWrapper(harnessRoot string, projectDir string, force bool) error {
+	sourcePath := filepath.Join(harnessRoot, "scripts", "templates", "beads-worktrees", "bd.mjs")
+	source, err := os.ReadFile(sourcePath)
+	if err != nil {
+		return fmt.Errorf("failed to read beads-worktrees template: %w", err)
+	}
+
+	destDir := filepath.Join(projectDir, "scripts", "beads")
+	destPath := filepath.Join(destDir, "bd.mjs")
+	if !force {
+		if _, err := os.Stat(destPath); err == nil {
+			return ensureGitignoreHasTrees(projectDir)
+		}
+	}
+
+	if err := os.MkdirAll(destDir, 0o755); err != nil {
+		return err
+	}
+	if err := os.WriteFile(destPath, source, 0o755); err != nil {
+		return err
+	}
+
+	return ensureGitignoreHasTrees(projectDir)
+}
+
+func ensureGitignoreHasTrees(projectDir string) error {
+	ignorePath := filepath.Join(projectDir, ".gitignore")
+	data, err := os.ReadFile(ignorePath)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	content := string(data)
+	if strings.Contains(content, "\n.trees/\n") || strings.HasSuffix(content, "\n.trees/") || strings.Contains(content, "\n.trees/\r\n") {
+		return nil
+	}
+
+	trimmed := strings.TrimRight(content, "\r\n")
+	lines := []string{}
+	if trimmed != "" {
+		lines = append(lines, trimmed)
+	}
+	lines = append(lines, "", "# Beads worktrees", ".trees/")
+	out := strings.Join(lines, "\n") + "\n"
+	return os.WriteFile(ignorePath, []byte(out), 0o644)
 }
 
 func runCheck(root string, loadouts loadoutConfig, args []string) {
@@ -991,7 +1056,8 @@ func printUsage(loadouts loadoutConfig, deps dependencyConfig) {
 	fmt.Println("Commands:")
 	fmt.Println("  list [--agents] [--packs]")
 	fmt.Println("  install [--all] [--interactive] [--packs-only] [--agents-only] [--agents=a,b] [--packs=x,y]")
-	fmt.Println("  setup-project [--dir path] [--scope auto|root|workspace] [--package-manager auto|npm|pnpm|yarn|bun] [--install-only] [--skip-noslop] [--skip-agent-docs] [--skip-beads] [--skip-claude-settings]")
+	fmt.Println("  setup-project [--dir path] [--scope auto|root|workspace] [--package-manager auto|npm|pnpm|yarn|bun] [--install-only] [--skip-noslop] [--skip-agent-docs] [--skip-beads] [--beads-worktrees] [--skip-claude-settings]")
+	fmt.Println("  beads-worktrees [--dir path] [--force]")
 	fmt.Println("  update")
 	fmt.Println("  check [--all] [--interactive] [--agents=a,b]")
 	fmt.Println("  render [--all] [--interactive] [--agents=a,b]")

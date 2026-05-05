@@ -170,6 +170,12 @@ Skip one tool:
 ./skill-harness setup-project --dir ../my-project --skip-beads
 ```
 
+Install the repo-local Beads worktree wrapper (copies `scripts/beads/bd.mjs` + adds `.trees/` to `.gitignore`):
+
+```bash
+./skill-harness beads-worktrees --dir ../my-project
+```
+
 ### Validate installed agent dependencies
 
 ```bash
