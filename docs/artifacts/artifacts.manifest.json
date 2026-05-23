@@ -58,7 +58,7 @@
       "abstractionLevel": "runtime",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-system-context.html",
-      "sourceHash": "f8de412e7dffa647d4620e5f8d4865847673412bfa3dab83e6237986a8786d25",
+      "sourceHash": "19d9511baedae5e39f547310c42be3d7e8a2c6260a2e2598dcdf366b38b06e5a",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -97,7 +97,7 @@
       "abstractionLevel": "domain",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-domain-artifact-governance.html",
-      "sourceHash": "cb0fd73a74b81a07b2acd067f430bd1726cf684a76607101bee17e6275849f67",
+      "sourceHash": "ae7061da22ad153d60eacc21920c4ed8c038c64c8a5454ce6df3296e2d12f63c",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -176,7 +176,7 @@
       "abstractionLevel": "runtime",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-activity-setup-project.html",
-      "sourceHash": "3edd2669002d2a8fc6e6c06faebd757e43d251cf8c35f783fc2c929a63275156",
+      "sourceHash": "5e3c43ec6e76f78b304c80e98d82ce47d058d43d8cf9d7db154a55c55550edf0",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -211,7 +211,7 @@
       "abstractionLevel": "design",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-component-scaffold-engine.html",
-      "sourceHash": "cf34462c7f72bb2d02252dcf9fc28d732146b7856b0165478b10c2d854a1f075",
+      "sourceHash": "698f81406895c094c042a08120c207772b348f69223bebfbfb61ffe9b0b377ce",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -253,7 +253,7 @@
       "abstractionLevel": "decision",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-state-artifact-freshness.html",
-      "sourceHash": "41085e77f6f5f95e7c60f20027d489536093a4b722ab62bdf2a27578a192e993",
+      "sourceHash": "65122c2c921d8f535eb7479ddc3199bf18f06deabb9a79ba226ca40d23f7e83e",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
