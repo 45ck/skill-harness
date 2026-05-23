@@ -31,6 +31,7 @@ This creates:
 - `generated/review/`
 - `scripts/check-artifact-manifest.mjs`
 - `scripts/check-artifact-html-policy.mjs`
+- `scripts/open-artifact-review.mjs`
 
 It also adds `generated/review/` to `.gitignore` and adds package scripts when applicable:
 
@@ -40,6 +41,7 @@ It also adds `generated/review/` to `.gitignore` and adds package scripts when a
 - `artifacts:check`
 - `artifacts:manifest:check`
 - `artifacts:html:check`
+- `artifacts:open`
 
 If `--skip-agent-docs` is used, the artifact scaffold still works, but it does not add scripts that call `agent-docs`.
 
@@ -52,7 +54,7 @@ Modeling mode defaults to `auto`. Fresh developer-artifact setups resolve `auto`
 ./skill-harness setup-project --dir ../my-project --skip-modeling
 ```
 
-This is not a separate profile. It keeps the existing developer artifact profile and adds source-first modeling conveniences: `docs/artifacts/source/models/`, `docs/artifacts/source/models/model-inventory.md`, `generated/review/models/`, `docs/artifacts/templates/model-diff-artifact.md`, `scripts/generate-model-review.mjs`, `scripts/check-model-artifact-policy.mjs`, model-aware package scripts, and setup-proof check entries. The base scaffold already supports `model-view`; UML-first adds stricter UML/UWE/C4/evidence metadata, `model-diff` lineage checks, and paired human HTML review expectations. `--enable-modeling` remains as a legacy alias for `--modeling-mode uml-first`.
+This is not a separate profile. It keeps the existing developer artifact profile and adds source-first modeling conveniences: `docs/artifacts/source/models/`, `docs/artifacts/source/models/model-inventory.md`, `generated/review/models/`, `docs/artifacts/templates/model-diff-artifact.md`, `scripts/generate-model-review.mjs`, `scripts/open-artifact-review.mjs`, `scripts/check-model-artifact-policy.mjs`, model-aware package scripts, and setup-proof check entries. The base scaffold already supports `model-view`; UML-first adds stricter UML/UWE/C4/evidence metadata, `model-diff` lineage checks, and paired human HTML review expectations. `--enable-modeling` remains as a legacy alias for `--modeling-mode uml-first`.
 
 `.skill-harness/setup-proof.json` is the install evidence record for the setup run. It records the resolved target and operation directories, package manager, requested and effective artifact profile, tool initialization statuses, skipped capabilities, generated paths, Beads mode, and available check commands. Use it to distinguish a repo that merely has copied files from one where the harness recorded what it set up.
 
@@ -97,10 +99,18 @@ Generated HTML review artifacts must be static and self-contained by default:
 - semantic headings, landmarks, meaningful link text, and alt text
 - no secrets, tokens, credentials, private logs, customer data, or large opaque blobs
 
+Open generated HTML with the best available human surface:
+
+- Codex app: use the Browser plugin for local HTML when available.
+- Claude desktop: use the built-in browser or preview when available.
+- CLI-only: use `node scripts/open-artifact-review.mjs` to open the system default browser.
+- Headless or CI: use `node scripts/open-artifact-review.mjs --print` and pass the printed file URL to the human or host UI.
+
 Run:
 
 ```bash
 node scripts/check-artifact-html-policy.mjs
+node scripts/open-artifact-review.mjs --print
 ```
 
 The checker rejects common unsafe constructs including `<script>`, iframes, object/embed/form tags, meta refresh, external `src` / `href` / `action` references, and browser APIs such as `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, `sendBeacon`, `serviceWorker`, `document.cookie`, `localStorage`, and `sessionStorage`.

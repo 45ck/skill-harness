@@ -16,6 +16,7 @@ UML-first artifacts:
 - Keep canonical UML/UWE/C4/evidence model sources in repo-relative text files, preferring `docs/artifacts/source/models/` when no domain-specific docs path is better.
 - Keep `docs/artifacts/source/models/model-inventory.md` and `docs/artifacts/artifacts.manifest.json` aligned with model ids, owners, methods, source paths, evidence, and generated review surfaces.
 - Human review artifacts for models must be static HTML under `generated/review/models/`, generated from source with `node scripts/generate-model-review.mjs`, and validated with the model and HTML policy checks.
+- Open generated HTML in the best human review surface for the current environment. In Codex app, use the Browser plugin for local HTML when available; in Claude desktop, use the built-in browser/preview when available; in CLI-only contexts, use `node scripts/open-artifact-review.mjs` to open the system default browser or print the file URL in headless/CI contexts.
 - Treat HTML, SVG, PNG, screenshots, and generated comparison pages as review surfaces only. Source files and model diffs remain canonical.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->

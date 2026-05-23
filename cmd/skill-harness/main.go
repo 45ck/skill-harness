@@ -1172,6 +1172,7 @@ func buildProjectSetupProof(ctx projectSetupContext, options projectSetupProofOp
 				"generated/review/",
 				"scripts/check-artifact-manifest.mjs",
 				"scripts/check-artifact-html-policy.mjs",
+				"scripts/open-artifact-review.mjs",
 			},
 		}
 		proof.GeneratedPaths = append(proof.GeneratedPaths,
@@ -1180,9 +1181,11 @@ func buildProjectSetupProof(ctx projectSetupContext, options projectSetupProofOp
 			"generated/review/",
 			"scripts/check-artifact-manifest.mjs",
 			"scripts/check-artifact-html-policy.mjs",
+			"scripts/open-artifact-review.mjs",
 		)
 		proof.Checks["artifactManifest"] = checkProof{Status: "available", Command: "node scripts/check-artifact-manifest.mjs", Path: "scripts/check-artifact-manifest.mjs"}
 		proof.Checks["artifactHtmlPolicy"] = checkProof{Status: "available", Command: "node scripts/check-artifact-html-policy.mjs", Path: "scripts/check-artifact-html-policy.mjs"}
+		proof.Checks["artifactReviewOpen"] = checkProof{Status: "available", Command: "node scripts/open-artifact-review.mjs", Path: "scripts/open-artifact-review.mjs"}
 		if options.EffectiveModelingMode != modelingModeOff {
 			proof.GeneratedPaths = append(proof.GeneratedPaths,
 				"docs/artifacts/source/models/",
@@ -1313,6 +1316,7 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile arti
 		"artifacts:check":          "node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
 		"artifacts:html:check":     "node scripts/check-artifact-html-policy.mjs",
 		"artifacts:manifest:check": "node scripts/check-artifact-manifest.mjs",
+		"artifacts:open":           "node scripts/open-artifact-review.mjs",
 	}
 	if agentDocsEnabled {
 		defaultScripts["docs:check"] = "agent-docs check"
@@ -1331,6 +1335,7 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile arti
 		defaultScripts["models:generate"] = "node scripts/generate-model-review.mjs"
 		defaultScripts["models:check"] = "node scripts/check-model-artifact-policy.mjs"
 		defaultScripts["models:diff:check"] = "node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-html-policy.mjs"
+		defaultScripts["models:open"] = "node scripts/open-artifact-review.mjs generated/review/models/index.html"
 		defaultScripts["models:review"] = "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs"
 	}
 	for name, command := range defaultScripts {
@@ -1446,6 +1451,13 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 					"outDir":          "generated/review",
 					"commitGenerated": false,
 					"openMode":        artifactOpenMode(profile),
+					"openPolicy": map[string]any{
+						"preferHostBrowserTool": true,
+						"codexApp":              "use Browser plugin when available",
+						"claudeDesktop":         "use built-in browser or preview tool when available",
+						"cliFallback":           "system-default-browser",
+						"headlessFallback":      "print-file-url",
+					},
 				},
 				"mediaOutputs": artifactMediaOutputs(profile),
 				"agentLoop":    artifactAgentLoopConfig(profile, beadsEnabled),
@@ -1560,6 +1572,12 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	checkerPath := filepath.Join(projectDir, "scripts", "check-artifact-html-policy.mjs")
 	if !fileExists(checkerPath) {
 		if err := os.WriteFile(checkerPath, []byte(developerArtifactPolicyScript()), 0o644); err != nil {
+			return err
+		}
+	}
+	openerPath := filepath.Join(projectDir, "scripts", "open-artifact-review.mjs")
+	if !fileExists(openerPath) {
+		if err := os.WriteFile(openerPath, []byte(developerArtifactOpenScript()), 0o644); err != nil {
 			return err
 		}
 	}
@@ -1908,11 +1926,13 @@ Use this directory for durable developer artifacts and generated review surfaces
 - No secrets, credentials, tokens, private logs, or customer data.
 - Link back to the canonical source artifact and issue.
 - Regenerate or discard HTML when the source changes.
+- Open generated HTML with the best human review surface for the current environment: Codex Browser plugin in Codex app, Claude desktop preview/browser in Claude desktop, or node scripts/open-artifact-review.mjs for CLI/system-browser fallback.
 
 Run this policy check before handing off generated HTML:
 
     node scripts/check-artifact-manifest.mjs
     node scripts/check-artifact-html-policy.mjs
+    node scripts/open-artifact-review.mjs --print
 `, profile, effectiveProfile, modelingSection)
 }
 
@@ -2524,6 +2544,125 @@ const indexBody = '<section><h1>Model Review Index</h1><p>Static human review su
 fs.writeFileSync(path.join(modelReviewDir, 'index.html'), htmlPage('Model Review Index', indexBody));
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
 console.log('Generated ' + artifacts.length + ' model review artifact(s) in ' + repoPath(modelReviewDir));
+`
+}
+
+func developerArtifactOpenScript() string {
+	return `import fs from 'node:fs';
+import path from 'node:path';
+import { spawn } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
+
+const root = process.cwd();
+const args = process.argv.slice(2);
+const printOnly = args.includes('--print') || args.includes('--dry-run') || process.env.CI === 'true';
+const explicitTarget = args.find((arg) => !arg.startsWith('--'));
+
+function repoPath(filePath) {
+  return path.relative(root, filePath).replaceAll(path.sep, '/');
+}
+
+function isInsideRoot(filePath) {
+  return filePath === root || filePath.startsWith(root + path.sep);
+}
+
+function resolveReviewPath(value) {
+  if (typeof value !== 'string' || value.trim() === '') return null;
+  const resolved = path.resolve(root, value);
+  if (!isInsideRoot(resolved)) return null;
+  return resolved;
+}
+
+function readJSON(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function firstExisting(paths) {
+  for (const candidate of paths) {
+    if (candidate && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return candidate;
+  }
+  return null;
+}
+
+function discoverTarget() {
+  if (explicitTarget) {
+    const resolved = resolveReviewPath(explicitTarget);
+    if (resolved && fs.existsSync(resolved)) return resolved;
+    throw new Error('review artifact not found or outside repo: ' + explicitTarget);
+  }
+
+  const config = readJSON(path.join(root, '.skill-harness', 'project.json')) ?? {};
+  const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
+  const reviewDir = developerArtifacts.reviewSurface?.outDir ?? 'generated/review';
+  const modelReviewDir = developerArtifacts.modeling?.reviewDir ?? developerArtifacts.modelPolicy?.uml?.reviewDir ?? path.join(reviewDir, 'models');
+  const manifestPath = path.join(root, developerArtifacts.manifest?.path ?? 'docs/artifacts/artifacts.manifest.json');
+  const manifest = readJSON(manifestPath);
+  const manifestTargets = [];
+  for (const artifact of Array.isArray(manifest?.artifacts) ? manifest.artifacts : []) {
+    if (typeof artifact?.reviewSurface === 'string' && artifact.reviewSurface.endsWith('.html')) {
+      const resolved = resolveReviewPath(artifact.reviewSurface);
+      if (resolved) manifestTargets.push(resolved);
+    }
+  }
+
+  const discovered = firstExisting([
+    path.join(root, modelReviewDir, 'index.html'),
+    path.join(root, reviewDir, 'index.html'),
+    ...manifestTargets,
+  ]);
+  if (discovered) return discovered;
+  throw new Error('no generated HTML review artifact found; generate one first');
+}
+
+function hostHint() {
+  const originator = process.env.CODEX_INTERNAL_ORIGINATOR_OVERRIDE ?? '';
+  if (process.env.CODEX_THREAD_ID || /codex/i.test(originator)) {
+    return 'Codex app detected: prefer opening this file with the Browser plugin when the agent has it.';
+  }
+  if (process.env.CLAUDE_DESKTOP || /claude/i.test(originator)) {
+    return 'Claude desktop context detected: prefer the built-in browser or preview tool when available.';
+  }
+  return '';
+}
+
+function openSystemDefault(filePath) {
+  const url = pathToFileURL(filePath).href;
+  let command;
+  let commandArgs;
+  if (process.platform === 'win32') {
+    command = 'cmd';
+    commandArgs = ['/c', 'start', '', url];
+  } else if (process.platform === 'darwin') {
+    command = 'open';
+    commandArgs = [url];
+  } else {
+    command = 'xdg-open';
+    commandArgs = [url];
+  }
+  const child = spawn(command, commandArgs, { detached: true, stdio: 'ignore' });
+  child.unref();
+  return url;
+}
+
+try {
+  const target = discoverTarget();
+  const url = pathToFileURL(target).href;
+  const hint = hostHint();
+  if (hint) console.log(hint);
+  if (printOnly) {
+    console.log(url);
+  } else {
+    console.log('Opening ' + repoPath(target));
+    console.log(openSystemDefault(target));
+  }
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
 `
 }
 

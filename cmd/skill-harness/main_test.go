@@ -186,6 +186,9 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	if !fileExists(filepath.Join(root, "scripts", "check-artifact-manifest.mjs")) {
 		t.Fatal("expected artifact manifest checker script")
 	}
+	if !fileExists(filepath.Join(root, "scripts", "open-artifact-review.mjs")) {
+		t.Fatal("expected artifact review opener script")
+	}
 	if !fileExists(filepath.Join(root, "docs", "artifacts", "artifacts.manifest.json")) {
 		t.Fatal("expected artifact manifest")
 	}
@@ -216,6 +219,17 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	scripts := packageScripts(t, filepath.Join(root, "package.json"))
 	if scripts["artifacts:manifest:check"] != "node scripts/check-artifact-manifest.mjs" {
 		t.Fatalf("expected artifact manifest check script, got %#v", scripts["artifacts:manifest:check"])
+	}
+	if scripts["artifacts:open"] != "node scripts/open-artifact-review.mjs" {
+		t.Fatalf("expected artifact open script, got %#v", scripts["artifacts:open"])
+	}
+	reviewSurface, ok := artifacts["reviewSurface"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected reviewSurface config, got %#v", artifacts["reviewSurface"])
+	}
+	openPolicy, ok := reviewSurface["openPolicy"].(map[string]any)
+	if !ok || openPolicy["preferHostBrowserTool"] != true {
+		t.Fatalf("expected host browser open policy, got %#v", reviewSurface["openPolicy"])
 	}
 }
 
@@ -430,6 +444,9 @@ func TestWriteDeveloperArtifactScaffoldModeling(t *testing.T) {
 	if scripts["models:review"] != "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs" {
 		t.Fatalf("expected model review script, got %#v", scripts["models:review"])
 	}
+	if scripts["models:open"] != "node scripts/open-artifact-review.mjs generated/review/models/index.html" {
+		t.Fatalf("expected model open script, got %#v", scripts["models:open"])
+	}
 }
 
 func TestModelArtifactPolicyScriptAcceptsValidModelView(t *testing.T) {
@@ -512,6 +529,20 @@ func TestModelReviewGeneratorCreatesHumanHTML(t *testing.T) {
 	}
 	runNodeScript(t, root, "scripts/check-model-artifact-policy.mjs", true)
 	runNodeScript(t, root, "scripts/check-artifact-html-policy.mjs", true)
+}
+
+func TestArtifactReviewOpenScriptPrintsDiscoveredTarget(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, modelingModeUMLFirst); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	mustWriteFile(t, filepath.Join(root, "generated", "review", "models", "index.html"), "<!doctype html><html><body><main><h1>Models</h1></main></body></html>")
+	output := runNodeScript(t, root, "scripts/open-artifact-review.mjs", true, "--print")
+	if !strings.Contains(output, "file://") || !strings.Contains(output, "generated/review/models/index.html") {
+		t.Fatalf("expected printed file URL for model review index, got:\n%s", output)
+	}
 }
 
 func TestModelArtifactPolicyBaselineAcceptsEvidenceModelsWithoutHTML(t *testing.T) {
@@ -778,9 +809,10 @@ func writeManifest(t *testing.T, root string, artifacts []map[string]any) {
 	mustWriteFile(t, filepath.Join(root, "docs", "artifacts", "artifacts.manifest.json"), string(data)+"\n")
 }
 
-func runNodeScript(t *testing.T, root string, script string, wantSuccess bool) string {
+func runNodeScript(t *testing.T, root string, script string, wantSuccess bool, args ...string) string {
 	t.Helper()
-	cmd := exec.Command("node", script)
+	cmdArgs := append([]string{script}, args...)
+	cmd := exec.Command("node", cmdArgs...)
 	cmd.Dir = root
 	output, err := cmd.CombinedOutput()
 	if wantSuccess && err != nil {
