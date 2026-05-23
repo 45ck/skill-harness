@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "artifacts": [
+    {
+      "id": "model-to-code-human-artifacts-plan-2026-05-23",
+      "type": "planning-artifact",
+      "source": "docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md",
+      "status": "ready",
+      "owner": "codex",
+      "reviewSurface": "generated/review/model-to-code-human-artifacts-plan-2026-05-23.html",
+      "evidenceLinks": [
+        "docs/developer-artifacts.md",
+        "docs/artifacts/source/uml-model-driven-artifacts-research-2026-05-23.md",
+        "docs/artifacts/source/uml-first-default-review-2026-05-23.md",
+        "cmd/skill-harness/main.go",
+        "cmd/skill-harness/main_test.go",
+        "skill-harness-ra5"
+      ],
+      "freshness": {
+        "generatedAt": "2026-05-23",
+        "sourceFirst": true
+      }
+    }
+  ]
+}

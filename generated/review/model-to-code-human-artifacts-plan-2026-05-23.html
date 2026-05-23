@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <title>Model-To-Code Human Artifacts Plan</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20242a;
+      --muted: #596272;
+      --line: #d9e0e8;
+      --panel: #ffffff;
+      --soft: #f4f7f9;
+      --header: #16213a;
+      --teal: #0f766e;
+      --blue: #2563eb;
+      --amber: #a16207;
+      --red: #b42318;
+      --green: #157f3b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #edf1f5;
+      color: var(--ink);
+      font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: #0b5cad; }
+    header {
+      background: var(--header);
+      color: #fff;
+      padding: 34px 28px 30px;
+      border-bottom: 6px solid var(--teal);
+    }
+    header h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+    header p {
+      max-width: 980px;
+      margin: 0;
+      color: #d7e0ea;
+    }
+    main {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+    h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      line-height: 1.3;
+      letter-spacing: 0;
+    }
+    p { margin: 0 0 12px; }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+      background: #eef2f6;
+      border: 1px solid #dce3eb;
+      border-radius: 4px;
+      padding: 1px 4px;
+    }
+    pre {
+      margin: 10px 0 0;
+      padding: 12px;
+      overflow-x: auto;
+      background: #101828;
+      color: #e5edf7;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .pill {
+      border: 1px solid rgba(255,255,255,0.32);
+      border-radius: 999px;
+      padding: 4px 10px;
+      color: #e7edf5;
+      font-size: 12px;
+    }
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .two {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 14px;
+      min-width: 0;
+    }
+    .soft { background: var(--soft); }
+    .callout {
+      border-left: 4px solid var(--blue);
+      background: #eff6ff;
+      padding: 13px 15px;
+      border-radius: 6px;
+      margin: 12px 0;
+    }
+    .callout.good {
+      border-left-color: var(--green);
+      background: #f0fdf4;
+    }
+    .callout.warn {
+      border-left-color: var(--amber);
+      background: #fffbeb;
+    }
+    .callout.bad {
+      border-left-color: var(--red);
+      background: #fff1f2;
+    }
+    ul, ol {
+      margin: 8px 0 0 20px;
+      padding: 0;
+    }
+    li { margin: 4px 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f8fafc;
+      color: #334155;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .step {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--teal);
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 92px;
+    }
+    .step strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .step span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .status {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+    }
+    .status.ready { color: var(--green); border-color: #bbf7d0; background: #f0fdf4; }
+    .status.gap { color: var(--amber); border-color: #fde68a; background: #fffbeb; }
+    .diagram {
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    @media (max-width: 980px) {
+      .grid, .two, .steps { grid-template-columns: 1fr; }
+      main { padding: 14px; }
+      header h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Model-To-Code Human Artifacts Plan</h1>
+    <p>A source-backed plan for making canonical UML/C4/model artifacts map to code, generate Markdown for humans, and produce static browser review surfaces when the workflow calls for visual inspection.</p>
+    <div class="meta">
+      <span class="pill">Date: 2026-05-23</span>
+      <span class="pill">Issue: skill-harness-ra5</span>
+      <span class="pill">Source: docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md</span>
+      <span class="pill">Generated review surface</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <h2>Executive Read</h2>
+      <div class="two">
+        <div>
+          <p>The practical target is not full round-trip UML. The target is a governed artifact loop where canonical text models map to source files, symbols, tests, specs, issues, and generated review evidence.</p>
+          <p>The highest-leverage first move is to self-scaffold `skill-harness` enough to use its own artifact contract, then add a computed suite graph and drift checks over packs, agents, loadouts, templates, and docs.</p>
+        </div>
+        <div class="card soft">
+          <h3>Why Browser Artifacts Were Missing</h3>
+          <ul>
+            <li>No root `.skill-harness/project.json`.</li>
+            <li>No root artifact manifest before this artifact.</li>
+            <li>No root artifact HTML policy checker.</li>
+            <li>No automatic local review command wired for this repo.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Artifact Loop</h2>
+      <svg class="diagram" viewBox="0 0 1160 280" role="img" aria-label="Artifact loop from model source to generated review and CI checks">
+        <rect x="20" y="45" width="170" height="76" rx="8" fill="#eff6ff" stroke="#93c5fd"/>
+        <text x="105" y="75" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a8a">Model Source</text>
+        <text x="105" y="99" text-anchor="middle" font-size="13" fill="#334155">Markdown, TOON, UML</text>
+
+        <rect x="240" y="45" width="170" height="76" rx="8" fill="#f0fdfa" stroke="#5eead4"/>
+        <text x="325" y="75" text-anchor="middle" font-size="16" font-weight="700" fill="#115e59">Mapping</text>
+        <text x="325" y="99" text-anchor="middle" font-size="13" fill="#334155">paths, symbols, tests</text>
+
+        <rect x="460" y="45" width="170" height="76" rx="8" fill="#f7fee7" stroke="#bef264"/>
+        <text x="545" y="75" text-anchor="middle" font-size="16" font-weight="700" fill="#3f6212">Project Graph</text>
+        <text x="545" y="99" text-anchor="middle" font-size="13" fill="#334155">suite or repo model</text>
+
+        <rect x="680" y="45" width="170" height="76" rx="8" fill="#fff7ed" stroke="#fdba74"/>
+        <text x="765" y="75" text-anchor="middle" font-size="16" font-weight="700" fill="#9a3412">Human Docs</text>
+        <text x="765" y="99" text-anchor="middle" font-size="13" fill="#334155">Markdown output</text>
+
+        <rect x="900" y="45" width="220" height="76" rx="8" fill="#fdf2f8" stroke="#f9a8d4"/>
+        <text x="1010" y="75" text-anchor="middle" font-size="16" font-weight="700" fill="#9d174d">Browser Review</text>
+        <text x="1010" y="99" text-anchor="middle" font-size="13" fill="#334155">static generated HTML</text>
+
+        <rect x="350" y="175" width="460" height="70" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+        <text x="580" y="203" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">CI Drift Checks</text>
+        <text x="580" y="226" text-anchor="middle" font-size="13" fill="#475569">manifest, source hash, code mappings, generated docs, review safety</text>
+
+        <path d="M190 83 L240 83" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M410 83 L460 83" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M630 83 L680 83" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M850 83 L900 83" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M545 121 L545 175" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M765 121 C765 150 760 163 720 175" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+        <path d="M1010 121 C1010 170 860 198 810 205" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#64748b"/>
+          </marker>
+        </defs>
+      </svg>
+    </section>
+
+    <section class="section">
+      <h2>Recommended Architecture</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>1. Computed Suite Graph</h3>
+          <p>Load existing canonical files and normalize packs, skills, agents, templates, artifact profiles, modelling modes, and setup outputs.</p>
+          <p class="small"><span class="status ready">first slice</span> No new giant catalog required.</p>
+        </article>
+        <article class="card">
+          <h3>2. Hybrid Trace Layer</h3>
+          <p>`skill-harness` installs the artifact workflow; `agent-docs` / specgraph answers impact questions when available.</p>
+          <p class="small"><span class="status ready">optional</span> Basic checks still work without specgraph.</p>
+        </article>
+        <article class="card">
+          <h3>3. Target Repo Model Inventory</h3>
+          <p>Scaffold context, domain, use-case, and update-matrix sources with stable IDs and mapping examples.</p>
+          <p class="small"><span class="status gap">gap</span> Existing setup creates folders but not enough durable starter content.</p>
+        </article>
+      </div>
+      <div class="grid" style="margin-top:14px">
+        <article class="card">
+          <h3>4. Mapping Contract</h3>
+          <p>Require model IDs, code mappings, evidence links, update triggers, source hash, owner, and readiness status.</p>
+          <p class="small"><span class="status ready">checkable</span> Most fields fit the current manifest/checker direction.</p>
+        </article>
+        <article class="card">
+          <h3>5. Review Generator</h3>
+          <p>Generate static HTML and optional generated Markdown dashboards from canonical model sources and manifest metadata.</p>
+          <p class="small"><span class="status gap">needed</span> The root repo does not currently have this script surface.</p>
+        </article>
+        <article class="card">
+          <h3>6. CI Gate</h3>
+          <p>Fail on stale mappings, missing generated review pages, unsafe HTML, or unacknowledged model impact.</p>
+          <p class="small"><span class="status gap">needed</span> No root `.github/` workflow is present.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Ownership Split</h2>
+      <table>
+        <thead>
+          <tr><th>Area</th><th>Owns</th><th>Should Not Own</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>`skill-harness`</td><td>Scaffold contract, templates, scripts, checks, migration modes, review generators.</td><td>Project-specific model content, deep code indexing, long-lived graph state.</td></tr>
+          <tr><td>`agent-docs` / specgraph</td><td>Code/spec/model trace graph, impact queries, evidence linking.</td><td>HTML rendering, scaffold layout, generated review files.</td></tr>
+          <tr><td>Project repo</td><td>Canonical model sources, touchpoints, owners, evidence, repo-local commands.</td><td>Global install logic or cross-repo policy defaults.</td></tr>
+          <tr><td>`generated/review/models/`</td><td>Static HTML and generated review Markdown for humans.</td><td>Canonical truth.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Mapping Contract Example</h2>
+      <pre><code>artifactType: model-view
+modelId: setup-project-flow
+modelKind: activity
+method: uml
+notation: markdown-mermaid
+abstractionLevel: design
+owner: system-modeler
+codeMappings:
+  - kind: command
+    path: cmd/skill-harness/main.go
+    symbol: runSetupProject
+  - kind: config
+    path: scripts/agent_loadouts.json
+evidenceLinks:
+  - cmd/skill-harness/main_test.go
+  - README.md
+updateTriggers:
+  - setup-project behavior changes
+  - artifact profile changes
+  - modelling mode changes</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>Skill Harness Baseline Models</h2>
+      <table>
+        <thead>
+          <tr><th>Model ID</th><th>Kind / Method</th><th>Level</th><th>Primary Touchpoints</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>`sh-system-context`</td><td>context / c4</td><td>runtime</td><td>`README.md`, `main.go`, `dependencies.json`, `packs/`</td></tr>
+          <tr><td>`sh-domain-artifact-governance`</td><td>domain / uml</td><td>domain</td><td>`docs/developer-artifacts.md`, `AGENTS.md`, `AGENT_INSTRUCTIONS.md`, `main.go`</td></tr>
+          <tr><td>`sh-usecase-cli-workflows`</td><td>use-case / uml</td><td>domain</td><td>`README.md`, `main.go`</td></tr>
+          <tr><td>`sh-activity-setup-project`</td><td>activity / uml</td><td>runtime</td><td>`main.go`, `README.md`</td></tr>
+          <tr><td>`sh-component-scaffold-engine`</td><td>component / c4</td><td>design</td><td>`main.go`, `scripts/*.py`, `scripts/*.json`</td></tr>
+          <tr><td>`sh-state-artifact-freshness`</td><td>state / uml</td><td>decision</td><td>`docs/developer-artifacts.md`, checker/generator code</td></tr>
+          <tr><td>`sh-sequence-setup-project-toolchain`</td><td>sequence / uml</td><td>runtime</td><td>`setup-project`, `agent-docs`, `noslop`, `bd`, setup proof</td></tr>
+          <tr><td>`sh-deployment-local-toolchain`</td><td>deployment / c4</td><td>deployment</td><td>install scripts, home-dir output, target scaffold paths</td></tr>
+          <tr><td>`sh-loadout-pack-mapping`</td><td>architecture-space / evidence</td><td>runtime</td><td>`dependencies.json`, `agent_loadouts.json`, `docs/agent-loadouts.md`</td></tr>
+        </tbody>
+      </table>
+      <p class="small">Baseline required models are the first six. The final three become required when work crosses tooling orchestration, install topology, or agent/pack mapping.</p>
+    </section>
+
+    <section class="section">
+      <h2>Where Work Belongs</h2>
+      <table>
+        <thead>
+          <tr><th>Concern</th><th>Home</th><th>Reason</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Project setup flags and scaffold files</td><td>`skill-harness`</td><td>It owns `setup-project` and artifact profiles.</td></tr>
+          <tr><td>Suite graph over packs and agents</td><td>`skill-harness`</td><td>The harness owns installation and rendering relationships.</td></tr>
+          <tr><td>Requirements/spec traceability</td><td>`agent-docs` / specgraph</td><td>That system already owns spec-oriented documentation gates.</td></tr>
+          <tr><td>Model-to-code mapping schema</td><td>Scaffolded by `skill-harness`</td><td>Target repos need the schema without importing harness at runtime.</td></tr>
+          <tr><td>Repo-specific diagrams and docs</td><td>Target repo</td><td>The target repo owns domain and code truth.</td></tr>
+          <tr><td>Dependency/import rules</td><td>Target repo CI</td><td>Rules are language and architecture specific.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Implementation Slices</h2>
+      <div class="steps">
+        <div class="step"><strong>1. Self-Scaffold</strong><span>Add root project config, manifest, checks, model dirs.</span></div>
+        <div class="step"><strong>2. Suite Graph</strong><span>Add graph loader and deterministic doc generation.</span></div>
+        <div class="step"><strong>3. Model Inventory</strong><span>Scaffold starter context, domain, use-case, update matrix.</span></div>
+        <div class="step"><strong>4. Mapping Checks</strong><span>Validate paths, hashes, evidence, and review surfaces.</span></div>
+        <div class="step"><strong>5. Browser Workflow</strong><span>Add review command or documented local preview path.</span></div>
+        <div class="step"><strong>6. CI Gates</strong><span>Run tests, build, graph drift, artifact policy, smoke setup.</span></div>
+      </div>
+      <div class="callout" style="margin-top:14px">
+        <p><strong>Optional seventh slice:</strong> extend `agent-docs` / specgraph with model nodes and impact edges so changed files can resolve to impacted models. Repos without specgraph should still keep the basic manifest, path, hash, and HTML checks.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Update Rules And Drift Verdicts</h2>
+      <table>
+        <thead>
+          <tr><th>Change Type</th><th>Required Model Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>User goal or workflow changes</td><td>Update use-case and activity; maybe sequence.</td></tr>
+          <tr><td>Domain concepts or business rules change</td><td>Update domain; maybe state.</td></tr>
+          <tr><td>Service or component boundary changes</td><td>Update context/container/component.</td></tr>
+          <tr><td>Deployment or trust boundary changes</td><td>Update deployment and security evidence.</td></tr>
+          <tr><td>Internal refactor only</td><td>Regenerate dependency evidence; durable UML usually unchanged.</td></tr>
+          <tr><td>Generated review is stale</td><td>Regenerate from source or mark artifact not ready.</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead>
+          <tr><th>Drift Verdict</th><th>Meaning</th><th>Lifecycle Mapping</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>`aligned`</td><td>Source, mapping, evidence, and review surface match code/docs.</td><td>`ready`</td></tr>
+          <tr><td>`source-missing`</td><td>Behavior changed but no canonical model source exists.</td><td>`needs-source`</td></tr>
+          <tr><td>`inventory-mismatch`</td><td>Inventory, manifest, and touchpoints disagree.</td><td>`needs-source`</td></tr>
+          <tr><td>`review-stale`</td><td>Source or code changed after HTML generation.</td><td>`stale`</td></tr>
+          <tr><td>`evidence-missing`</td><td>Claims are under-supported.</td><td>`needs-evidence`</td></tr>
+          <tr><td>`policy-failed`</td><td>Manifest, model, or HTML policy checks fail.</td><td>`unsafe`</td></tr>
+          <tr><td>`inconclusive`</td><td>Impact cannot yet be determined.</td><td>`inconclusive`</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Next Move</h2>
+      <div class="callout good">
+        <p>Implement `skill-harness-wqp` first enough to self-scaffold this repo's artifact loop, then implement `skill-harness-wdv` as the reusable suite graph and drift check.</p>
+      </div>
+      <div class="callout warn">
+        <p>The browser artifact gap is both a workflow issue and a repo setup issue: agents should create generated review surfaces when asked, and the root repo should have the scaffolded manifest/check scripts that make this automatic.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
