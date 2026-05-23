@@ -58,6 +58,7 @@ Default behavior:
 - run `agent-docs install-gates --quality`
 - scaffold developer artifact guidance by default; `auto` resolves to a dual profile with canonical Markdown/TOON/specgraph sources, optional generated review surfaces, and an artifact provenance manifest
 - use `--developer-artifacts-profile agent-loop` for governed self-improving agent workflows with a loop playbook, trace/eval receipt directory, and policy checker
+- use `--enable-modeling` when the target repo needs stricter source-first UML/UWE/C4 model artifacts, generated HTML review pages under `generated/review/models/`, `model-diff` manifest entries, and model policy checks
 - write `.skill-harness/setup-proof.json` as machine-readable evidence of selected profile, package manager, initialized tools, skipped capabilities, generated paths, Beads mode, and available check commands
 
 Useful variants:
@@ -78,6 +79,7 @@ Useful variants:
 ./skill-harness setup-project --dir path/to/project --developer-artifacts-profile tui
 ./skill-harness setup-project --dir path/to/project --developer-artifacts-profile media
 ./skill-harness setup-project --dir path/to/project --developer-artifacts-profile agent-loop
+./skill-harness setup-project --dir path/to/project --enable-modeling
 ```
 
 ## Frontier doctrine companion
@@ -141,6 +143,7 @@ For the fully automated equivalent of the above, use the `setup-project` command
 - Treat generated HTML under `generated/review/` as a human review surface only.
 - Record generated review surfaces in `docs/artifacts/artifacts.manifest.json` with source path, artifact type, evidence links, and freshness data when available.
 - For Mermaid, C4, UML-style, UWE-inspired, dependency, and architecture-space views, keep the diagram/model source durable and pre-render diagrams into HTML as inline SVG or static markup.
+- With `--enable-modeling`, keep authored model sources in repo-relative text files, prefer `docs/artifacts/source/models/` when there is no better domain docs path, put generated HTML model reviews under `generated/review/models/`, and run `node scripts/check-model-artifact-policy.mjs`.
 - Do not add browser Mermaid runtimes, external scripts, or external assets to generated review HTML by default.
 - Use `--developer-artifacts-profile agent-loop` only for governed self-improving agent workflows; generated trace receipts belong under `generated/agent-runs/` and should stay out of git unless summarized and redacted.
 

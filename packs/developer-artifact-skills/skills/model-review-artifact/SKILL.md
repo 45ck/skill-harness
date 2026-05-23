@@ -32,15 +32,19 @@ Keep the model source durable and diffable. Use generated HTML only as the revie
 
 ## Required Metadata
 
-- artifact type: `model-view`, `architecture-view`, `blast-radius`, or `review-dashboard`
+- artifact type: `model-view`, `model-diff`, `architecture-view`, `blast-radius`, or `review-dashboard`
+- model id: stable identity across revisions when the project uses model policy checks
 - model kind: sequence, state, class, domain, context, container, component, dynamic, deployment, dependency, use-case, activity, or architecture-space
 - notation
+- method when relevant: uml, uwe, or c4
+- facets when relevant: UWE content, navigation, presentation, process, access, or adaptation
 - abstraction level: domain, design, runtime, deployment, or decision
 - canonical source path
 - generated review path, if any
 - evidence links
 - owner
 - freshness data: source hash, renderer, renderer version, and generated timestamp when available
+- for model diffs: before artifact id, after artifact id, diff method, lineage, and generated review path
 
 ## Process
 
@@ -48,9 +52,9 @@ Keep the model source durable and diffable. Use generated HTML only as the revie
 2. Pick the model kind and abstraction level.
 3. Choose the canonical notation and source path.
 4. Name the evidence that backs the model.
-5. Decide whether a generated HTML review surface is useful.
+5. Decide whether a generated HTML review surface is useful. When `--enable-modeling` is active, pair authored model sources with generated HTML review surfaces under `generated/review/models/`.
 6. Record the artifact in `docs/artifacts/artifacts.manifest.json`.
-7. If HTML is generated, pre-render diagrams and run the artifact checks.
+7. If HTML is generated, pre-render diagrams and run the artifact checks. When model policy checks are scaffolded, also run `node scripts/check-model-artifact-policy.mjs`.
 
 ## Output
 

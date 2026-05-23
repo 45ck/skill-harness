@@ -43,6 +43,14 @@ It also adds `generated/review/` to `.gitignore` and adds package scripts when a
 
 If `--skip-agent-docs` is used, the artifact scaffold still works, but it does not add scripts that call `agent-docs`.
 
+For stricter model-driven engineering, add:
+
+```bash
+./skill-harness setup-project --dir ../my-project --enable-modeling
+```
+
+This is not a separate profile. It keeps the existing developer artifact profile and adds source-first modeling conveniences: `docs/artifacts/source/models/`, `generated/review/models/`, `docs/artifacts/templates/model-diff-artifact.md`, `scripts/check-model-artifact-policy.mjs`, model-aware package scripts, and setup-proof check entries. The base scaffold already supports `model-view`; `--enable-modeling` adds stricter UML/UWE/C4 metadata, `model-diff` lineage checks, and paired human HTML review expectations.
+
 `.skill-harness/setup-proof.json` is the install evidence record for the setup run. It records the resolved target and operation directories, package manager, requested and effective artifact profile, tool initialization statuses, skipped capabilities, generated paths, Beads mode, and available check commands. Use it to distinguish a repo that merely has copied files from one where the harness recorded what it set up.
 
 ## Profiles
@@ -107,6 +115,21 @@ Run the manifest check before handing off model-backed artifacts:
 
 ```bash
 node scripts/check-artifact-manifest.mjs
+```
+
+When `--enable-modeling` is used, model-backed artifacts get an additional policy layer:
+
+- `model-view` and `model-diff` entries require `modelId`, `modelKind`, `notation`, `method`, `abstractionLevel`, `owner`, source path, review path, and freshness metadata when present
+- valid methods are `uml`, `uwe`, and `c4`; each method has allowed model kinds
+- UWE facets are `content`, `navigation`, `presentation`, `process`, `access`, and `adaptation`; `access` is the local access-control facet and `adaptation` covers personalization/context variation
+- `model-diff` entries must reference valid before/after artifact ids and declare `diff.method`
+- HTML, SVG, PNG, screenshots, and generated comparison pages are review surfaces only; the source diff remains canonical
+- generated model review HTML should live under `generated/review/models/`
+
+Run:
+
+```bash
+node scripts/check-model-artifact-policy.mjs
 ```
 
 ## Media And Demo Artifacts
