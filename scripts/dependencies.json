@@ -101,6 +101,9 @@
     },
     "integration-tooling-skills": {
       "path": "packs/integration-tooling-skills"
+    },
+    "developer-artifact-skills": {
+      "path": "packs/developer-artifact-skills"
     }
   },
   "agents": {
@@ -149,7 +152,8 @@
         "cloud-platform-operations-skills",
         "documentation-evidence-skills",
         "frontier-agent-playbook",
-        "integration-tooling-skills"
+        "integration-tooling-skills",
+        "developer-artifact-skills"
       ]
     },
     "software-architect-beads": {
@@ -159,7 +163,8 @@
         "cloud-platform-operations-skills",
         "documentation-evidence-skills",
         "frontier-agent-playbook",
-        "integration-tooling-skills"
+        "integration-tooling-skills",
+        "developer-artifact-skills"
       ]
     },
     "web-engineer": {
@@ -209,7 +214,8 @@
         "software-quality-skills",
         "code-review-inspection-skills",
         "refactoring-code-smells-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "developer-artifact-skills"
       ]
     },
     "security-reviewer": {
@@ -242,7 +248,8 @@
         "cloud-platform-operations-skills",
         "deployment-release-skills",
         "maintenance-evolution-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "developer-artifact-skills"
       ]
     },
     "delivery-manager-beads": {
@@ -252,20 +259,23 @@
         "cloud-platform-operations-skills",
         "deployment-release-skills",
         "maintenance-evolution-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "developer-artifact-skills"
       ]
     },
     "research-writer": {
       "repos": [
         "research-literature-review-skills",
         "documentation-evidence-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "developer-artifact-skills"
       ]
     },
     "workflow-engineer": {
       "repos": [
         "coding-workflow-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "developer-artifact-skills"
       ]
     }
   }

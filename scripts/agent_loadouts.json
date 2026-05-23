@@ -89,7 +89,10 @@
       "digital-expert-test",
       "legacy-automation-fallback",
       "llm-default-architecture",
-      "verification-first-delivery"
+      "verification-first-delivery",
+      "developer-artifact-shaper",
+      "html-review-artifact",
+      "artifact-evidence-gate"
     ]
   },
   "software-architect-beads": {
@@ -109,7 +112,10 @@
       "digital-expert-test",
       "legacy-automation-fallback",
       "llm-default-architecture",
-      "verification-first-delivery"
+      "verification-first-delivery",
+      "developer-artifact-shaper",
+      "html-review-artifact",
+      "artifact-evidence-gate"
     ]
   },
   "web-engineer": {
@@ -207,7 +213,9 @@
       "rework-plan-writer",
       "frontier-model-context",
       "digital-expert-test",
-      "legacy-automation-fallback"
+      "legacy-automation-fallback",
+      "artifact-evidence-gate",
+      "artifact-handoff-pack"
     ]
   },
   "security-reviewer": {
@@ -269,7 +277,9 @@
       "frontier-model-context",
       "digital-expert-test",
       "pre-ai-scarcity-thinking",
-      "verification-first-delivery"
+      "verification-first-delivery",
+      "developer-artifact-shaper",
+      "artifact-handoff-pack"
     ]
   },
   "delivery-manager-beads": {
@@ -286,7 +296,9 @@
       "frontier-model-context",
       "digital-expert-test",
       "pre-ai-scarcity-thinking",
-      "verification-first-delivery"
+      "verification-first-delivery",
+      "developer-artifact-shaper",
+      "artifact-handoff-pack"
     ]
   },
   "research-writer": {
@@ -301,7 +313,10 @@
       "evaluation-report-writer",
       "frontier-model-context",
       "digital-expert-test",
-      "pre-ai-scarcity-thinking"
+      "pre-ai-scarcity-thinking",
+      "developer-artifact-shaper",
+      "html-review-artifact",
+      "artifact-evidence-gate"
     ]
   },
   "workflow-engineer": {
@@ -314,7 +329,9 @@
       "digital-expert-test",
       "legacy-automation-fallback",
       "llm-default-architecture",
-      "verification-first-delivery"
+      "verification-first-delivery",
+      "developer-artifact-shaper",
+      "artifact-handoff-pack"
     ]
   }
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -58,6 +59,103 @@ func TestResolvePackageManagerFromPackageManagerField(t *testing.T) {
 	if manager != packageManagerBun {
 		t.Fatalf("expected bun, got %q", manager)
 	}
+}
+
+func TestParseArtifactProfileRejectsUnknownValue(t *testing.T) {
+	if _, err := parseArtifactProfile("rich-ui"); err == nil {
+		t.Fatal("expected unsupported artifact profile to return an error")
+	}
+}
+
+func TestWriteDeveloperArtifactScaffold(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	for _, path := range []string{
+		filepath.Join(root, "docs", "artifacts", "source"),
+		filepath.Join(root, "docs", "artifacts", "templates"),
+		filepath.Join(root, "generated", "review"),
+		filepath.Join(root, ".skill-harness"),
+		filepath.Join(root, "scripts"),
+	} {
+		info, err := os.Stat(path)
+		if err != nil {
+			t.Fatalf("expected scaffold path %s: %v", path, err)
+		}
+		if !info.IsDir() {
+			t.Fatalf("expected %s to be a directory", path)
+		}
+	}
+
+	data, err := os.ReadFile(filepath.Join(root, ".skill-harness", "project.json"))
+	if err != nil {
+		t.Fatalf("read config: %v", err)
+	}
+	var config map[string]any
+	if err := json.Unmarshal(data, &config); err != nil {
+		t.Fatalf("config should be valid JSON: %v", err)
+	}
+	artifacts := developerArtifactsConfig(t, config)
+	if artifacts["profile"] != string(artifactProfileDual) {
+		t.Fatalf("expected dual profile, got %#v", artifacts["profile"])
+	}
+	if !fileExists(filepath.Join(root, "scripts", "check-artifact-html-policy.mjs")) {
+		t.Fatal("expected HTML policy checker script")
+	}
+	if !gitignoreHasLine(mustReadText(t, filepath.Join(root, ".gitignore")), "generated/review/") {
+		t.Fatal("expected generated review output to be gitignored")
+	}
+}
+
+func TestWriteDeveloperArtifactScaffoldResolvesAutoProfile(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileAuto, true); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(root, ".skill-harness", "project.json"))
+	if err != nil {
+		t.Fatalf("read config: %v", err)
+	}
+	var config map[string]any
+	if err := json.Unmarshal(data, &config); err != nil {
+		t.Fatalf("config should be valid JSON: %v", err)
+	}
+	artifacts := developerArtifactsConfig(t, config)
+	if artifacts["requestedProfile"] != string(artifactProfileAuto) {
+		t.Fatalf("expected requested auto profile, got %#v", artifacts["requestedProfile"])
+	}
+	if artifacts["profile"] != string(artifactProfileDual) {
+		t.Fatalf("expected effective dual profile, got %#v", artifacts["profile"])
+	}
+}
+
+func developerArtifactsConfig(t *testing.T, config map[string]any) map[string]any {
+	t.Helper()
+	capabilities, ok := config["capabilities"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected capabilities map, got %#v", config["capabilities"])
+	}
+	artifacts, ok := capabilities["developerArtifacts"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected developerArtifacts map, got %#v", capabilities["developerArtifacts"])
+	}
+	return artifacts
+}
+
+func mustReadText(t *testing.T, path string) string {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read %s: %v", path, err)
+	}
+	return string(data)
 }
 
 func mustMkdirAll(t *testing.T, path string) {

@@ -24,11 +24,11 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## software-architect
 
-- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery
+- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, html-review-artifact, artifact-evidence-gate
 
 ## software-architect-beads
 
-- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery
+- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, html-review-artifact, artifact-evidence-gate
 
 ## web-engineer
 
@@ -52,7 +52,7 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## quality-reviewer
 
-- Skills: fagan-inspection, maintainability-reviewer, technical-debt-auditor, code-review-checklist-runner, review-severity-scorer, code-smell-detector, refactoring-candidate-ranker, quality-risk-register-builder, rework-plan-writer, frontier-model-context, digital-expert-test, legacy-automation-fallback
+- Skills: fagan-inspection, maintainability-reviewer, technical-debt-auditor, code-review-checklist-runner, review-severity-scorer, code-smell-detector, refactoring-candidate-ranker, quality-risk-register-builder, rework-plan-writer, frontier-model-context, digital-expert-test, legacy-automation-fallback, artifact-evidence-gate, artifact-handoff-pack
 
 ## security-reviewer
 
@@ -68,19 +68,19 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## delivery-manager
 
-- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery
+- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack
 
 ## delivery-manager-beads
 
-- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery
+- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack
 
 ## research-writer
 
-- Skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking
+- Skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, developer-artifact-shaper, html-review-artifact, artifact-evidence-gate
 
 ## workflow-engineer
 
-- Skills: issue-driven-delivery, gh-review-followthrough, gh-actions-failure-triage, review-ready-check, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery
+- Skills: issue-driven-delivery, gh-review-followthrough, gh-actions-failure-triage, review-ready-check, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack
 
 ## Dependency model
 

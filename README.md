@@ -48,6 +48,7 @@ That command:
 - runs `noslop init`
 - runs `bd init`
 - runs `agent-docs install-gates --quality`
+- scaffolds developer artifact guidance by default, with Markdown/TOON/specgraph as canonical source and generated HTML as an optional review surface
 
 ## Benchmark results
 
@@ -168,6 +169,8 @@ Skip one tool:
 ./skill-harness setup-project --dir ../my-project --skip-agent-docs
 ./skill-harness setup-project --dir ../my-project --skip-noslop
 ./skill-harness setup-project --dir ../my-project --skip-beads
+./skill-harness setup-project --dir ../my-project --skip-artifacts
+./skill-harness setup-project --dir ../my-project --skip-developer-artifacts
 ```
 
 Install the repo-local Beads worktree wrapper (copies `scripts/beads/bd.mjs` + adds `.trees/` to `.gitignore`):
@@ -175,6 +178,19 @@ Install the repo-local Beads worktree wrapper (copies `scripts/beads/bd.mjs` + a
 ```bash
 ./skill-harness beads-worktrees --dir ../my-project
 ```
+
+Choose a developer artifact profile:
+
+```bash
+./skill-harness setup-project --dir ../my-project --developer-artifacts-profile auto
+./skill-harness setup-project --dir ../my-project --developer-artifacts-profile codex-app
+./skill-harness setup-project --dir ../my-project --developer-artifacts-profile claude-desktop
+./skill-harness setup-project --dir ../my-project --developer-artifacts-profile cli
+./skill-harness setup-project --dir ../my-project --developer-artifacts-profile tui
+./skill-harness setup-project --dir ../my-project --developer-artifacts-profile none
+```
+
+Artifact profiles are guidance and scaffold settings, not a separate runtime. `auto` is the default and resolves to `dual`: canonical Markdown/TOON/specgraph sources plus optional generated review surfaces. Use `codex-app` or `claude-desktop` for desktop workflows with file-backed previews, `cli` or `tui` for terminal-heavy projects, and `none`, `--skip-artifacts`, or `--skip-developer-artifacts` for minimal projects. The shorter `--artifact-profile markdown|html|dual|none` form remains supported as an alias.
 
 ### Validate installed agent dependencies
 
@@ -243,6 +259,7 @@ Agent-to-skill mapping lives in [docs/agent-loadouts.md](docs/agent-loadouts.md)
 - `coding-workflow-skills` (embedded)
 - `design-tooling-skills` (embedded)
 - `integration-tooling-skills` (embedded)
+- `developer-artifact-skills` (embedded)
 
 ## Shared doctrine companion
 

@@ -56,6 +56,7 @@ Default behavior:
 - run `noslop init`
 - run `bd init`
 - run `agent-docs install-gates --quality`
+- scaffold developer artifact guidance by default; `auto` resolves to a dual profile with canonical Markdown/TOON/specgraph sources and optional generated review surfaces
 
 Useful variants:
 
@@ -67,6 +68,12 @@ Useful variants:
 ./skill-harness setup-project --dir path/to/project --skip-agent-docs
 ./skill-harness setup-project --dir path/to/project --skip-noslop
 ./skill-harness setup-project --dir path/to/project --skip-beads
+./skill-harness setup-project --dir path/to/project --skip-artifacts
+./skill-harness setup-project --dir path/to/project --skip-developer-artifacts
+./skill-harness setup-project --dir path/to/project --developer-artifacts-profile codex-app
+./skill-harness setup-project --dir path/to/project --developer-artifacts-profile claude-desktop
+./skill-harness setup-project --dir path/to/project --developer-artifacts-profile cli
+./skill-harness setup-project --dir path/to/project --developer-artifacts-profile tui
 ```
 
 ## Frontier doctrine companion

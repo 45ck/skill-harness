@@ -58,6 +58,20 @@ const (
 	packageManagerBun  packageManager = "bun"
 )
 
+type artifactProfile string
+
+const (
+	artifactProfileAuto          artifactProfile = "auto"
+	artifactProfileMarkdown      artifactProfile = "markdown"
+	artifactProfileHTML          artifactProfile = "html"
+	artifactProfileDual          artifactProfile = "dual"
+	artifactProfileCodexApp      artifactProfile = "codex-app"
+	artifactProfileClaudeDesktop artifactProfile = "claude-desktop"
+	artifactProfileCLI           artifactProfile = "cli"
+	artifactProfileTUI           artifactProfile = "tui"
+	artifactProfileNone          artifactProfile = "none"
+)
+
 type projectSetupContext struct {
 	TargetDir      string
 	OperationDir   string
@@ -189,6 +203,10 @@ func runSetupProject(root string, args []string) {
 	skipBeads := fs.Bool("skip-beads", false, "Do not install or initialize Beads.")
 	beadsWorktrees := fs.Bool("beads-worktrees", true, "Install repo-local Beads worktree wrapper script.")
 	skipClaudeSettings := fs.Bool("skip-claude-settings", false, "Do not write .claude/settings.json.")
+	skipArtifacts := fs.Bool("skip-artifacts", false, "Do not scaffold developer artifact guidance.")
+	skipDeveloperArtifacts := fs.Bool("skip-developer-artifacts", false, "Do not scaffold developer artifact guidance.")
+	artifactProfileValue := fs.String("artifact-profile", string(artifactProfileAuto), "Developer artifact profile: auto, markdown, html, dual, or none.")
+	developerArtifactsProfileValue := fs.String("developer-artifacts-profile", string(artifactProfileAuto), "Developer artifact profile: auto, codex-app, claude-desktop, cli, tui, markdown, html, dual, or none.")
 	installOnly := fs.Bool("install-only", false, "Install packages only; skip initialization commands.")
 	scopeValue := fs.String("scope", string(projectScopeAuto), "Setup scope: auto, root, or workspace.")
 	packageManagerValue := fs.String("package-manager", string(packageManagerAuto), "Package manager: auto, npm, pnpm, yarn, or bun.")
@@ -200,6 +218,12 @@ func runSetupProject(root string, args []string) {
 	ctx, err := resolveProjectSetupContext(projectDir, *scopeValue, *packageManagerValue)
 	exitOnErr(err)
 	exitOnErr(requireSetupCommands(ctx.PackageManager))
+	profileValue := *artifactProfileValue
+	if flagWasSet(fs, "developer-artifacts-profile") {
+		profileValue = *developerArtifactsProfileValue
+	}
+	artifactProfile, err := parseArtifactProfile(profileValue)
+	exitOnErr(err)
 
 	if _, err := os.Stat(filepath.Join(ctx.OperationDir, "package.json")); errors.Is(err, os.ErrNotExist) {
 		exitOnErr(writeMinimalPackageJSON(ctx.OperationDir))
@@ -234,6 +258,9 @@ func runSetupProject(root string, args []string) {
 
 	if !*skipAgentDocs {
 		exitOnErr(runLocalTool(ctx.OperationDir, ctx.PackageManager, "agent-docs", "init"))
+	}
+	if !*skipArtifacts && !*skipDeveloperArtifacts && artifactProfile != artifactProfileNone {
+		exitOnErr(writeDeveloperArtifactScaffold(ctx.OperationDir, artifactProfile, !*skipAgentDocs))
 	}
 	if !*skipNoslop {
 		exitOnErr(runLocalTool(ctx.OperationDir, ctx.PackageManager, "noslop", "init"))
@@ -730,6 +757,41 @@ func parsePackageManager(value string) (packageManager, error) {
 	}
 }
 
+func parseArtifactProfile(value string) (artifactProfile, error) {
+	switch artifactProfile(strings.ToLower(strings.TrimSpace(value))) {
+	case artifactProfileAuto:
+		return artifactProfileAuto, nil
+	case artifactProfileMarkdown:
+		return artifactProfileMarkdown, nil
+	case artifactProfileHTML:
+		return artifactProfileHTML, nil
+	case artifactProfileDual:
+		return artifactProfileDual, nil
+	case artifactProfileCodexApp:
+		return artifactProfileCodexApp, nil
+	case artifactProfileClaudeDesktop:
+		return artifactProfileClaudeDesktop, nil
+	case artifactProfileCLI:
+		return artifactProfileCLI, nil
+	case artifactProfileTUI:
+		return artifactProfileTUI, nil
+	case artifactProfileNone:
+		return artifactProfileNone, nil
+	default:
+		return "", fmt.Errorf("unsupported artifact profile: %s", value)
+	}
+}
+
+func flagWasSet(fs *flag.FlagSet, name string) bool {
+	found := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			found = true
+		}
+	})
+	return found
+}
+
 func resolvePackageManager(preferred packageManager, startDir string) (packageManager, error) {
 	if preferred != packageManagerAuto {
 		return preferred, nil
@@ -866,6 +928,340 @@ func writeMinimalPackageJSON(projectDir string) error {
 	}
 	content = append(content, '\n')
 	return os.WriteFile(filepath.Join(projectDir, "package.json"), content, 0o644)
+}
+
+func updatePackageScripts(projectDir string, agentDocsEnabled bool) error {
+	packagePath := filepath.Join(projectDir, "package.json")
+	data, err := os.ReadFile(packagePath)
+	if err != nil {
+		return err
+	}
+	metadata := map[string]any{}
+	if err := json.Unmarshal(data, &metadata); err != nil {
+		return err
+	}
+	scripts, _ := metadata["scripts"].(map[string]any)
+	if scripts == nil {
+		scripts = map[string]any{}
+	}
+	defaultScripts := map[string]string{
+		"artifacts:html:check": "node scripts/check-artifact-html-policy.mjs",
+	}
+	if agentDocsEnabled {
+		defaultScripts["docs:check"] = "agent-docs check"
+		defaultScripts["docs:generate"] = "agent-docs generate"
+		defaultScripts["docs:report"] = "agent-docs report"
+	}
+	for name, command := range defaultScripts {
+		if _, exists := scripts[name]; !exists {
+			scripts[name] = command
+		}
+	}
+	metadata["scripts"] = scripts
+	updated, err := json.MarshalIndent(metadata, "", "  ")
+	if err != nil {
+		return err
+	}
+	updated = append(updated, '\n')
+	return os.WriteFile(packagePath, updated, 0o644)
+}
+
+func ensureGitignoreLines(projectDir string, lines []string) error {
+	path := filepath.Join(projectDir, ".gitignore")
+	existing := ""
+	if data, err := os.ReadFile(path); err == nil {
+		existing = string(data)
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	out := strings.TrimRight(existing, "\r\n")
+	for _, line := range lines {
+		if gitignoreHasLine(existing, line) {
+			continue
+		}
+		if out != "" {
+			out += "\n"
+		}
+		out += line
+	}
+	if out != "" {
+		out += "\n"
+	}
+	return os.WriteFile(path, []byte(out), 0o644)
+}
+
+func gitignoreHasLine(text, expected string) bool {
+	for _, line := range strings.Split(text, "\n") {
+		if strings.TrimSpace(line) == expected {
+			return true
+		}
+	}
+	return false
+}
+
+func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, agentDocsEnabled bool) error {
+	effectiveProfile := effectiveArtifactProfile(profile)
+	dirs := []string{
+		filepath.Join(projectDir, "docs", "artifacts", "source"),
+		filepath.Join(projectDir, "docs", "artifacts", "templates"),
+		filepath.Join(projectDir, "generated", "review"),
+		filepath.Join(projectDir, ".skill-harness"),
+		filepath.Join(projectDir, "scripts"),
+	}
+	for _, dir := range dirs {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return err
+		}
+	}
+
+	canonicalTooling := []string{"specgraph", "agent-docs"}
+	if !agentDocsEnabled {
+		canonicalTooling = []string{}
+	}
+	config := map[string]any{
+		"version": 1,
+		"capabilities": map[string]any{
+			"developerArtifacts": map[string]any{
+				"enabled":          true,
+				"requestedProfile": string(profile),
+				"profile":          string(effectiveProfile),
+				"canonical": map[string]any{
+					"formats": []string{"markdown", "toon"},
+					"tooling": canonicalTooling,
+					"paths":   []string{"docs", "docs/artifacts/source"},
+				},
+				"reviewSurface": map[string]any{
+					"format":          "html",
+					"outDir":          "generated/review",
+					"commitGenerated": false,
+					"openMode":        artifactOpenMode(profile),
+				},
+				"htmlPolicy": map[string]any{
+					"role":                  "generated-review-surface",
+					"selfContained":         true,
+					"allowInlineJavaScript": false,
+					"allowExternalScripts":  false,
+					"allowExternalAssets":   false,
+					"allowNetworkCalls":     false,
+					"requireSemanticHTML":   true,
+					"requiredCSP":           artifactRequiredCSP(),
+				},
+			},
+		},
+	}
+	data, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return err
+	}
+	data = append(data, '\n')
+	if err := os.WriteFile(filepath.Join(projectDir, ".skill-harness", "project.json"), data, 0o644); err != nil {
+		return err
+	}
+	if err := updatePackageScripts(projectDir, agentDocsEnabled); err != nil {
+		return err
+	}
+	if err := ensureGitignoreLines(projectDir, []string{"generated/review/"}); err != nil {
+		return err
+	}
+
+	readmePath := filepath.Join(projectDir, "docs", "artifacts", "README.md")
+	if !fileExists(readmePath) {
+		if err := os.WriteFile(readmePath, []byte(developerArtifactReadme(profile)), 0o644); err != nil {
+			return err
+		}
+	}
+
+	templatePath := filepath.Join(projectDir, "docs", "artifacts", "templates", "review-artifact.md")
+	if !fileExists(templatePath) {
+		if err := os.WriteFile(templatePath, []byte(developerArtifactTemplate()), 0o644); err != nil {
+			return err
+		}
+	}
+
+	checkerPath := filepath.Join(projectDir, "scripts", "check-artifact-html-policy.mjs")
+	if !fileExists(checkerPath) {
+		return os.WriteFile(checkerPath, []byte(developerArtifactPolicyScript()), 0o644)
+	}
+	return nil
+}
+
+func effectiveArtifactProfile(profile artifactProfile) artifactProfile {
+	switch profile {
+	case artifactProfileAuto:
+		return artifactProfileDual
+	case artifactProfileCodexApp, artifactProfileClaudeDesktop:
+		return artifactProfileHTML
+	case artifactProfileCLI, artifactProfileTUI:
+		return artifactProfileMarkdown
+	default:
+		return profile
+	}
+}
+
+func artifactOpenMode(profile artifactProfile) string {
+	switch profile {
+	case artifactProfileCodexApp, artifactProfileClaudeDesktop, artifactProfileHTML:
+		return "file-preview"
+	case artifactProfileCLI, artifactProfileTUI, artifactProfileMarkdown:
+		return "path-or-command"
+	default:
+		return "when-supported"
+	}
+}
+
+func artifactRequiredCSP() string {
+	return "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+}
+
+func developerArtifactReadme(profile artifactProfile) string {
+	effectiveProfile := effectiveArtifactProfile(profile)
+	return fmt.Sprintf(`# Developer Artifacts
+
+Requested profile: %s
+Effective profile: %s
+
+Use this directory for durable developer artifacts and generated review surfaces.
+
+## Source Of Truth
+
+- Keep canonical decisions, specs, investigations, and handoff notes in Markdown, TOON, or specgraph-compatible sources.
+- Treat HTML as a generated review surface for scanning, comparison, diagrams, prototypes, and desktop app previews.
+- Do not make generated HTML the only durable source for a decision.
+
+## Layout
+
+- source/ - canonical artifact sources when they do not belong in a domain-specific docs folder.
+- templates/ - local templates for recurring artifact types.
+- ../../generated/review/ - generated HTML or rich review artifacts for humans.
+
+## HTML Review Policy
+
+- Self-contained static HTML only by default.
+- No external scripts, external assets, or network calls unless the project explicitly opts in.
+- No inline JavaScript unless the project explicitly opts in and reviews the script.
+- Every HTML review artifact must include the required CSP meta tag from .skill-harness/project.json.
+- Use semantic headings, landmarks, meaningful link text, and alt text for embedded images.
+- No secrets, credentials, tokens, private logs, or customer data.
+- Link back to the canonical source artifact and issue.
+- Regenerate or discard HTML when the source changes.
+
+Run this policy check before handing off generated HTML:
+
+    node scripts/check-artifact-html-policy.mjs
+`, profile, effectiveProfile)
+}
+
+func developerArtifactTemplate() string {
+	return `# Review Artifact: [Title]
+
+**Status:** Draft
+**Canonical source:** [path or issue]
+**Review surface:** Markdown | HTML | Dual
+
+## Purpose
+
+What decision, review, or handoff this artifact supports.
+
+## Evidence
+
+- Source files:
+- Issues:
+- Test or verification output:
+
+## Summary
+
+The smallest useful explanation for a reviewer.
+
+## Follow-Up
+
+- [ ] Action item
+`
+}
+
+func developerArtifactPolicyScript() string {
+	return `import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const configPath = path.join(root, '.skill-harness', 'project.json');
+const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
+const requiredCsp = developerArtifacts.htmlPolicy?.requiredCSP ?? '';
+const reviewRoot = path.join(root, developerArtifacts.reviewSurface?.outDir ?? 'generated/review');
+
+const blockedTagPatterns = [
+  /<script\b/i,
+  /<iframe\b/i,
+  /<object\b/i,
+  /<embed\b/i,
+  /<form\b/i,
+  /<meta\b[^>]*http-equiv=["']?refresh/i,
+  /<link\b[^>]*rel=["']?(?:preload|prefetch|preconnect)/i
+];
+
+const blockedApiPatterns = [
+  /\bfetch\s*\(/,
+  /\bXMLHttpRequest\b/,
+  /\bWebSocket\b/,
+  /\bEventSource\b/,
+  /\bsendBeacon\s*\(/,
+  /\bserviceWorker\b/,
+  /\bdocument\.cookie\b/,
+  /\blocalStorage\b/,
+  /\bsessionStorage\b/
+];
+
+const externalReferencePattern = /\b(?:src|href|action)=["'](?:https?:|\/\/)/i;
+
+function walk(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...walk(fullPath));
+    } else if (entry.isFile() && entry.name.endsWith('.html')) {
+      files.push(fullPath);
+    }
+  }
+  return files;
+}
+
+function checkFile(filePath) {
+  const html = fs.readFileSync(filePath, 'utf8');
+  const failures = [];
+  if (!html.includes('Content-Security-Policy') || !html.includes(requiredCsp)) {
+    failures.push('missing required CSP meta tag');
+  }
+  for (const pattern of blockedTagPatterns) {
+    if (pattern.test(html)) failures.push('blocked tag or preload pattern: ' + pattern);
+  }
+  for (const pattern of blockedApiPatterns) {
+    if (pattern.test(html)) failures.push('blocked browser API: ' + pattern);
+  }
+  if (externalReferencePattern.test(html)) {
+    failures.push('external src/href/action reference');
+  }
+  return failures;
+}
+
+const failures = [];
+for (const filePath of walk(reviewRoot)) {
+  const fileFailures = checkFile(filePath);
+  for (const failure of fileFailures) {
+    failures.push(path.relative(root, filePath) + ': ' + failure);
+  }
+}
+
+if (failures.length > 0) {
+  console.error('Artifact HTML policy failed:');
+  for (const failure of failures) console.error('- ' + failure);
+  process.exit(1);
+}
+
+console.log('Artifact HTML policy passed');
+`
 }
 
 func installBeads(projectDir string) (beadsInstallMode, error) {
@@ -1056,7 +1452,7 @@ func printUsage(loadouts loadoutConfig, deps dependencyConfig) {
 	fmt.Println("Commands:")
 	fmt.Println("  list [--agents] [--packs]")
 	fmt.Println("  install [--all] [--interactive] [--packs-only] [--agents-only] [--agents=a,b] [--packs=x,y]")
-	fmt.Println("  setup-project [--dir path] [--scope auto|root|workspace] [--package-manager auto|npm|pnpm|yarn|bun] [--install-only] [--skip-noslop] [--skip-agent-docs] [--skip-beads] [--beads-worktrees] [--skip-claude-settings]")
+	fmt.Println("  setup-project [--dir path] [--scope auto|root|workspace] [--package-manager auto|npm|pnpm|yarn|bun] [--developer-artifacts-profile auto|codex-app|claude-desktop|cli|tui|none] [--install-only] [--skip-noslop] [--skip-agent-docs] [--skip-beads] [--beads-worktrees] [--skip-developer-artifacts] [--skip-claude-settings]")
 	fmt.Println("  beads-worktrees [--dir path] [--force]")
 	fmt.Println("  update")
 	fmt.Println("  check [--all] [--interactive] [--agents=a,b]")
