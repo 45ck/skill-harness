@@ -171,8 +171,80 @@
           "canonical source exists before generated review",
           "manifest entry links source, review surface, owner, evidence, and freshness",
           "high-fidelity is required for UI and customer-facing workflow review",
+          "source-declared infographic specs render to static review markup without browser runtimes",
           "synthetic user or agent simulation evidence is labelled separately from real user evidence",
           "HTML policy passes before handoff"
+        ]
+      },
+      "infographicPolicy": {
+        "enabled": true,
+        "defaultMode": "source-spec-to-static-review",
+        "browserRuntime": "blocked-by-default-html-policy",
+        "specFence": "artifact-infographic",
+        "allowedStaticOutputs": [
+          "inline-svg",
+          "static-html",
+          "data-url-image"
+        ],
+        "tools": [
+          {
+            "id": "mermaid",
+            "label": "Mermaid",
+            "role": "architecture, workflow, sequence, and model diagrams",
+            "output": "pre-rendered inline SVG or static markup"
+          },
+          {
+            "id": "vega-lite",
+            "label": "Vega-Lite",
+            "role": "default declarative charts for metrics, comparisons, and evidence dashboards",
+            "output": "static SVG generated from source specs"
+          },
+          {
+            "id": "observable-plot",
+            "label": "Observable Plot",
+            "role": "compact exploratory charts and statistical views",
+            "output": "static SVG generated from source specs"
+          },
+          {
+            "id": "d3",
+            "label": "D3",
+            "role": "custom infographic layouts when canned charts are not expressive enough",
+            "output": "static SVG generated during artifact generation"
+          },
+          {
+            "id": "graphviz",
+            "label": "Graphviz",
+            "role": "node-edge dependency, lineage, and relationship maps",
+            "output": "static SVG generated from DOT or structured edges"
+          },
+          {
+            "id": "echarts",
+            "label": "Apache ECharts",
+            "role": "dashboard-style chart families when a richer chart grammar is useful",
+            "output": "static SVG or PNG generated outside the browser runtime"
+          },
+          {
+            "id": "rawgraphs",
+            "label": "RAWGraphs",
+            "role": "design-led or unusual infographic forms using tabular data",
+            "output": "exported SVG copied into the generated review surface"
+          },
+          {
+            "id": "chartjs",
+            "label": "Chart.js",
+            "role": "simple familiar charts when existing source data already matches Chart.js conventions",
+            "output": "server-rendered image or static SVG equivalent"
+          }
+        ],
+        "selectionRules": [
+          "use Mermaid for authored architecture/process/model diagrams already represented as Mermaid text",
+          "use Vega-Lite as the default chart grammar for source-backed metrics and comparison charts",
+          "use Observable Plot for compact exploratory or statistical chart specs",
+          "use D3 when the artifact needs a bespoke static infographic layout",
+          "use Graphviz for dependency, lineage, and relationship graphs",
+          "use ECharts only as a generation-time renderer or static equivalent, not as a browser runtime",
+          "use RAWGraphs for design-led exported SVGs with tabular source data",
+          "use Chart.js only through server-rendered/static output or an equivalent static chart"
         ]
       },
       "reviewSurface": {

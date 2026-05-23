@@ -23,6 +23,8 @@ Generated visual files are never the only durable source. Edit source first, the
 - Low-fidelity sketches are scratch artifacts only unless the project explicitly records them as research evidence.
 - Use realistic states, dense data, error paths, accessibility cues, assumptions, and evidence strength in the review surface.
 - Use scan-friendly metrics, charts, timelines, evidence/freshness panels, and source links for non-UI human review artifacts.
+- Use Mermaid for authored diagrams, Vega-Lite as the default chart grammar, Observable Plot for compact exploratory charts, D3 for bespoke static layouts, Graphviz for node-edge maps, ECharts only as generation-time/static output, RAWGraphs for exported design-led SVGs, and Chart.js only through server-rendered/static output or an equivalent static chart.
+- Put chart and graph intent in `artifact-infographic` JSON fences or manifest `infographics` arrays when the project has the generic renderer.
 
 ## Artifact Families
 
@@ -50,8 +52,9 @@ Generated visual files are never the only durable source. Edit source first, the
 4. Define the generated review path under `generated/review/<family>/`.
 5. List evidence links and label real evidence separately from synthetic user or agent-simulation evidence.
 6. Add or update the manifest entry with source, review surface, owner, evidence, status, freshness, and `reviewRequired: true` when a generated HTML surface is expected.
-7. Run `node scripts/generate-artifact-review.mjs` when available.
-8. Run manifest and HTML policy checks before handoff when the project has them.
+7. Add `artifact-infographic` specs for charts, graphs, timelines, or source-backed infographic panels when useful.
+8. Run `node scripts/generate-artifact-review.mjs` when available.
+9. Run manifest and HTML policy checks before handoff when the project has them.
 
 ## Output
 

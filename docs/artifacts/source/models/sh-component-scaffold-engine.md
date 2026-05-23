@@ -41,7 +41,7 @@ Show the design-level components that collaborate to scaffold and verify suite o
 
 ## Scope
 
-Included components are the CLI command router, dependency/loadout readers, agent stack resolver, repo baseline governance auditor, repo lock/report writer, install orchestrator, project setup orchestrator, developer artifact scaffold writer, model policy/review script emitters, Beads worktree wrapper installer, Python helper scripts, agent template sources, target repo filesystem, and external command dependencies.
+Included components are the CLI command router, dependency/loadout readers, agent stack resolver, agent-stack lock/proof writer, repo baseline governance auditor, repo baseline lock/report writer, install orchestrator, project setup orchestrator, developer artifact scaffold writer, model policy/review script emitters, Beads worktree wrapper installer, Python helper scripts, agent template sources, target repo filesystem, and external command dependencies.
 
 ## Source Model
 
@@ -54,12 +54,12 @@ flowchart LR
   Scaffold --> AgentStack[".skill-harness/agent-stack.json"]
   Resolver --> AgentStack
   Resolver --> EffectiveState["effective agents, packs, skills"]
+  Resolver --> StackLock[".skill-harness/agent-stack.lock.json"]
   EffectiveState --> InstallRender["install, render, and check --dir"]
   RepoGovernance --> BaselineManifest[".skill-harness/baseline.manifest.json"]
   RepoGovernance --> SurfaceModes["generated, managed-section, overlay, owned, ignored"]
   RepoGovernance --> BaselineLock[".skill-harness/baseline.lock.json"]
   RepoGovernance --> UpdateReport[".skill-harness/update-report.json"]
-  RepoGovernance --> StackLock[".skill-harness/agent-stack.lock.json"]
   Scaffold --> SourceDirs["docs/artifacts/source/*"]
   Scaffold --> PackageScripts["package.json scripts"]
   Scaffold --> Templates["artifact templates"]
@@ -74,7 +74,7 @@ flowchart LR
 
 ## Responsibility Split
 
-Go owns portable project setup, agent stack resolution, repo baseline governance, repo audit state, and lock/report writing. Repo governance is conservative: it writes only baseline manifest, lock, and update-report files, while classifying project-specific skills, agents, Beads state, and instruction files as overlay or owned unless a repo opts into generated or managed-section treatment. Node scripts own artifact and HTML checks because target projects commonly already have Node for package scripts. Python scripts own suite graph generation because existing suite maintenance scripts are Python.
+Go owns portable project setup, agent stack resolution, agent-stack lock/proof writing, repo baseline governance, repo audit state, and baseline lock/report writing. Repo governance is conservative: it writes only baseline manifest, baseline lock, and update-report files, while classifying project-specific skills, agents, Beads state, and instruction files as overlay or owned unless a repo opts into generated or managed-section treatment. Node scripts own artifact and HTML checks because target projects commonly already have Node for package scripts. Python scripts own suite graph generation because existing suite maintenance scripts are Python.
 
 ## Evidence
 

@@ -153,7 +153,7 @@
       "abstractionLevel": "runtime",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-system-context.html",
-      "sourceHash": "b29cd74a641d097882ba41fe740e3b6f827e275b7ad968cb63af1a69e983138d",
+      "sourceHash": "a0688e14f4ed20bd49d068ec435f847689305982843163da097e4304e9812f92",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -238,7 +238,7 @@
       "abstractionLevel": "domain",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-usecase-cli-workflows.html",
-      "sourceHash": "52418a7e8f40d25d45a267651649b8e7383add82befa6030e9727eea5b9d0b45",
+      "sourceHash": "a49b532160d0fdfc7c145163a5f537d2b2eec1c2eb081bf89fa8db2d55c3ffef",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -309,7 +309,7 @@
       "abstractionLevel": "design",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-component-scaffold-engine.html",
-      "sourceHash": "d699f49cec457a0c27d6cd23d52ec348f2aa3f59c5a4c690fd9caa1de20ffc07",
+      "sourceHash": "26170808cf58e64682e293da8eeb95240d1aec537524d63a016d2eb749d8c17a",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-24",
       "implementationTouchpoints": [

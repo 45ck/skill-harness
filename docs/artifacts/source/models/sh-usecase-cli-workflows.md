@@ -56,6 +56,8 @@ flowchart TD
   Maintainer --> Setup["Setup project"]
   ResolveStack --> EffectiveState["Effective agents, packs, skills, and diagnostics"]
   Bootstrap --> StackConfig[".skill-harness/agent-stack.json"]
+  Bootstrap --> StackLock[".skill-harness/agent-stack.lock.json"]
+  Bootstrap --> SetupProof[".skill-harness/setup-proof.json"]
   UpdateProject --> StackLock[".skill-harness/agent-stack.lock.json"]
   RepoInit --> BaselineManifest[".skill-harness/baseline.manifest.json"]
   RepoAudit --> BaselineManifest
@@ -74,7 +76,7 @@ flowchart TD
 
 `setup-project` is the workflow most tightly coupled to developer artifacts. It creates repo-local policy, scripts, proof files, source directories, review surfaces, and a default agent stack overlay while respecting flags that skip Beads, agent-docs, Claude settings, or modeling.
 
-Agent-native commands keep setup prompt-first. `resolve` is read-only, `bootstrap --agent-native` creates local desired state without package installs, `install --dir`, `render --dir`, and `check --dir` consume resolved state when no explicit selections are passed, and `update-project --write-lock` records the resolved baseline state for future reconciliation.
+Agent-native commands keep setup prompt-first. `resolve` is read-only, `bootstrap --agent-native` creates local desired state, lock, and proof without package installs, `install --dir`, `render --dir`, and `check --dir` consume resolved state when no explicit selections are passed and require `agent-stack.json`, and `update-project --write-lock` records the resolved baseline state for future reconciliation.
 
 Repo governance commands add a project-safe distribution layer over the agent stack. `repo init` creates `.skill-harness/baseline.manifest.json`; `repo audit` reports managed, overlay, owned, generated, ignored, and missing surfaces; `repo drift` fails on warning/error findings; `repo sync` refreshes lock and update-report files only; `repo update --check` and `repo trim --dry-run` are observe-only paths for accepting baseline improvements and reducing unused agents or packs.
 

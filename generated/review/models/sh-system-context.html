@@ -59,7 +59,7 @@ flowchart LR
   Agent[&quot;Codex or Claude agent&quot;] --&gt; CLI
   CLI --&gt; Config[&quot;Repo configuration and pack metadata&quot;]
   CLI --&gt; Target[&quot;Target project workspace&quot;]
-  Target --&gt; Stack[&quot;.skill-harness agent stack overlay and lock&quot;]
+  Target --&gt; Stack[&quot;.skill-harness agent stack overlay, lock, and setup proof&quot;]
   Stack --&gt; CLI
   Config --&gt; Agents[&quot;Rendered agent loadouts&quot;]
   Config --&gt; Artifacts[&quot;Developer artifact policy&quot;]
@@ -68,7 +68,7 @@ flowchart LR
 
 ## Boundary
 
-The harness owns suite setup, rendering, and repo-local artifact policy. Target projects own their canonical product, business, data, research, UX, model, and generated evidence sources. Generated HTML is review material, not canonical source.
+The harness owns suite setup, rendering, resolved agent-stack locks, setup proof, and repo-local artifact policy. Target projects own their canonical product, business, data, research, UX, model, and generated evidence sources. Generated HTML is review material, not canonical source.
 
 ## Evidence
 
@@ -77,7 +77,7 @@ Evidence comes from `AGENTS.md`, `scripts/dependencies.json`, `scripts/agent_loa
 ## Freshness
 
 Update this model when CLI command boundaries, pack dependencies, agent rendering behavior, or developer artifact policy changes.
-</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../AGENTS.md">AGENTS.md</a></li><li><a href="../../../scripts/dependencies.json">scripts/dependencies.json</a></li><li><a href="../../../scripts/agent_loadouts.json">scripts/agent_loadouts.json</a></li></ul><h3>Update Triggers</h3><ul><li>CLI command surface changes</li><li>agent loadout or pack boundary changes</li><li>developer artifact capability changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>b29cd74a641d097882ba41fe740e3b6f827e275b7ad968cb63af1a69e983138d</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-23</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
+</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../AGENTS.md">AGENTS.md</a></li><li><a href="../../../scripts/dependencies.json">scripts/dependencies.json</a></li><li><a href="../../../scripts/agent_loadouts.json">scripts/agent_loadouts.json</a></li></ul><h3>Update Triggers</h3><ul><li>CLI command surface changes</li><li>agent loadout or pack boundary changes</li><li>developer artifact capability changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>a0688e14f4ed20bd49d068ec435f847689305982843163da097e4304e9812f92</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-23</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
 </main>
 </body>
 </html>

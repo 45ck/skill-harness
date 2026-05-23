@@ -22,6 +22,8 @@ This is maintainer and agent operating guidance. Public contributors should star
 - Use source-first artifacts for product, business, data, research, UX, and mockup work: canonical agent-readable source first, generated visual human review surface second.
 - Prefer `docs/artifacts/source/product/`, `business/`, `data/`, `research/`, and `ux/` for canonical sources and matching `generated/review/` subfolders for human surfaces.
 - High-fidelity HTML/prototype review is the default for UI, product, customer-facing workflow, and mockup artifacts. Low-fidelity sketches are scratch only unless captured as explicit research evidence.
+- Use Mermaid, Vega-Lite, Observable Plot, D3, Graphviz, Apache ECharts, RAWGraphs, and Chart.js as source/spec or generation-time infographic renderers only. Generated HTML must embed static SVG/HTML/data-url output and must not load browser chart runtimes.
+- Add `artifact-infographic` JSON fences or manifest `infographics` entries when a non-model human artifact needs charts, graphs, or other infographic panels.
 - Record generated visual artifacts in `docs/artifacts/artifacts.manifest.json` with source, review surface, owner, evidence links, status, and freshness. Keep synthetic user or agent-simulation evidence distinct from real user/customer evidence.
 - Use multiple specialist agents when ownership crosses real boundaries: product, business, data, research, UX, structural modeling, and readiness review.
 

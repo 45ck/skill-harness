@@ -347,6 +347,30 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	if visualPolicy["lowFidelityPolicy"] != "scratch-only-not-canonical" {
 		t.Fatalf("expected low-fi scratch policy, got %#v", visualPolicy["lowFidelityPolicy"])
 	}
+	infographicPolicy, ok := artifacts["infographicPolicy"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected infographic policy config, got %#v", artifacts["infographicPolicy"])
+	}
+	if infographicPolicy["defaultMode"] != "source-spec-to-static-review" || infographicPolicy["browserRuntime"] != "blocked-by-default-html-policy" {
+		t.Fatalf("expected static infographic policy, got %#v", infographicPolicy)
+	}
+	infographicTools, ok := infographicPolicy["tools"].([]any)
+	if !ok {
+		t.Fatalf("expected infographic tools, got %#v", infographicPolicy["tools"])
+	}
+	for _, tool := range []string{"mermaid", "vega-lite", "observable-plot", "d3", "graphviz", "echarts", "rawgraphs", "chartjs"} {
+		found := false
+		for _, item := range infographicTools {
+			toolConfig, _ := item.(map[string]any)
+			if toolConfig["id"] == tool {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("expected infographic tool %q in %#v", tool, infographicTools)
+		}
+	}
 	families, ok := visualPolicy["families"].([]any)
 	if !ok || len(families) != 5 {
 		t.Fatalf("expected five visual artifact families, got %#v", visualPolicy["families"])
@@ -712,7 +736,26 @@ func TestArtifactReviewGeneratorCreatesInfographicHTML(t *testing.T) {
 	}
 
 	sourcePath := filepath.Join(root, "docs", "artifacts", "source", "research", "html-artifacts.md")
-	source := "# HTML Artifact Discovery\n\n## Purpose\n\nDecide how human review artifacts should be generated.\n\n## Evidence\n\n- docs/developer-artifacts.md\n"
+	source := strings.Join([]string{
+		"# HTML Artifact Discovery",
+		"",
+		"## Purpose",
+		"",
+		"Decide how human review artifacts should be generated.",
+		"",
+		"```artifact-infographic",
+		"{\"title\":\"Renderer Fit\",\"tool\":\"vega-lite\",\"kind\":\"bar\",\"values\":[{\"label\":\"Source\",\"value\":3},{\"label\":\"HTML\",\"value\":2}]}",
+		"```",
+		"",
+		"```artifact-infographic",
+		"{\"title\":\"Review Flow\",\"tool\":\"graphviz\",\"kind\":\"graph\",\"edges\":[[\"Source\",\"Manifest\"],[\"Manifest\",\"HTML\"]]}",
+		"```",
+		"",
+		"## Evidence",
+		"",
+		"- docs/developer-artifacts.md",
+		"",
+	}, "\n")
 	mustWriteFile(t, sourcePath, source)
 	writeManifest(t, root, []map[string]any{
 		{
@@ -733,7 +776,7 @@ func TestArtifactReviewGeneratorCreatesInfographicHTML(t *testing.T) {
 		t.Fatal("expected generated infographic HTML")
 	}
 	html := mustReadText(t, htmlPath)
-	for _, want := range []string{"Infographic Snapshot", "Source-To-Review Flow", "Canonical Source", "Evidence", "Content-Security-Policy"} {
+	for _, want := range []string{"Infographic Snapshot", "Open-Source Infographic Toolkit", "Static Infographic Specs", "Renderer Fit", "Review Flow", "vega-lite", "graphviz", "Source-To-Review Flow", "Canonical Source", "Evidence", "Content-Security-Policy"} {
 		if !strings.Contains(html, want) {
 			t.Fatalf("expected generated artifact HTML to contain %q", want)
 		}
@@ -1115,6 +1158,100 @@ func TestCLIResolvePrintsAgentStackJSON(t *testing.T) {
 	}
 }
 
+func TestCLIBootstrapAgentNativeWritesStackLockAndProof(t *testing.T) {
+	binary := buildSkillHarnessBinary(t)
+	projectDir := t.TempDir()
+
+	output := runSkillHarnessCLI(t, binary, fakeTooling(t), "bootstrap", "--agent-native", "--dir", projectDir, "--json")
+	var result struct {
+		State      string               `json:"state"`
+		LockPath   string               `json:"lockPath"`
+		ProofPath  string               `json:"proofPath"`
+		Resolution agentStackResolution `json:"resolution"`
+	}
+	if err := json.Unmarshal([]byte(output), &result); err != nil {
+		t.Fatalf("bootstrap output should be JSON: %v\n%s", err, output)
+	}
+	if result.State != "clean" || result.Resolution.Profile != "default" {
+		t.Fatalf("expected clean default bootstrap result, got state=%q profile=%q", result.State, result.Resolution.Profile)
+	}
+	if !fileExists(filepath.Join(projectDir, ".skill-harness", "agent-stack.json")) {
+		t.Fatalf("expected agent stack config")
+	}
+	if !fileExists(filepath.Join(projectDir, ".skill-harness", "agent-stack.lock.json")) {
+		t.Fatalf("expected agent stack lock")
+	}
+	if !fileExists(filepath.Join(projectDir, ".skill-harness", "setup-proof.json")) {
+		t.Fatalf("expected setup proof")
+	}
+	var proof projectSetupProof
+	if err := json.Unmarshal([]byte(mustReadText(t, filepath.Join(projectDir, ".skill-harness", "setup-proof.json"))), &proof); err != nil {
+		t.Fatalf("setup proof should be JSON: %v", err)
+	}
+	if proof.Tools["agentStackLock"].Status != "written" {
+		t.Fatalf("expected agentStackLock proof, got %#v", proof.Tools["agentStackLock"])
+	}
+}
+
+func TestCLIBootstrapAgentNativeWritesProofBesideStackInMonorepo(t *testing.T) {
+	binary := buildSkillHarnessBinary(t)
+	root := t.TempDir()
+	appDir := filepath.Join(root, "apps", "web")
+	mustWriteFile(t, filepath.Join(root, "pnpm-workspace.yaml"), "packages:\n  - apps/*\n")
+	mustWriteFile(t, filepath.Join(root, "pnpm-lock.yaml"), "lockfileVersion: '9.0'\n")
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+	mustWriteFile(t, filepath.Join(appDir, "package.json"), "{\n  \"name\": \"web\",\n  \"private\": true\n}\n")
+
+	runSkillHarnessCLI(t, binary, fakeTooling(t), "bootstrap", "--agent-native", "--dir", appDir)
+
+	if !fileExists(filepath.Join(appDir, ".skill-harness", "agent-stack.json")) {
+		t.Fatalf("expected agent stack in app dir")
+	}
+	if !fileExists(filepath.Join(appDir, ".skill-harness", "setup-proof.json")) {
+		t.Fatalf("expected setup proof beside app stack")
+	}
+	if fileExists(filepath.Join(root, ".skill-harness", "setup-proof.json")) {
+		t.Fatalf("did not expect bootstrap proof to be written at monorepo root")
+	}
+}
+
+func TestCLIUpdateProjectWritesAgentStackLock(t *testing.T) {
+	binary := buildSkillHarnessBinary(t)
+	projectDir := t.TempDir()
+	mustWriteFile(t, filepath.Join(projectDir, ".skill-harness", "agent-stack.json"), `{
+  "version": 1,
+  "profile": "minimal",
+  "disabledAgents": ["workflow-engineer"]
+}
+`)
+
+	output := runSkillHarnessCLI(t, binary, fakeTooling(t), "update-project", "--dir", projectDir, "--write-lock", "--json")
+	var result struct {
+		State      string               `json:"state"`
+		Resolution agentStackResolution `json:"resolution"`
+		Lock       agentStackLock       `json:"lock"`
+	}
+	if err := json.Unmarshal([]byte(output), &result); err != nil {
+		t.Fatalf("update-project output should be JSON: %v\n%s", err, output)
+	}
+	if result.State != "overridden" || result.Resolution.Profile != "minimal" {
+		t.Fatalf("expected overridden minimal update, got state=%q profile=%q", result.State, result.Resolution.Profile)
+	}
+	if result.Lock.Profile != "minimal" || result.Lock.OverlayHash == "" {
+		t.Fatalf("expected agent-stack lock with profile and overlay hash, got %#v", result.Lock)
+	}
+	if !containsString(result.Lock.OptOuts.DisabledAgents, "workflow-engineer") {
+		t.Fatalf("expected disabled agent in lock opt-outs, got %#v", result.Lock.OptOuts)
+	}
+	var lock agentStackLock
+	if err := json.Unmarshal([]byte(mustReadText(t, filepath.Join(projectDir, ".skill-harness", "agent-stack.lock.json"))), &lock); err != nil {
+		t.Fatalf("agent stack lock should be JSON: %v", err)
+	}
+	if lock.Profile != "minimal" || len(lock.AgentSkills) == 0 {
+		t.Fatalf("expected resolved lock content, got %#v", lock)
+	}
+}
+
 func TestRepoAuditDetectsRepoLocalOverlays(t *testing.T) {
 	root := repoRootForTest(t)
 	deps := loadDependencies(root)
@@ -1152,6 +1289,13 @@ func TestCLIRepoInitAndSyncWritesManifestLockAndReport(t *testing.T) {
 	if !fileExists(filepath.Join(projectDir, ".skill-harness", "baseline.manifest.json")) {
 		t.Fatalf("expected baseline manifest to be written")
 	}
+	var manifest repoBaselineManifest
+	if err := json.Unmarshal([]byte(mustReadText(t, filepath.Join(projectDir, ".skill-harness", "baseline.manifest.json"))), &manifest); err != nil {
+		t.Fatalf("baseline manifest should be JSON: %v", err)
+	}
+	if manifest.Surfaces[".skill-harness/setup-proof.json"].Mode != repoSurfaceIgnored {
+		t.Fatalf("absent generated setup proof should default to ignored, got %#v", manifest.Surfaces[".skill-harness/setup-proof.json"])
+	}
 
 	runSkillHarnessCLI(t, binary, fakeTooling(t), "repo", "sync", "--dir", projectDir)
 	if !fileExists(filepath.Join(projectDir, ".skill-harness", "baseline.lock.json")) {
@@ -1168,6 +1312,45 @@ func TestCLIRepoInitAndSyncWritesManifestLockAndReport(t *testing.T) {
 	}
 	if report.State != "managed" || report.Profile != "minimal" {
 		t.Fatalf("expected managed minimal report, got state=%q profile=%q", report.State, report.Profile)
+	}
+	if hasRepoFinding(report.Findings, "surface-missing") {
+		t.Fatalf("repo init should not create immediate drift for absent default surfaces, got %#v", report.Findings)
+	}
+
+	runSkillHarnessCLI(t, binary, fakeTooling(t), "repo", "lock", "--dir", projectDir)
+	if !fileExists(filepath.Join(projectDir, ".skill-harness", "baseline.lock.json")) {
+		t.Fatalf("expected repo lock to write baseline lock")
+	}
+}
+
+func TestRepoInitPinsSkillHarnessRevisionFromRoot(t *testing.T) {
+	root := repoRootForTest(t)
+	deps := loadDependencies(root)
+	loadouts := loadLoadouts(root)
+	projectDir := t.TempDir()
+	originalDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("getwd: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(originalDir); err != nil {
+			t.Fatalf("restore cwd: %v", err)
+		}
+	})
+	if err := os.Chdir(projectDir); err != nil {
+		t.Fatalf("chdir target: %v", err)
+	}
+
+	manifest := defaultRepoBaselineManifest(root, "minimal", projectDir)
+	expected := currentGitRevision(root)
+	if expected == "" {
+		t.Skip("skill-harness root is not a git checkout")
+	}
+	if manifest.Baseline.Pin != expected {
+		t.Fatalf("expected baseline pin %q from skill-harness root, got %q", expected, manifest.Baseline.Pin)
+	}
+	if err := validateRepoManifest(manifest, deps, loadouts); err != nil {
+		t.Fatalf("default manifest should validate: %v", err)
 	}
 }
 
@@ -1208,6 +1391,19 @@ func TestCLIInstallUsesResolvedAgentStackRepos(t *testing.T) {
 	commands := tooling.commands(t)
 	assertCommandContains(t, commands, "python", "bootstrap_dependencies.py")
 	assertNoCommandContains(t, commands, "--repo frontier-agent-playbook")
+}
+
+func TestCLIInstallWithDirRequiresAgentStack(t *testing.T) {
+	binary := buildSkillHarnessBinary(t)
+	projectDir := t.TempDir()
+
+	output, err := runSkillHarnessCLIExpectError(t, binary, fakeTooling(t), "install", "--dir", projectDir)
+	if err == nil {
+		t.Fatalf("expected install --dir to fail without agent-stack.json")
+	}
+	if !strings.Contains(output, "missing") || !strings.Contains(output, "agent-stack.json") {
+		t.Fatalf("expected missing agent-stack error, got %q", output)
+	}
 }
 
 func developerArtifactsConfig(t *testing.T, config map[string]any) map[string]any {
@@ -1366,6 +1562,21 @@ func runSkillHarnessCLI(t *testing.T, binary string, tooling fakeToolingEnv, arg
 		t.Fatalf("skill-harness %s failed: %v\n%s", strings.Join(args, " "), err, output)
 	}
 	return string(output)
+}
+
+func runSkillHarnessCLIExpectError(t *testing.T, binary string, tooling fakeToolingEnv, args ...string) (string, error) {
+	t.Helper()
+	cmd := exec.Command(binary, args...)
+	cmd.Dir = repoRootForTest(t)
+	cmd.Env = append(os.Environ(),
+		"PATH="+tooling.binDir+string(os.PathListSeparator)+os.Getenv("PATH"),
+		"SKILL_HARNESS_COMMAND_LOG="+tooling.logPath,
+	)
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		return string(output), nil
+	}
+	return string(output), err
 }
 
 func fakeTooling(t *testing.T, names ...string) fakeToolingEnv {

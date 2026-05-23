@@ -46,7 +46,7 @@ flowchart LR
   Agent["Codex or Claude agent"] --> CLI
   CLI --> Config["Repo configuration and pack metadata"]
   CLI --> Target["Target project workspace"]
-  Target --> Stack[".skill-harness agent stack overlay and lock"]
+  Target --> Stack[".skill-harness agent stack overlay, lock, and setup proof"]
   Stack --> CLI
   Config --> Agents["Rendered agent loadouts"]
   Config --> Artifacts["Developer artifact policy"]
@@ -55,7 +55,7 @@ flowchart LR
 
 ## Boundary
 
-The harness owns suite setup, rendering, and repo-local artifact policy. Target projects own their canonical product, business, data, research, UX, model, and generated evidence sources. Generated HTML is review material, not canonical source.
+The harness owns suite setup, rendering, resolved agent-stack locks, setup proof, and repo-local artifact policy. Target projects own their canonical product, business, data, research, UX, model, and generated evidence sources. Generated HTML is review material, not canonical source.
 
 ## Evidence
 

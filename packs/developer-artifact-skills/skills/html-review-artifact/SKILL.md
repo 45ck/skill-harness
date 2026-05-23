@@ -15,6 +15,8 @@ Use this skill when a human needs to scan, compare, inspect, or interact with a 
 - Do not use inline JavaScript. The reviewed inline-JS lane is reserved until manifest metadata, CSP/checker support, and human approval requirements are implemented together.
 - Do not load external scripts, fonts, images, analytics, or network resources.
 - For Mermaid, C4, UML-style, and architecture diagrams, embed pre-rendered inline SVG or static markup by default.
+- Use Mermaid, Vega-Lite, Observable Plot, D3, Graphviz, Apache ECharts, RAWGraphs, and Chart.js as source/spec or generation-time renderers only. Do not load their browser runtimes in the generated HTML.
+- Prefer `artifact-infographic` JSON fences or manifest `infographics` entries for non-model charts and graphs so the review page can regenerate static SVG/HTML panels.
 - For product, business, data, research, UX, and mockup review, render the source into a visual surface such as a dashboard, evidence board, state board, journey map, schema map, or high-fidelity prototype.
 - For discovery, planning, and research intended for human review, produce an infographic-style HTML surface with summary metrics, charts or diagrams, evidence/freshness panels, source links, and clear review verdicts.
 - For UI and customer-facing workflow review, prefer high-fidelity states with realistic copy, data density, errors, loading states, and accessibility affordances.

@@ -28,6 +28,8 @@ Useful commands:
 ./skill-harness update-project --dir path/to/project --write-lock
 ```
 
+`bootstrap --agent-native` creates the repo-local overlay, resolved lock, and setup proof without package installs or global writes. After that, `install --dir`, `render --dir`, and `check --dir` use only the resolved effective stack unless explicit agents or packs are supplied.
+
 ## Shared suite install
 
 Run this from the repo root when the goal is to install the shared packs and agents:
@@ -168,6 +170,8 @@ For the fully automated equivalent of the above, use the `setup-project` command
 - Keep canonical decisions, specs, handoffs, and model sources in Markdown, TOON, specgraph-compatible sources, or existing project docs.
 - For product, business, data, research, UX, and mockup work, keep canonical agent-readable sources in `docs/artifacts/source/<family>/` unless a domain-specific docs path is better, then generate visual human review surfaces under `generated/review/<family>/`.
 - High-fidelity HTML/prototype review is the default for UI, product, customer-facing workflow, and mockup artifacts. Low-fidelity sketches are scratch only unless explicitly captured as research evidence.
+- Use the infographic toolkit for human artifact charts and graphs: Mermaid, Vega-Lite, Observable Plot, D3, Graphviz, Apache ECharts, RAWGraphs, and Chart.js are source/spec or generation-time choices only. Generated HTML must stay static and must not load their browser runtimes.
+- Prefer `artifact-infographic` JSON fences or manifest `infographics` arrays for non-model charts and graphs so generated HTML can be refreshed deterministically.
 - Use specialist agent teams when artifact ownership crosses real boundaries: requirements for product, delivery for business, backend for data, research for evidence, UX for high-fidelity review, system-modeler for structural impact, and quality-reviewer for readiness gates.
 - Treat generated HTML under `generated/review/` as a human review surface only.
 - Open generated HTML with the best available human surface. In Codex app, use the Browser plugin for local HTML when available. In Claude desktop, use the built-in browser or preview when available. In CLI-only contexts, use `node scripts/open-artifact-review.mjs` to open the system default browser or print the file URL in headless/CI contexts.

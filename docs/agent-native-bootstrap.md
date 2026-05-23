@@ -4,6 +4,8 @@
 
 The detailed planning source is [agent-native-bootstrap-update-plan-2026-05-24.md](artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md).
 
+Implementation note: the current CLI implements the repo-local desired-state contract, lock/proof scaffolding, and resolved install/render/check behavior. Full three-way update reconciliation across old lock, new baseline, and local overlay remains follow-up work.
+
 ## Core Idea
 
 Use `skill-harness` as an upstream baseline, not as files that downstream repos permanently fork.
@@ -77,13 +79,13 @@ skill-harness check --dir .
 
 `resolve` is read-only. It computes effective packs, agents, skills, opt-outs, repo-local additions, and policy-sensitive changes from the upstream baseline plus `.skill-harness/agent-stack.json`.
 
-`bootstrap --agent-native` scaffolds the repo-local overlay when it is missing and prints the next safe action. It does not silently install packages or write global agent state.
+`bootstrap --agent-native` scaffolds the repo-local overlay when it is missing, writes `.skill-harness/agent-stack.lock.json`, writes `.skill-harness/setup-proof.json`, and prints the next safe action. It does not silently install packages or write global agent state.
 
-`install --dir`, `render --dir`, and `check --dir` consume the resolved agent stack when the user has not supplied explicit `--agents` or `--packs` flags.
+`install --dir`, `render --dir`, and `check --dir` consume the resolved agent stack when the user has not supplied explicit `--agents` or `--packs` flags. These side-effecting commands require `.skill-harness/agent-stack.json`; run `bootstrap --agent-native` first in a fresh repo.
 
-`update-project` reads the overlay, reports current adoption state, and can write `.skill-harness/agent-stack.lock.json` with `--write-lock`. It is intentionally dry-run unless asked to write the lockfile.
+`update-project` reads the overlay, reports resolved agent-stack state, and can write `.skill-harness/agent-stack.lock.json` with `--write-lock`. It is intentionally dry-run unless asked to write the lockfile.
 
-`audit-project` tells an agent whether a repo is unmanaged, generated-only, agent-native, or conflicted. `repo audit` and `repo lock` expose a lower-level audit/lock surface for the same state.
+`audit-project` tells an agent whether a repo is unmanaged, generated-only, agent-native, or conflicted. `repo audit`, `repo sync`, and `repo lock` expose the lower-level legacy baseline-manifest governance surface and write `.skill-harness/baseline.lock.json`, not the agent-stack lock.
 
 ## Overlay Rules
 
@@ -192,7 +194,8 @@ Current implementation status:
 - `agent-stack.json` schema and default scaffold exist.
 - `resolve` computes effective agents, packs, skills, opt-outs, overlays, and diagnostics.
 - `setup-project` writes `.skill-harness/agent-stack.json` without overwriting an existing stack.
-- `install --dir`, `render --dir`, and `check --dir` consume resolved state.
+- `bootstrap --agent-native` writes the overlay, resolved agent-stack lock, and setup proof without installing packages or writing global agent files.
+- `install --dir`, `render --dir`, and `check --dir` consume resolved state and fail fast when a target repo has not been bootstrapped with `agent-stack.json`.
 - `audit-project`, `repo audit`, `repo lock`, `bootstrap --agent-native`, and `update-project --write-lock` provide the first audit/update surfaces.
 
 ## Done Criteria
