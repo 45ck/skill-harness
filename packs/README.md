@@ -16,3 +16,5 @@ Current embedded packs:
 - `specgraph-skills` — 5 specgraph workflow skills (requires `@45ck/agent-docs`)
 - `noslop-skills` — 3 noslop quality gate skills (requires `@45ck/noslop`)
 - `developer-artifact-skills` — developer artifact shaping, generated HTML review surfaces, evidence gates, and handoff bundles
+
+See [docs/developer-artifacts.md](../docs/developer-artifacts.md) for the setup-project scaffold, profiles, generated HTML policy, and maintenance rules.

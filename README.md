@@ -289,6 +289,7 @@ If another agent needs to install this repo or use it as the setup entrypoint, p
 
 - [cmd/skill-harness/main.go](cmd/skill-harness/main.go)
 - [AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md)
+- [docs/developer-artifacts.md](docs/developer-artifacts.md)
 - [docs/third-party-skill-intake.md](docs/third-party-skill-intake.md)
 - [packs/README.md](packs/README.md)
 - [scripts/dependencies.json](scripts/dependencies.json)

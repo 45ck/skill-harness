@@ -152,5 +152,6 @@ After project setup:
 
 - [README.md](README.md)
 - [cmd/skill-harness/main.go](cmd/skill-harness/main.go)
+- [docs/developer-artifacts.md](docs/developer-artifacts.md)
 - [scripts/dependencies.json](scripts/dependencies.json)
 - [scripts/build_release.py](scripts/build_release.py)
