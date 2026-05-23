@@ -8,6 +8,7 @@ reviewRequired: true
 evidenceLinks:
   - AGENTS.md
   - docs/developer-artifacts.md
+  - docs/artifact-infographic-toolkit.md
   - scripts/generate-artifact-review.mjs
   - scripts/check-artifact-manifest.mjs
   - scripts/check-artifact-html-policy.mjs
@@ -72,37 +73,127 @@ The renderer treats infographic projects as source/spec or generation-time helpe
 
 Generated HTML must not load these libraries in the browser. Agents should use `artifact-infographic` JSON fences or manifest `infographics` arrays so charts and graphs regenerate with the source.
 
+## Renderer Showcase Specs
+
+These source specs intentionally exercise every supported infographic renderer lane. The current generic renderer uses static fallback shapes for portable review; projects can later add generation-time adapters while preserving the same no-runtime HTML policy.
+
 ```artifact-infographic
 {
-  "title": "Toolkit Coverage",
-  "tool": "vega-lite",
-  "kind": "bar",
-  "summary": "All recommended open-source visualization options are represented in the source-first policy.",
-  "values": [
-    {"label": "Mermaid", "value": 1},
-    {"label": "Vega-Lite", "value": 1},
-    {"label": "Plot", "value": 1},
-    {"label": "D3", "value": 1},
-    {"label": "Graphviz", "value": 1},
-    {"label": "ECharts", "value": 1},
-    {"label": "RAWGraphs", "value": 1},
-    {"label": "Chart.js", "value": 1}
+  "title": "Mermaid Workflow",
+  "tool": "mermaid",
+  "kind": "graph",
+  "summary": "Mermaid remains the default source grammar for authored workflow and model diagrams.",
+  "edges": [
+    ["Discovery", "Source Artifact"],
+    ["Source Artifact", "Mermaid Text"],
+    ["Mermaid Text", "Static Review SVG"],
+    ["Static Review SVG", "Human Review"]
   ]
 }
 ```
 
 ```artifact-infographic
 {
-  "title": "Static Review Lane",
+  "title": "Vega-Lite Evidence Mix",
+  "tool": "vega-lite",
+  "kind": "bar",
+  "summary": "Vega-Lite is the default declarative chart grammar for source-backed metrics and comparisons.",
+  "values": [
+    {"label": "Docs", "value": 5},
+    {"label": "Tests", "value": 4},
+    {"label": "Models", "value": 3},
+    {"label": "Reviews", "value": 4}
+  ]
+}
+```
+
+```artifact-infographic
+{
+  "title": "Observable Plot Trend",
+  "tool": "observable-plot",
+  "kind": "line",
+  "summary": "Observable Plot fits compact exploratory trends that should still render as static SVG.",
+  "values": [
+    {"label": "Draft", "value": 1},
+    {"label": "Source", "value": 2},
+    {"label": "Review", "value": 4},
+    {"label": "Ready", "value": 5}
+  ]
+}
+```
+
+```artifact-infographic
+{
+  "title": "D3 Custom Layout",
+  "tool": "d3",
+  "kind": "bar",
+  "summary": "D3 is reserved for bespoke static infographic layouts when simpler grammars are too limiting.",
+  "values": [
+    {"label": "Layout", "value": 4},
+    {"label": "Narrative", "value": 5},
+    {"label": "Custom", "value": 5},
+    {"label": "Portable", "value": 3}
+  ]
+}
+```
+
+```artifact-infographic
+{
+  "title": "Graphviz Relationship Map",
   "tool": "graphviz",
   "kind": "graph",
-  "summary": "Infographic tools feed source specs or generation-time adapters; the browser receives static review markup.",
+  "summary": "Graphviz handles source-backed node-edge maps for dependencies, lineage, and relationships.",
   "edges": [
-    ["Canonical Source", "Infographic Spec"],
-    ["Infographic Spec", "Static Renderer"],
-    ["Static Renderer", "Generated HTML"],
-    ["Generated HTML", "HTML Policy Check"],
-    ["HTML Policy Check", "Human Review"]
+    ["Manifest", "Source"],
+    ["Manifest", "Review HTML"],
+    ["Source", "Infographic Spec"],
+    ["Infographic Spec", "Static Output"],
+    ["Static Output", "Review HTML"]
+  ]
+}
+```
+
+```artifact-infographic
+{
+  "title": "ECharts Dashboard Mix",
+  "tool": "echarts",
+  "kind": "bar",
+  "summary": "ECharts can support richer dashboard chart families only through generation-time static output.",
+  "values": [
+    {"label": "Status", "value": 4},
+    {"label": "Risk", "value": 2},
+    {"label": "Freshness", "value": 5},
+    {"label": "Evidence", "value": 4}
+  ]
+}
+```
+
+```artifact-infographic
+{
+  "title": "RAWGraphs Design Export",
+  "tool": "rawgraphs",
+  "kind": "bar",
+  "summary": "RAWGraphs is useful for design-led exported SVGs that still trace back to tabular source.",
+  "values": [
+    {"label": "Table", "value": 3},
+    {"label": "Visual", "value": 5},
+    {"label": "Export", "value": 4},
+    {"label": "Embed", "value": 4}
+  ]
+}
+```
+
+```artifact-infographic
+{
+  "title": "Chart.js Static Trend",
+  "tool": "chartjs",
+  "kind": "line",
+  "summary": "Chart.js is acceptable only as server-rendered/static output or an equivalent static chart.",
+  "values": [
+    {"label": "Spec", "value": 1},
+    {"label": "Render", "value": 3},
+    {"label": "Check", "value": 4},
+    {"label": "Handoff", "value": 5}
   ]
 }
 ```
