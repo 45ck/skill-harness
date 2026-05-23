@@ -28,6 +28,7 @@ implementationTouchpoints:
   - scripts/open-artifact-review.mjs
   - scripts/generate-artifact-review.mjs
   - scripts/generate-model-review.mjs
+  - docs/artifacts/templates/e2e-product-system-atlas.md
 docTouchpoints:
   - docs/developer-artifacts.md
   - docs/artifacts/source/models/model-inventory.md
@@ -124,6 +125,7 @@ classDiagram
 - Every model view records method, notation, owner, touchpoints, and freshness.
 - HTML review files are generated from source and checked for drift.
 - Non-model artifacts that set `reviewRequired: true` are generated through the generic artifact review generator.
+- E2E Product System Atlas artifacts use UWE navigation as the structural spine and attach screenshots, QA verdicts, runtime evidence, access branches, and adaptation variants to navigation nodes.
 - Default HTML interaction is CSS-only. Inline JavaScript requires an explicit reviewed lane, manifest metadata, and policy/checker support before use.
 - Synthetic user or agent-simulation evidence is labelled separately from real user/customer evidence.
 - Host-specific opening is transport only: `open-artifact-review.mjs` resolves the review target, while Codex Browser, Claude preview, system browser, or a local HTTP server provides the human viewing surface.
@@ -134,8 +136,8 @@ Evidence comes from `docs/developer-artifacts.md`, `.skill-harness/project.json`
 
 ## Freshness
 
-Update this model when artifact manifest schema, visual-source-first policy, model metadata requirements, HTML safety policy, interaction lane policy, or generated review semantics change.
-</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md">docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md</a></li><li><a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a></li><li><a href="../../../cmd/skill-harness/main.go">cmd/skill-harness/main.go</a></li></ul><h3>Update Triggers</h3><ul><li>artifact manifest schema changes</li><li>visual-source-first policy changes</li><li>HTML policy changes</li><li>interaction lane policy changes</li><li>generated review semantics changes</li><li>model metadata contract changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>09ff16c28e34095fedaa2e65783f9de92f70de0f075c1813160a63689237098f</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-24</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
+Update this model when artifact manifest schema, visual-source-first policy, E2E Product System Atlas semantics, model metadata requirements, HTML safety policy, interaction lane policy, or generated review semantics change.
+</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md">docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md</a></li><li><a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a></li><li><a href="../../../cmd/skill-harness/main.go">cmd/skill-harness/main.go</a></li></ul><h3>Update Triggers</h3><ul><li>artifact manifest schema changes</li><li>visual-source-first policy changes</li><li>HTML policy changes</li><li>interaction lane policy changes</li><li>generated review semantics changes</li><li>model metadata contract changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>c46b3529a4b48866fb004fdd3e58231a0ba8157aa7dad39497577b9b47915d7d</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-24</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
 </main>
 </body>
 </html>

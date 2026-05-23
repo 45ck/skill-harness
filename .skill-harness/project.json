@@ -28,6 +28,7 @@
         "implementation-plan",
         "review-artifact",
         "product-brief",
+        "e2e-product-system-atlas",
         "opportunity-brief",
         "business-case",
         "stakeholder-map",
@@ -173,7 +174,8 @@
           "high-fidelity is required for UI and customer-facing workflow review",
           "source-declared infographic specs render to static review markup without browser runtimes",
           "synthetic user or agent simulation evidence is labelled separately from real user evidence",
-          "HTML policy passes before handoff"
+          "HTML policy passes before handoff",
+          "UWE navigation atlases cover navigable nodes, actions, screenshots, side effects, and untested branches without claiming exhaustive state-space coverage"
         ]
       },
       "infographicPolicy": {

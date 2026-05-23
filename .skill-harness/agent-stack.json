@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "baseline": {
+    "source": "https://github.com/45ck/skill-harness.git",
+    "channel": "stable"
+  },
+  "profile": "default",
+  "policies": {
+    "ciChanges": "ask",
+    "globalWrites": "ask",
+    "guardrailOverride": "ask",
+    "hookChanges": "ask",
+    "packageInstalls": "ask"
+  }
+}

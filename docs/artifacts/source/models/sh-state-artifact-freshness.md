@@ -40,7 +40,7 @@ Define how a source-backed artifact moves between draft, ready, stale, evidence-
 
 ## Scope
 
-This state model applies to source-backed artifacts listed in `docs/artifacts/artifacts.manifest.json`, including UML-first model views and visual-source-first product, business, data, research, UX, planning, discovery, and mockup artifacts.
+This state model applies to source-backed artifacts listed in `docs/artifacts/artifacts.manifest.json`, including UML-first model views and visual-source-first product, E2E product system atlas, business, data, research, UX, planning, discovery, and mockup artifacts.
 
 ## Source Model
 
@@ -58,6 +58,8 @@ stateDiagram-v2
   NeedsEvidence --> Ready: add concrete evidence
   Ready --> NeedsFidelity: UI/product review lacks high-fidelity surface
   NeedsFidelity --> Ready: generate high-fidelity review
+  Ready --> NeedsNavigationEvidence: UWE atlas lacks node/action evidence
+  NeedsNavigationEvidence --> Ready: add screenshots, QA verdicts, side effects
   Ready --> Unsafe: review leaks secret or private data
   Unsafe --> Ready: redact and rerun policy checks
 ```
@@ -72,7 +74,7 @@ Evidence comes from manifest source hashes, generic artifact review drift checks
 
 ## Freshness
 
-Update this model when readiness verdicts, sourceHash behavior, generic artifact review generation, model review generation, visual-source-first policy, or CI gate ordering changes.
+Update this model when readiness verdicts, sourceHash behavior, generic artifact review generation, model review generation, visual-source-first policy, E2E atlas evidence policy, or CI gate ordering changes.
 
 | Lifecycle state | Derived drift verdict |
 | --- | --- |
@@ -82,5 +84,6 @@ Update this model when readiness verdicts, sourceHash behavior, generic artifact
 | NeedsEvidence | `needs-evidence` |
 | NeedsFidelity | `mapping-missing` or `review-stale` |
 | NeedsReviewSurface | `review-stale` |
+| NeedsNavigationEvidence | `needs-evidence` |
 | Unsafe | `unsafe` |
 | Inconclusive | `inconclusive` |

@@ -313,6 +313,9 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	if !fileExists(filepath.Join(root, "docs", "artifacts", "templates", "visual-source-artifact.md")) {
 		t.Fatal("expected visual source artifact template")
 	}
+	if !fileExists(filepath.Join(root, "docs", "artifacts", "templates", "e2e-product-system-atlas.md")) {
+		t.Fatal("expected E2E product system atlas template")
+	}
 	if !gitignoreHasLine(mustReadText(t, filepath.Join(root, ".gitignore")), "generated/review/") {
 		t.Fatal("expected generated review output to be gitignored")
 	}
@@ -794,6 +797,49 @@ func TestArtifactReviewGeneratorCreatesInfographicHTML(t *testing.T) {
 
 	mustWriteFile(t, sourcePath, source+"\nChanged without regeneration.\n")
 	runNodeScript(t, root, "scripts/generate-artifact-review.mjs", false, "--check")
+}
+
+func TestArtifactReviewGeneratorEmbedsScreenshotEvidence(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, modelingModeOff); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	sourcePath := filepath.Join(root, "docs", "artifacts", "source", "product", "atlas.md")
+	source := "# App Atlas\n\n## Purpose\n\nInspect a UWE navigation model with screenshot evidence.\n"
+	mustWriteFile(t, sourcePath, source)
+	imagePath := filepath.Join(root, "generated", "review", "evidence", "atlas", "landing.svg")
+	mustWriteFile(t, imagePath, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><rect width="120" height="80" fill="#eef2f6"/><text x="16" y="42">Landing</text></svg>`)
+	writeManifest(t, root, []map[string]any{
+		{
+			"id":             "app-atlas",
+			"type":           "e2e-product-system-atlas",
+			"family":         "product",
+			"source":         "docs/artifacts/source/product/atlas.md",
+			"status":         "ready",
+			"owner":          "system-modeler",
+			"reviewRequired": true,
+			"evidenceLinks":  []string{"docs/developer-artifacts.md"},
+			"screenshots": []map[string]any{
+				{
+					"path":    "generated/review/evidence/atlas/landing.svg",
+					"caption": "Landing page",
+					"alt":     "Landing page screenshot",
+				},
+			},
+		},
+	})
+
+	runNodeScript(t, root, "scripts/generate-artifact-review.mjs", true)
+	htmlPath := filepath.Join(root, "generated", "review", "product", "app-atlas.html")
+	html := mustReadText(t, htmlPath)
+	for _, want := range []string{"Screenshots And Evidence Images", "Landing page", "data:image/svg+xml;base64,"} {
+		if !strings.Contains(html, want) {
+			t.Fatalf("expected generated artifact HTML to contain %q", want)
+		}
+	}
+	runNodeScript(t, root, "scripts/check-artifact-html-policy.mjs", true)
 }
 
 func TestArtifactReviewGeneratorRejectsUnsafeReviewSurface(t *testing.T) {

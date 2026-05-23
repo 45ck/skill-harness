@@ -1,0 +1,221 @@
+{
+  "version": 1,
+  "state": "managed",
+  "projectDir": "D:\\Visual Studio Projects\\skill-harness",
+  "manifestPath": "D:\\Visual Studio Projects\\skill-harness\\.skill-harness\\baseline.manifest.json",
+  "profile": "agent-native",
+  "baseline": {
+    "source": "skill-harness",
+    "channel": "default",
+    "pin": "6007ccf2bbca"
+  },
+  "surfaces": [
+    {
+      "path": ".agent-docs",
+      "mode": "ignored",
+      "status": "missing"
+    },
+    {
+      "path": ".beads",
+      "mode": "owned",
+      "status": "present",
+      "kind": "dir",
+      "count": 17
+    },
+    {
+      "path": ".claude/agents",
+      "mode": "generated",
+      "status": "present",
+      "kind": "dir",
+      "count": 20
+    },
+    {
+      "path": ".claude/skills",
+      "mode": "ignored",
+      "status": "missing"
+    },
+    {
+      "path": ".codex/agents",
+      "mode": "generated",
+      "status": "present",
+      "kind": "dir",
+      "count": 20
+    },
+    {
+      "path": ".codex/skills",
+      "mode": "ignored",
+      "status": "missing"
+    },
+    {
+      "path": ".github/skills",
+      "mode": "ignored",
+      "status": "missing"
+    },
+    {
+      "path": ".skill-harness/agent-stack.json",
+      "mode": "overlay",
+      "status": "present",
+      "kind": "file",
+      "count": 1
+    },
+    {
+      "path": ".skill-harness/setup-proof.json",
+      "mode": "generated",
+      "status": "present",
+      "kind": "file",
+      "count": 1
+    },
+    {
+      "path": "AGENTS.md",
+      "mode": "managed-section",
+      "status": "present",
+      "kind": "file",
+      "count": 1
+    },
+    {
+      "path": "AGENT_INSTRUCTIONS.md",
+      "mode": "managed-section",
+      "status": "present",
+      "kind": "file",
+      "count": 1
+    },
+    {
+      "path": "CLAUDE.md",
+      "mode": "managed-section",
+      "status": "present",
+      "kind": "file",
+      "count": 1
+    },
+    {
+      "path": "docs/artifacts/artifacts.manifest.json",
+      "mode": "managed-section",
+      "status": "present",
+      "kind": "file",
+      "count": 1
+    },
+    {
+      "path": "docs/artifacts/source/models",
+      "mode": "overlay",
+      "status": "present",
+      "kind": "dir",
+      "count": 7
+    },
+    {
+      "path": "generated/review",
+      "mode": "generated",
+      "status": "present",
+      "kind": "dir",
+      "count": 9
+    },
+    {
+      "path": "llms.txt",
+      "mode": "generated",
+      "status": "present",
+      "kind": "file",
+      "count": 1
+    },
+    {
+      "path": "packs",
+      "mode": "overlay",
+      "status": "present",
+      "kind": "dir",
+      "count": 9
+    },
+    {
+      "path": "scripts/beads",
+      "mode": "ignored",
+      "status": "missing"
+    }
+  ],
+  "localAgents": {
+    ".claude/agents": [
+      "backend-engineer",
+      "delivery-manager",
+      "delivery-manager-beads",
+      "pentest-reviewer",
+      "qa-automation-engineer",
+      "quality-reviewer",
+      "requirements-analyst",
+      "requirements-analyst-beads",
+      "research-writer",
+      "security-reviewer",
+      "security-reviewer-beads",
+      "software-architect",
+      "software-architect-beads",
+      "system-modeler",
+      "system-modeler-beads",
+      "test-designer",
+      "test-designer-beads",
+      "ux-researcher",
+      "web-engineer",
+      "workflow-engineer"
+    ],
+    ".codex/agents": [
+      "backend-engineer",
+      "delivery-manager",
+      "delivery-manager-beads",
+      "pentest-reviewer",
+      "qa-automation-engineer",
+      "quality-reviewer",
+      "requirements-analyst",
+      "requirements-analyst-beads",
+      "research-writer",
+      "security-reviewer",
+      "security-reviewer-beads",
+      "software-architect",
+      "software-architect-beads",
+      "system-modeler",
+      "system-modeler-beads",
+      "test-designer",
+      "test-designer-beads",
+      "ux-researcher",
+      "web-engineer",
+      "workflow-engineer"
+    ]
+  },
+  "effectiveAgents": [
+    "delivery-manager",
+    "quality-reviewer",
+    "requirements-analyst",
+    "software-architect",
+    "workflow-engineer"
+  ],
+  "effectivePacks": [
+    "agent-operating-skills",
+    "agile-delivery-skills",
+    "business-analysis-skills",
+    "cloud-platform-operations-skills",
+    "code-review-inspection-skills",
+    "coding-workflow-skills",
+    "demo-production-skills",
+    "deployment-release-skills",
+    "developer-artifact-skills",
+    "documentation-evidence-skills",
+    "enterprise-architecture-integration-skills",
+    "fagan-inspection-skill",
+    "frontier-agent-playbook",
+    "integration-tooling-skills",
+    "maintenance-evolution-skills",
+    "project-management-skills",
+    "refactoring-code-smells-skills",
+    "software-architecture-skills",
+    "software-quality-skills",
+    "specgraph-skills"
+  ],
+  "findings": [],
+  "suggestions": [
+    "baseline source can be reviewed from https://github.com/45ck/skill-harness.git",
+    "consider disabling unused agents in .skill-harness/baseline.manifest.json to reduce context and install cost",
+    "effective pack set has 20 pack(s); repo trim --dry-run can identify packs to opt out of after workflow review",
+    "preserve .skill-harness/agent-stack.json as a repo-local overlay during baseline updates",
+    "preserve docs/artifacts/source/models as a repo-local overlay during baseline updates",
+    "preserve packs as a repo-local overlay during baseline updates"
+  ],
+  "policies": {
+    "beads": "preserve",
+    "closeout": "repo-owned",
+    "globalWrites": "ask",
+    "packageInstalls": "ask",
+    "hookChanges": "ask"
+  }
+}

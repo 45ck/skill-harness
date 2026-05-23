@@ -15,6 +15,7 @@ implementationTouchpoints:
   - scripts/open-artifact-review.mjs
   - scripts/generate-artifact-review.mjs
   - scripts/generate-model-review.mjs
+  - docs/artifacts/templates/e2e-product-system-atlas.md
 docTouchpoints:
   - docs/developer-artifacts.md
   - docs/artifacts/source/models/model-inventory.md
@@ -111,6 +112,7 @@ classDiagram
 - Every model view records method, notation, owner, touchpoints, and freshness.
 - HTML review files are generated from source and checked for drift.
 - Non-model artifacts that set `reviewRequired: true` are generated through the generic artifact review generator.
+- E2E Product System Atlas artifacts use UWE navigation as the structural spine and attach screenshots, QA verdicts, runtime evidence, access branches, and adaptation variants to navigation nodes.
 - Default HTML interaction is CSS-only. Inline JavaScript requires an explicit reviewed lane, manifest metadata, and policy/checker support before use.
 - Synthetic user or agent-simulation evidence is labelled separately from real user/customer evidence.
 - Host-specific opening is transport only: `open-artifact-review.mjs` resolves the review target, while Codex Browser, Claude preview, system browser, or a local HTTP server provides the human viewing surface.
@@ -121,4 +123,4 @@ Evidence comes from `docs/developer-artifacts.md`, `.skill-harness/project.json`
 
 ## Freshness
 
-Update this model when artifact manifest schema, visual-source-first policy, model metadata requirements, HTML safety policy, interaction lane policy, or generated review semantics change.
+Update this model when artifact manifest schema, visual-source-first policy, E2E Product System Atlas semantics, model metadata requirements, HTML safety policy, interaction lane policy, or generated review semantics change.

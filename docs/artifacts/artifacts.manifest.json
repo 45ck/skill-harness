@@ -142,6 +142,87 @@
       "generatedAt": "2026-05-24"
     },
     {
+      "id": "e2e-product-system-atlas-workflow-2026-05-24",
+      "title": "E2E Product System Atlas Workflow",
+      "type": "e2e-product-system-atlas",
+      "family": "product",
+      "source": "docs/artifacts/source/product/e2e-product-system-atlas-workflow-2026-05-24.md",
+      "status": "ready",
+      "owner": "system-modeler",
+      "reviewRequired": true,
+      "reviewSurface": "generated/review/product/e2e-product-system-atlas-workflow-2026-05-24.html",
+      "renderer": "skill-harness artifact review generator",
+      "evidenceLinks": [
+        "docs/developer-artifacts.md",
+        "docs/artifacts/templates/e2e-product-system-atlas.md",
+        "docs/artifacts/source/models/sh-uwe-navigation-atlas.md",
+        "scripts/generate-artifact-review.mjs",
+        "cmd/skill-harness/main.go"
+      ],
+      "updateTriggers": [
+        "UWE navigation atlas workflow changes",
+        "screenshot evidence embedding changes",
+        "manual QA evidence contract changes",
+        "visual-source-first policy changes"
+      ],
+      "freshness": {
+        "generatedAt": "2026-05-23",
+        "sourceFirst": true
+      },
+      "sourceHash": "4618673cd352facfc973e3f46a4e8c449471ba258d73b7444ca74ee520ba7155",
+      "generatedAt": "2026-05-23"
+    },
+    {
+      "id": "sh-uwe-navigation-atlas",
+      "title": "Skill Harness UWE Navigation Atlas Model",
+      "type": "model-view",
+      "source": "docs/artifacts/source/models/sh-uwe-navigation-atlas.md",
+      "status": "ready",
+      "modelId": "sh-uwe-navigation-atlas",
+      "modelKind": "component",
+      "method": "uwe",
+      "notation": "mermaid",
+      "abstractionLevel": "design",
+      "owner": "system-modeler",
+      "reviewSurface": "generated/review/models/sh-uwe-navigation-atlas.html",
+      "sourceHash": "66066241a40676fb1024b44dec2378e9bae6d591974e10610107f3013cb2f131",
+      "renderer": "skill-harness model review generator",
+      "generatedAt": "2026-05-24",
+      "implementationTouchpoints": [
+        "cmd/skill-harness/main.go",
+        "scripts/generate-artifact-review.mjs",
+        "scripts/check-artifact-manifest.mjs",
+        "docs/artifacts/artifacts.manifest.json"
+      ],
+      "docTouchpoints": [
+        "docs/developer-artifacts.md",
+        "docs/artifacts/templates/e2e-product-system-atlas.md",
+        "docs/artifacts/source/product/e2e-product-system-atlas-workflow-2026-05-24.md",
+        "docs/artifacts/source/models/model-inventory.md"
+      ],
+      "evidenceLinks": [
+        "docs/artifacts/source/product/e2e-product-system-atlas-workflow-2026-05-24.md",
+        "docs/developer-artifacts.md"
+      ],
+      "reviewRequired": true,
+      "updateTriggers": [
+        "E2E Product System Atlas template changes",
+        "screenshot evidence embedding changes",
+        "visual-source-first policy changes",
+        "UWE facet guidance changes",
+        "manual QA evidence contract changes"
+      ],
+      "driftVerdict": "aligned",
+      "facets": [
+        "content",
+        "navigation",
+        "presentation",
+        "process",
+        "access",
+        "adaptation"
+      ]
+    },
+    {
       "id": "sh-system-context",
       "title": "Skill Harness System Context",
       "type": "model-view",
@@ -193,7 +274,7 @@
       "abstractionLevel": "domain",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-domain-artifact-governance.html",
-      "sourceHash": "09ff16c28e34095fedaa2e65783f9de92f70de0f075c1813160a63689237098f",
+      "sourceHash": "c46b3529a4b48866fb004fdd3e58231a0ba8157aa7dad39497577b9b47915d7d",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-24",
       "implementationTouchpoints": [
@@ -354,7 +435,7 @@
       "abstractionLevel": "decision",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-state-artifact-freshness.html",
-      "sourceHash": "c17609d48cef20086daaf86e29f5d44aa5d28b40ea072ad630ee0c0583dba768",
+      "sourceHash": "233a6b3cb2afcd369fa66d10d8081865c1cbf7629097f89f6a29e2f89f799433",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-24",
       "implementationTouchpoints": [

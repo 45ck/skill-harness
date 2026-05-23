@@ -3287,6 +3287,13 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 		}
 	}
 
+	atlasTemplatePath := filepath.Join(projectDir, "docs", "artifacts", "templates", "e2e-product-system-atlas.md")
+	if !fileExists(atlasTemplatePath) {
+		if err := os.WriteFile(atlasTemplatePath, []byte(developerE2EProductSystemAtlasTemplate()), 0o644); err != nil {
+			return err
+		}
+	}
+
 	modelTemplatePath := filepath.Join(projectDir, "docs", "artifacts", "templates", "model-artifact.md")
 	if !fileExists(modelTemplatePath) {
 		if err := os.WriteFile(modelTemplatePath, []byte(developerModelArtifactTemplate()), 0o644); err != nil {
@@ -3457,6 +3464,7 @@ func artifactTypes(enableModeling bool) []string {
 		"plan",
 		"spec",
 		"product-brief",
+		"e2e-product-system-atlas",
 		"opportunity-brief",
 		"business-case",
 		"stakeholder-map",
@@ -3577,9 +3585,9 @@ func artifactVisualPolicy() map[string]any {
 				"name":          "product",
 				"sourceDir":     "docs/artifacts/source/product",
 				"reviewDir":     "generated/review/product",
-				"sourceKinds":   []string{"prd", "opportunity-brief", "feature-map", "acceptance-criteria", "roadmap"},
-				"reviewKinds":   []string{"product-brief", "feature-map", "decision-dashboard"},
-				"primaryAgents": []string{"requirements-analyst", "delivery-manager"},
+				"sourceKinds":   []string{"prd", "opportunity-brief", "feature-map", "acceptance-criteria", "roadmap", "e2e-product-system-atlas"},
+				"reviewKinds":   []string{"product-brief", "feature-map", "decision-dashboard", "uwe-navigation-atlas"},
+				"primaryAgents": []string{"requirements-analyst", "delivery-manager", "system-modeler", "ux-researcher", "test-designer"},
 			},
 			{
 				"name":          "business",
@@ -3631,6 +3639,7 @@ func artifactVisualPolicy() map[string]any {
 			"high-fidelity is required for UI and customer-facing workflow review",
 			"synthetic user or agent simulation evidence is labelled separately from real user evidence",
 			"HTML policy passes before handoff",
+			"UWE navigation atlases cover navigable nodes, actions, screenshots, side effects, and untested branches without claiming exhaustive state-space coverage",
 		},
 	}
 }
@@ -3952,6 +3961,106 @@ What product, business, data, research, or UX decision this visual review suppor
 - Source hash:
 - Generated at:
 - Open risks:
+`
+}
+
+func developerE2EProductSystemAtlasTemplate() string {
+	return `# E2E Product System Atlas: [App Name]
+
+**Status:** Draft
+**Artifact type:** e2e-product-system-atlas
+**Family:** product
+**Model method:** UWE navigation model with screenshot-backed evidence
+**Canonical source:** docs/artifacts/source/product/[app]-e2e-product-system-atlas.md
+**Generated review:** generated/review/product/[app]-e2e-product-system-atlas.html
+**Owner agents:** requirements-analyst, system-modeler, ux-researcher, test-designer, web-engineer, backend-engineer, software-architect, security-reviewer, quality-reviewer
+
+## Purpose
+
+Create a source-first atlas for inspecting the whole app from landing page to deployed workload behavior. The review surface should show the UWE navigation structure, screenshots for navigable nodes, manual QA evidence for actions, and runtime side effects.
+
+## Scope
+
+- Product boundary:
+- Deployed target or environment:
+- User roles:
+- Included entry points:
+- Excluded or unreachable areas:
+- Authorization and data-safety limits:
+
+## UWE Navigation Nodes
+
+| Node ID | Route or state | Role(s) | Screenshot evidence | Primary actions | Expected side effects |
+| --- | --- | --- | --- | --- | --- |
+| landing | / | anonymous | generated/review/evidence/[app]/landing.png | sign in, sign up, browse | session unchanged |
+
+## Navigation Links
+
+artifact-infographic:
+
+    {
+      "title": "UWE Navigation Graph",
+      "tool": "graphviz",
+      "kind": "graph",
+      "summary": "Navigable app nodes and role-sensitive links. Keep this as a bounded navigation model, not a giant whole-system UML diagram.",
+      "edges": [
+        ["Landing", "Auth"],
+        ["Auth", "Dashboard"],
+        ["Dashboard", "Primary Workflow"],
+        ["Primary Workflow", "Result State"]
+      ]
+    }
+
+## Action And Side-Effect Matrix
+
+| Action ID | Node | Trigger | Expected UI result | Data effect | Runtime effect | Evidence | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ACT-001 | landing | click sign in | auth form visible | none | route transition only | screenshot + manual QA note | untested |
+
+## Manual QA Sequence
+
+1. Inventory public routes and capture desktop/mobile screenshots.
+2. Authenticate with each authorized role and capture post-login navigation nodes.
+3. Exercise every primary visible action once with safe test data.
+4. Exercise important invalid, empty, denied, and recovery paths.
+5. Record data, event, job, email, webhook, or deployed workload side effects.
+6. Mark untested branches explicitly instead of implying full coverage.
+
+## Deployment And Runtime Evidence
+
+| Area | Evidence to capture | Notes |
+| --- | --- | --- |
+| Deployed URL | URL, commit, build id | avoid secrets |
+| Health | health check, uptime check, smoke result | link logs only after redaction |
+| Data stores | tables/collections touched | use test data |
+| Jobs/events | queue/event/log observation | no raw private logs |
+| Integrations | outbound calls/webhooks/emails | redact tokens and customer data |
+
+## Screenshot Manifest
+
+List screenshots in docs/artifacts/artifacts.manifest.json under screenshots, images, or visualEvidence. Generated HTML embeds small local images as data URLs.
+
+json:
+
+    {
+      "screenshots": [
+        {
+          "path": "generated/review/evidence/[app]/landing.png",
+          "caption": "Landing page",
+          "alt": "Landing page screenshot"
+        }
+      ]
+    }
+
+## Readiness Gate
+
+- Canonical source exists and names scope, roles, and exclusions.
+- UWE navigation nodes cover all known routable or user-reachable states.
+- Each primary action has expected UI result, side effect, evidence, and verdict.
+- Screenshots are local, redacted, and linked from the manifest.
+- Runtime claims are backed by logs, traces, health checks, tests, or deployment metadata.
+- Untested branches are labelled untested or inconclusive.
+- Generated HTML passes manifest, drift, and HTML policy checks.
 `
 }
 
@@ -4464,7 +4573,7 @@ function familyFor(artifact) {
   const match = source.match(/docs\/artifacts\/source\/([^/]+)\//);
   if (match && families.has(match[1])) return match[1];
   if (['research-synthesis', 'claim-evidence-matrix'].includes(artifact.type)) return 'research';
-  if (['product-brief', 'opportunity-brief', 'planning-artifact'].includes(artifact.type)) return 'product';
+  if (['product-brief', 'opportunity-brief', 'planning-artifact', 'e2e-product-system-atlas'].includes(artifact.type)) return 'product';
   if (['business-case', 'stakeholder-map'].includes(artifact.type)) return 'business';
   if (['data-dictionary', 'metric-definition', 'lineage-map'].includes(artifact.type)) return 'data';
   if (['high-fidelity-prototype', 'interaction-state-board', 'journey-map', 'visual-review'].includes(artifact.type)) return 'ux';
@@ -4648,8 +4757,50 @@ function renderInfographicSpecs(source, artifact) {
   return '<section class="panel"><h2>Static Infographic Specs</h2><div class="chart-grid">' + specs.map(renderInfographicSpec).join('') + '</div></section>';
 }
 
+function imageMime(filePath) {
+  switch (path.extname(filePath).toLowerCase()) {
+    case '.png': return 'image/png';
+    case '.jpg':
+    case '.jpeg': return 'image/jpeg';
+    case '.gif': return 'image/gif';
+    case '.webp': return 'image/webp';
+    case '.svg': return 'image/svg+xml';
+    default: return '';
+  }
+}
+
+function imageDataUrl(relativePath) {
+  if (typeof relativePath !== 'string' || relativePath.trim() === '') return null;
+  const fullPath = path.resolve(root, relativePath);
+  if ((!fullPath.startsWith(root + path.sep) && fullPath !== root) || !fs.existsSync(fullPath) || !fs.statSync(fullPath).isFile()) return null;
+  const mime = imageMime(fullPath);
+  if (!mime) return null;
+  const maxBytes = 2 * 1024 * 1024;
+  if (fs.statSync(fullPath).size > maxBytes) return null;
+  return 'data:' + mime + ';base64,' + fs.readFileSync(fullPath).toString('base64');
+}
+
+function artifactImages(artifact) {
+  const values = [];
+  for (const key of ['screenshots', 'images', 'visualEvidence']) {
+    if (Array.isArray(artifact[key])) values.push(...artifact[key]);
+  }
+  return values.map((entry) => typeof entry === 'string' ? { path: entry, alt: entry } : entry).filter((entry) => entry && typeof entry.path === 'string');
+}
+
+function gallerySection(artifact) {
+  const figures = [];
+  for (const image of artifactImages(artifact)) {
+    const dataUrl = imageDataUrl(image.path);
+    if (!dataUrl) continue;
+    figures.push('<figure><img src="' + escapeAttribute(dataUrl) + '" alt="' + escapeAttribute(image.alt || image.caption || image.path) + '"><figcaption>' + escapeHtml(image.caption || image.path) + '</figcaption></figure>');
+  }
+  if (figures.length === 0) return '';
+  return '<section class="panel"><h2>Screenshots And Evidence Images</h2><div class="gallery">' + figures.join('\n') + '</div></section>';
+}
+
 function htmlPage(title, body) {
-  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="' + escapeAttribute(requiredCsp) + '">\n<title>' + escapeHtml(title) + '</title>\n<style>\n:root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;--bg:#eef2f6;--panel:#fff;--text:#1f2937;--muted:#5b6472;--line:#d8dee8;--navy:#172033;--teal:#0f766e;--blue:#2457c5;--amber:#a15c07;--green:#16794b;--red:#b42318;--violet:#6546a3}*{box-sizing:border-box}body{margin:0;color:var(--text);background:var(--bg)}a{color:#174ea6}header{background:var(--navy);color:#fff;padding:28px;border-bottom:6px solid var(--teal)}header h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:0}header p{max-width:1040px;margin:0;color:#dce6f1}main{max-width:1240px;margin:0 auto;padding:18px}h2,h3{margin:0 0 10px;line-height:1.2;letter-spacing:0}p{margin:0 0 12px}.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{border:1px solid var(--line);border-top:5px solid var(--teal);border-radius:8px;padding:12px;background:#fff;min-height:104px}.metric strong{display:block;font-size:28px;line-height:1;margin-bottom:6px}.metric span{color:var(--muted);font-size:13px}.blue{border-top-color:var(--blue)}.amber{border-top-color:var(--amber)}.green{border-top-color:var(--green)}.violet{border-top-color:var(--violet)}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:650}.tab-panel{display:none;margin-top:14px}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4){display:block}.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.step{border:1px solid var(--line);border-radius:8px;background:#f9fbfd;padding:12px;min-height:96px}.step strong{display:block;margin-bottom:5px}.step span,.muted{color:var(--muted)}.bar-row{display:grid;grid-template-columns:172px minmax(0,1fr) 52px;gap:10px;align-items:center;margin:10px 0}.bar-track{height:18px;background:#e8edf4;border-radius:999px;overflow:hidden}.bar{display:block;height:100%;border-radius:999px;background:var(--teal)}.w100{width:100%}.w80{width:80%}.w60{width:60%}.w40{width:40%}.w20{width:20%}.toolkit-grid,.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.tool-card,.chart-panel{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px}.tool-card strong,.tool-card span,.tool-card em{display:block}.tool-card span{color:var(--muted);font-size:13px}.tool-card em{margin-top:6px;color:#334155;font-size:12px;font-style:normal}.chart-head{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}.tool-badge{display:inline-flex;border:1px solid #b9c7dc;background:#f4f7fb;border-radius:999px;padding:2px 8px;color:#334155;font-size:12px;font-weight:700;white-space:nowrap}.infographic-chart{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff;margin-top:8px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid var(--line);text-align:left;vertical-align:top;padding:9px}th{background:#f7f9fc}pre{white-space:pre-wrap;overflow:auto;background:#101828;color:#e5edf7;padding:14px;border-radius:8px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#eef2f6;border:1px solid #dae2ec;border-radius:4px;padding:1px 4px}ul,ol{margin:8px 0 0 20px;padding:0}li{margin:4px 0}.callout{border-left:5px solid var(--teal);background:#effaf8;padding:12px 14px;border-radius:7px;margin:12px 0}@media(max-width:920px){.grid,.metrics{grid-template-columns:1fr}main{padding:12px}.bar-row{grid-template-columns:1fr}.chart-head{display:block}.tool-badge{margin-bottom:8px}}\n</style>\n</head>\n<body>\n' + body + '\n</body>\n</html>\n';
+  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="' + escapeAttribute(requiredCsp) + '">\n<title>' + escapeHtml(title) + '</title>\n<style>\n:root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;--bg:#eef2f6;--panel:#fff;--text:#1f2937;--muted:#5b6472;--line:#d8dee8;--navy:#172033;--teal:#0f766e;--blue:#2457c5;--amber:#a15c07;--green:#16794b;--red:#b42318;--violet:#6546a3}*{box-sizing:border-box}body{margin:0;color:var(--text);background:var(--bg)}a{color:#174ea6}header{background:var(--navy);color:#fff;padding:28px;border-bottom:6px solid var(--teal)}header h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:0}header p{max-width:1040px;margin:0;color:#dce6f1}main{max-width:1240px;margin:0 auto;padding:18px}h2,h3{margin:0 0 10px;line-height:1.2;letter-spacing:0}p{margin:0 0 12px}.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{border:1px solid var(--line);border-top:5px solid var(--teal);border-radius:8px;padding:12px;background:#fff;min-height:104px}.metric strong{display:block;font-size:28px;line-height:1;margin-bottom:6px}.metric span{color:var(--muted);font-size:13px}.blue{border-top-color:var(--blue)}.amber{border-top-color:var(--amber)}.green{border-top-color:var(--green)}.violet{border-top-color:var(--violet)}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:650}.tab-panel{display:none;margin-top:14px}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4){display:block}.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.step{border:1px solid var(--line);border-radius:8px;background:#f9fbfd;padding:12px;min-height:96px}.step strong{display:block;margin-bottom:5px}.step span,.muted{color:var(--muted)}.bar-row{display:grid;grid-template-columns:172px minmax(0,1fr) 52px;gap:10px;align-items:center;margin:10px 0}.bar-track{height:18px;background:#e8edf4;border-radius:999px;overflow:hidden}.bar{display:block;height:100%;border-radius:999px;background:var(--teal)}.w100{width:100%}.w80{width:80%}.w60{width:60%}.w40{width:40%}.w20{width:20%}.toolkit-grid,.chart-grid,.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.tool-card,.chart-panel{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px}.tool-card strong,.tool-card span,.tool-card em{display:block}.tool-card span{color:var(--muted);font-size:13px}.tool-card em{margin-top:6px;color:#334155;font-size:12px;font-style:normal}.chart-head{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}.tool-badge{display:inline-flex;border:1px solid #b9c7dc;background:#f4f7fb;border-radius:999px;padding:2px 8px;color:#334155;font-size:12px;font-weight:700;white-space:nowrap}.infographic-chart{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff;margin-top:8px}figure{margin:0;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}figure img{display:block;width:100%;height:auto}figcaption{padding:9px 10px;color:var(--muted);font-size:13px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid var(--line);text-align:left;vertical-align:top;padding:9px}th{background:#f7f9fc}pre{white-space:pre-wrap;overflow:auto;background:#101828;color:#e5edf7;padding:14px;border-radius:8px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#eef2f6;border:1px solid #dae2ec;border-radius:4px;padding:1px 4px}ul,ol{margin:8px 0 0 20px;padding:0}li{margin:4px 0}.callout{border-left:5px solid var(--teal);background:#effaf8;padding:12px 14px;border-radius:7px;margin:12px 0}@media(max-width:920px){.grid,.metrics{grid-template-columns:1fr}main{padding:12px}.bar-row{grid-template-columns:1fr}.chart-head{display:block}.tool-badge{margin-bottom:8px}}\n</style>\n</head>\n<body>\n' + body + '\n</body>\n</html>\n';
 }
 
 function renderArtifact(artifact, outPath) {
@@ -4667,6 +4818,7 @@ function renderArtifact(artifact, outPath) {
     '<section class="panel"><h2>Infographic Snapshot</h2><div class="bar-row"><span>Evidence coverage</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, evidenceCount * 20)) + '"></span></span><strong>' + evidenceCount + '</strong></div><div class="bar-row"><span>Source depth</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, stats.sectionCount * 20)) + '"></span></span><strong>' + stats.sectionCount + '</strong></div><div class="bar-row"><span>Update triggers</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, updateCount * 20)) + '"></span></span><strong>' + updateCount + '</strong></div></section>' +
     renderInfographicToolkit() +
     renderInfographicSpecs(source, artifact) +
+    gallerySection(artifact) +
     '<section class="panel"><h2>Source-To-Review Flow</h2><div class="flow"><div class="step"><strong>Canonical Source</strong><span>' + escapeHtml(artifact.source || '') + '</span></div><div class="step"><strong>Generated HTML</strong><span>' + escapeHtml(artifact.reviewSurface || '') + '</span></div><div class="step"><strong>Evidence</strong><span>' + evidenceCount + ' linked item(s)</span></div><div class="step"><strong>Freshness</strong><span>' + escapeHtml(artifact.generatedAt || artifact.freshness?.generatedAt || 'not-recorded') + '</span></div></div></section>' +
     '<section class="panel tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-evidence" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-metadata" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-evidence">Evidence</label><label for="tab-source">Source</label><label for="tab-metadata">Metadata</label></div><div class="tab-panels">' +
     '<div class="tab-panel"><h2>Review Sections</h2>' + (sectionHeads.length === 0 ? '<p class="muted">No headings found in source.</p>' : '<ol>' + sectionHeads.map((heading) => '<li>' + escapeHtml(heading.text) + '</li>').join('') + '</ol>') + '</div>' +

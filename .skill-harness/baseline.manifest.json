@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "baseline": {
+    "source": "skill-harness",
+    "channel": "default",
+    "pin": "6007ccf2bbca"
+  },
+  "profile": "agent-native",
+  "surfaces": {
+    ".agent-docs": {
+      "mode": "ignored"
+    },
+    ".beads": {
+      "mode": "owned"
+    },
+    ".claude/agents": {
+      "mode": "generated"
+    },
+    ".claude/skills": {
+      "mode": "ignored"
+    },
+    ".codex/agents": {
+      "mode": "generated"
+    },
+    ".codex/skills": {
+      "mode": "ignored"
+    },
+    ".github/skills": {
+      "mode": "ignored"
+    },
+    ".skill-harness/agent-stack.json": {
+      "mode": "overlay"
+    },
+    ".skill-harness/setup-proof.json": {
+      "mode": "generated"
+    },
+    "AGENTS.md": {
+      "mode": "managed-section"
+    },
+    "AGENT_INSTRUCTIONS.md": {
+      "mode": "managed-section"
+    },
+    "CLAUDE.md": {
+      "mode": "managed-section"
+    },
+    "docs/artifacts/artifacts.manifest.json": {
+      "mode": "managed-section"
+    },
+    "docs/artifacts/source/models": {
+      "mode": "overlay"
+    },
+    "generated/review": {
+      "mode": "generated"
+    },
+    "llms.txt": {
+      "mode": "generated"
+    },
+    "packs": {
+      "mode": "overlay"
+    },
+    "scripts/beads": {
+      "mode": "ignored"
+    }
+  },
+  "agents": {
+    "enabled": [
+      "requirements-analyst",
+      "software-architect",
+      "delivery-manager",
+      "quality-reviewer",
+      "workflow-engineer"
+    ]
+  },
+  "packs": {},
+  "policies": {
+    "beads": "preserve",
+    "closeout": "repo-owned",
+    "globalWrites": "ask",
+    "packageInstalls": "ask",
+    "hookChanges": "ask"
+  }
+}

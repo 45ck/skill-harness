@@ -144,7 +144,7 @@ Use visual-source-first artifacts when product, business, data, research, UX, or
 
 | Family | Canonical Sources | Human Review Surfaces | Primary Agents |
 |---|---|---|---|
-| Product | PRD, opportunity brief, feature map, roadmap, acceptance criteria | product brief, feature map, decision dashboard | requirements-analyst, delivery-manager |
+| Product | PRD, opportunity brief, feature map, roadmap, acceptance criteria, E2E product system atlas | product brief, feature map, decision dashboard, UWE navigation atlas | requirements-analyst, delivery-manager, system-modeler, ux-researcher, test-designer |
 | Business | business model, pricing assumptions, stakeholder map, risk register | strategy review, assumption dashboard, stakeholder map | delivery-manager, requirements-analyst |
 | Data | schema, data dictionary, metric definition, lineage, quality rules | schema map, metric dashboard, data quality review | backend-engineer, test-designer |
 | Research | claim-evidence matrix, literature theme map, interview synthesis, assumption register | research board, evidence map, confidence dashboard | research-writer, ux-researcher |
@@ -156,6 +156,7 @@ Rules:
 - Put generated visual review surfaces under `generated/review/<family>/`.
 - High-fidelity HTML/prototype review is the default for UI, product, customer-facing workflow, and mockup artifacts. Low-fidelity sketches are scratch unless explicitly captured as research evidence.
 - Visual review surfaces should expose realistic states, data density, error paths, assumptions, evidence strength, source links, and freshness metadata.
+- Use an E2E Product System Atlas when whole-app inspection needs a UWE navigation model with screenshots, manual QA verdicts, runtime side effects, and access/adaptation branches. Keep it bounded to discovered user-reachable routes, states, actions, and important error paths.
 - Human-facing discovery and planning work should produce source plus generated HTML by default when the intended audience is a human reviewer. Mark those manifest entries with `reviewRequired: true` and generate the infographic surface with `node scripts/generate-artifact-review.mjs`.
 - Use the infographic toolkit when charts or diagrams improve review: Mermaid for authored diagrams, Vega-Lite as the default chart grammar, Observable Plot for compact exploratory charts, D3 for bespoke static layouts, Graphviz for node-edge maps, ECharts only as generation-time/static output, RAWGraphs for exported design-led SVGs, and Chart.js only through server-rendered/static output or an equivalent static chart.
 - Put source-declared chart specs in `artifact-infographic` JSON fences or manifest `infographics` arrays. Generated HTML must embed only static markup, inline SVG, or data-url images.
@@ -176,6 +177,7 @@ Mermaid, C4, UML-style, UWE-inspired, dependency, and architecture-space views f
 - treat Mermaid C4 as a useful review notation, but mark the C4 level explicitly: context, container, component, dynamic, or deployment
 - treat dependency graphs as generated evidence unless the project has a separate model source of truth
 - keep UWE UML semantics in structured source; generate simplified review diagrams only when they help humans inspect the workflow
+- for screenshot-backed whole-app inspection, treat UWE navigation as the spine and attach screenshots, action QA, side effects, access rules, and adaptation variants to navigation nodes instead of maintaining a giant whole-system UML diagram
 
 Run the manifest check before handing off model-backed artifacts:
 

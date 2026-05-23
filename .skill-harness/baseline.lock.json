@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "baseline": {
+    "source": "skill-harness",
+    "channel": "default",
+    "pin": "6007ccf2bbca"
+  },
+  "profile": "agent-native",
+  "resolvedAt": "2026-05-23T21:40:28Z",
+  "effectiveAgents": [
+    "delivery-manager",
+    "quality-reviewer",
+    "requirements-analyst",
+    "software-architect",
+    "workflow-engineer"
+  ],
+  "effectivePacks": [
+    "agent-operating-skills",
+    "agile-delivery-skills",
+    "business-analysis-skills",
+    "cloud-platform-operations-skills",
+    "code-review-inspection-skills",
+    "coding-workflow-skills",
+    "demo-production-skills",
+    "deployment-release-skills",
+    "developer-artifact-skills",
+    "documentation-evidence-skills",
+    "enterprise-architecture-integration-skills",
+    "fagan-inspection-skill",
+    "frontier-agent-playbook",
+    "integration-tooling-skills",
+    "maintenance-evolution-skills",
+    "project-management-skills",
+    "refactoring-code-smells-skills",
+    "software-architecture-skills",
+    "software-quality-skills",
+    "specgraph-skills"
+  ],
+  "surfaces": [
+    {
+      "path": ".agent-docs",
+      "mode": "ignored",
+      "status": "missing"
+    },
+    {
+      "path": ".beads",
+      "mode": "owned",
+      "status": "present"
+    },
+    {
+      "path": ".claude/agents",
+      "mode": "generated",
+      "status": "present"
+    },
+    {
+      "path": ".claude/skills",
+      "mode": "ignored",
+      "status": "missing"
+    },
+    {
+      "path": ".codex/agents",
+      "mode": "generated",
+      "status": "present"
+    },
+    {
+      "path": ".codex/skills",
+      "mode": "ignored",
+      "status": "missing"
+    },
+    {
+      "path": ".github/skills",
+      "mode": "ignored",
+      "status": "missing"
+    },
+    {
+      "path": ".skill-harness/agent-stack.json",
+      "mode": "overlay",
+      "status": "present",
+      "contentHash": "sha256:cc82fb39ce85cd16ce06852bb06ce38ab5169fe66fc8429e19fa31bb6e61dad6"
+    },
+    {
+      "path": ".skill-harness/setup-proof.json",
+      "mode": "generated",
+      "status": "present",
+      "contentHash": "sha256:ab2377981e504747b8c86886167490b54ec789c47160d0111d34ddde57fedd59"
+    },
+    {
+      "path": "AGENTS.md",
+      "mode": "managed-section",
+      "status": "present",
+      "contentHash": "sha256:f15a4b7725680b9da4cfbf124e1e2b934f94954bae4ca084bc79ae86e3bc36f1"
+    },
+    {
+      "path": "AGENT_INSTRUCTIONS.md",
+      "mode": "managed-section",
+      "status": "present",
+      "contentHash": "sha256:cf365b4ef28118832b8797bcb905bc6425db383f67203c47e742e692340bbfec"
+    },
+    {
+      "path": "CLAUDE.md",
+      "mode": "managed-section",
+      "status": "present",
+      "contentHash": "sha256:d5b3ce044ea10cacb502bfd999fb77b055d9329087a85cb26ca46e56084f9ec8"
+    },
+    {
+      "path": "docs/artifacts/artifacts.manifest.json",
+      "mode": "managed-section",
+      "status": "present",
+      "contentHash": "sha256:8792bfbe5b974ecee50af24a7ee5c6ee113dbe1705253cc6acd8c8fc39cbf870"
+    },
+    {
+      "path": "docs/artifacts/source/models",
+      "mode": "overlay",
+      "status": "present"
+    },
+    {
+      "path": "generated/review",
+      "mode": "generated",
+      "status": "present"
+    },
+    {
+      "path": "llms.txt",
+      "mode": "generated",
+      "status": "present",
+      "contentHash": "sha256:8a144d14cfc2586d8bb975aba1150d75c2b60c4bbcf59e3a87e2331d7fac96ac"
+    },
+    {
+      "path": "packs",
+      "mode": "overlay",
+      "status": "present"
+    },
+    {
+      "path": "scripts/beads",
+      "mode": "ignored",
+      "status": "missing"
+    }
+  ]
+}
