@@ -74,6 +74,7 @@ Useful variants:
 ./skill-harness setup-project --dir path/to/project --developer-artifacts-profile claude-desktop
 ./skill-harness setup-project --dir path/to/project --developer-artifacts-profile cli
 ./skill-harness setup-project --dir path/to/project --developer-artifacts-profile tui
+./skill-harness setup-project --dir path/to/project --developer-artifacts-profile media
 ```
 
 ## Frontier doctrine companion
@@ -161,5 +162,6 @@ After project setup:
 - [README.md](README.md)
 - [cmd/skill-harness/main.go](cmd/skill-harness/main.go)
 - [docs/developer-artifacts.md](docs/developer-artifacts.md)
+- [docs/demo-production-media.md](docs/demo-production-media.md)
 - [scripts/dependencies.json](scripts/dependencies.json)
 - [scripts/build_release.py](scripts/build_release.py)

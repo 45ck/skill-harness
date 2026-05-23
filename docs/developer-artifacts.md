@@ -53,6 +53,7 @@ Use `--developer-artifacts-profile` to select the target workflow:
 | `claude-desktop` | `html` | Desktop preview workflows where a generated HTML artifact helps review |
 | `cli` | `markdown` | Terminal-heavy work where paths and Markdown are the primary interface |
 | `tui` | `markdown` | TUI work where HTML should remain secondary |
+| `media` | `dual` | Demo, QA, and generated media workflows where source-backed media and review surfaces are useful |
 | `markdown` | `markdown` | Alias for canonical-source-only workflows |
 | `html` | `html` | Alias for generated HTML review workflows |
 | `dual` | `dual` | Explicit source plus generated review workflow |
@@ -104,6 +105,19 @@ Run the manifest check before handing off model-backed artifacts:
 node scripts/check-artifact-manifest.mjs
 ```
 
+## Media And Demo Artifacts
+
+Use `--developer-artifacts-profile media` for repos that produce reviewable demos, QA evidence reels, silent cuts, slideshow-style MP4s, poster frames, or release demo bundles.
+
+The media profile keeps the normal source-first artifact model and adds:
+
+- `generated/media/`
+- `docs/artifacts/templates/demo-artifact.md`
+- `.skill-harness/project.json` media output policy
+- `.gitignore` coverage for generated media
+
+Media outputs are generated artifacts, not canonical truth. Keep `.demo.yaml`, QA flows, QA reports, Markdown/TOON source notes, and manifest entries as the durable source. Failed or inconclusive QA evidence may become a repro or draft plan, but not an approved product demo. Exclude raw traces, HAR/network dumps, console logs, page errors, secrets, and customer data from demo handoff bundles unless they have been explicitly redacted and approved.
+
 ## Skill Pack
 
 The embedded `developer-artifact-skills` pack provides:
@@ -115,6 +129,15 @@ The embedded `developer-artifact-skills` pack provides:
 - `artifact-handoff-pack`: assemble the minimal handoff bundle
 
 These skills are wired into the author, reviewer, delivery, research, and workflow loadouts where artifact decisions naturally happen.
+
+The embedded `demo-production-skills` pack provides:
+
+- `demo-story-packager`: package completed demo runs with source, media, evidence, and handoff notes
+- `demo-social-cut`: plan short silent cuts from evidence-backed demo runs
+- `demo-slideshow-edit`: plan no-caption slideshow reels from frames, storyboards, and selected spans
+- `demo-review-surface`: create static review surfaces for demo media and evidence
+- `qa-to-demo`: convert QA evidence into demo specs or clip plans without changing verdict semantics
+- `demo-release-packager`: assemble approved demo media into safe handoff bundles
 
 ## Evidence Rules
 
@@ -138,6 +161,7 @@ When changing this capability, update all of these together:
 - `scripts/agent_loadouts.json`
 - `docs/agent-loadouts.md`
 - `packs/developer-artifact-skills/`
+- `packs/demo-production-skills/`
 - `README.md`
 - `AGENT_INSTRUCTIONS.md`
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qa to Demo"
+  short_description: "Convert QA evidence to demos"
+  default_prompt: "Use $qa-to-demo to convert this QA report into a reproducible demo spec or clip plan."

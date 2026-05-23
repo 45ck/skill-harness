@@ -143,3 +143,36 @@ python scripts/external_skill_intake.py `
 ```
 
 The script only inventories repo structure and skill names. Adoption decisions still need human review.
+
+## Intake gate output
+
+The intake script now reports the fields that matter before any external repo can be considered for adoption:
+
+- `SKILL.md` skill count and overlap with the local 45ck catalog
+- agent files and plugin surfaces such as `.claude-plugin`, `.codex-plugin`, and `plugin.json`
+- Codex metadata files such as `agents/openai.yaml`
+- MCP config files such as `.mcp.json`
+- lock, index, or manifest files such as `skills_index.json`
+- license and third-party notice files
+- executable helpers such as shell, PowerShell, Python, JavaScript, and TypeScript files
+- blocked flags for approval bypass, remote shell execution, or secret exfiltration patterns
+- review flags for token references, MCP/tool config, install scripts, and executable helpers
+- a trust recommendation: `intake-candidate`, `manual-review-*`, or `quarantine`
+
+Use machine-readable output when turning a review into tracked work:
+
+```powershell
+python scripts/external_skill_intake.py `
+  --output docs/external-skill-intake-report.md `
+  --json-output docs/external-skill-intake-report.json
+```
+
+Use the blocking mode in CI or before proposing a new dependency:
+
+```powershell
+python scripts/external_skill_intake.py `
+  "D:\Visual Studio Projects\skill-intake\some-public-skill-repo" `
+  --fail-on-blocked
+```
+
+`--fail-on-blocked` is intentionally narrow. It catches patterns that should not flow into shared installs, but it does not replace license review, script review, MCP review, or a first-party rewrite decision.

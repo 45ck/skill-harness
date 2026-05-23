@@ -1,0 +1,4 @@
+interface:
+  display_name: "Demo Slideshow Edit"
+  short_description: "Plan no-caption slideshow reels"
+  default_prompt: "Use $demo-slideshow-edit to plan a no-caption slideshow reel from these demo frames and evidence."

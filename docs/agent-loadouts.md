@@ -12,7 +12,7 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## ux-researcher
 
-- Skills: persona-synthesizer, task-analysis-writer, usability-test-planner, representative-task-writer, wireframe-critic, field-study-planner, satisfaction-questionnaire-writer, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking
+- Skills: persona-synthesizer, task-analysis-writer, usability-test-planner, representative-task-writer, wireframe-critic, field-study-planner, satisfaction-questionnaire-writer, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, demo-social-cut, demo-slideshow-edit, demo-review-surface
 
 ## system-modeler
 
@@ -48,7 +48,7 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## qa-automation-engineer
 
-- Skills: unit-test-writer, integration-test-writer, api-test-suite-builder, ui-test-scenario-writer, fixture-and-test-data-builder, regression-suite-curator, test-readability-reviewer, test-plan-writer, frontier-model-context, digital-expert-test, legacy-automation-fallback, verification-first-delivery
+- Skills: unit-test-writer, integration-test-writer, api-test-suite-builder, ui-test-scenario-writer, fixture-and-test-data-builder, regression-suite-curator, test-readability-reviewer, test-plan-writer, frontier-model-context, digital-expert-test, legacy-automation-fallback, verification-first-delivery, qa-to-demo, demo-review-surface, demo-story-packager
 
 ## quality-reviewer
 
@@ -68,21 +68,16 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## delivery-manager
 
-- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack
+- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack, demo-release-packager, demo-story-packager
 
 ## delivery-manager-beads
 
-- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack
+- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack, demo-release-packager, demo-story-packager
 
 ## research-writer
 
-- Skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate
+- Skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate, demo-review-surface, demo-story-packager
 
 ## workflow-engineer
 
-- Skills: issue-driven-delivery, gh-review-followthrough, gh-actions-failure-triage, review-ready-check, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack
-
-## Dependency model
-
-- The agent-to-repo mapping is declared in [scripts/dependencies.json](../scripts/dependencies.json).
-- Installers bootstrap those dependency repos automatically before installing or rendering agents.
+- Skills: issue-driven-delivery, gh-review-followthrough, gh-actions-failure-triage, review-ready-check, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack, demo-story-packager, demo-release-packager

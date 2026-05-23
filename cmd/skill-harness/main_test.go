@@ -67,6 +67,22 @@ func TestParseArtifactProfileRejectsUnknownValue(t *testing.T) {
 	}
 }
 
+func TestParseArtifactProfileAcceptsMedia(t *testing.T) {
+	profile, err := parseArtifactProfile("media")
+	if err != nil {
+		t.Fatalf("parseArtifactProfile returned error: %v", err)
+	}
+	if profile != artifactProfileMedia {
+		t.Fatalf("expected media profile, got %q", profile)
+	}
+	if effectiveArtifactProfile(profile) != artifactProfileDual {
+		t.Fatalf("expected media to resolve to dual, got %q", effectiveArtifactProfile(profile))
+	}
+	if artifactOpenMode(profile) != "file-preview" {
+		t.Fatalf("expected media open mode to use file-preview, got %q", artifactOpenMode(profile))
+	}
+}
+
 func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
@@ -142,6 +158,62 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	}
 }
 
+func TestWriteDeveloperArtifactScaffoldMediaProfile(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileMedia, true); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	if !dirExists(filepath.Join(root, "generated", "media")) {
+		t.Fatal("expected generated media directory")
+	}
+	if !fileExists(filepath.Join(root, "docs", "artifacts", "templates", "demo-artifact.md")) {
+		t.Fatal("expected demo artifact template")
+	}
+	if !gitignoreHasLine(mustReadText(t, filepath.Join(root, ".gitignore")), "generated/media/") {
+		t.Fatal("expected generated media output to be gitignored")
+	}
+
+	data, err := os.ReadFile(filepath.Join(root, ".skill-harness", "project.json"))
+	if err != nil {
+		t.Fatalf("read config: %v", err)
+	}
+	var config map[string]any
+	if err := json.Unmarshal(data, &config); err != nil {
+		t.Fatalf("config should be valid JSON: %v", err)
+	}
+	artifacts := developerArtifactsConfig(t, config)
+	if artifacts["requestedProfile"] != string(artifactProfileMedia) {
+		t.Fatalf("expected requested media profile, got %#v", artifacts["requestedProfile"])
+	}
+	if artifacts["profile"] != string(artifactProfileDual) {
+		t.Fatalf("expected effective dual profile, got %#v", artifacts["profile"])
+	}
+	if artifacts["specialization"] != "media-demo" {
+		t.Fatalf("expected media-demo specialization, got %#v", artifacts["specialization"])
+	}
+	mediaOutputs, ok := artifacts["mediaOutputs"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected mediaOutputs config, got %#v", artifacts["mediaOutputs"])
+	}
+	if mediaOutputs["enabled"] != true {
+		t.Fatalf("expected media outputs enabled, got %#v", mediaOutputs["enabled"])
+	}
+	if mediaOutputs["outDir"] != "generated/media" {
+		t.Fatalf("expected generated/media outDir, got %#v", mediaOutputs["outDir"])
+	}
+	statuses, ok := mediaOutputs["allowedStatuses"].([]any)
+	if !ok || !containsJSONValue(statuses, "needs-evidence") || !containsJSONValue(statuses, "inconclusive") {
+		t.Fatalf("expected conservative media statuses, got %#v", mediaOutputs["allowedStatuses"])
+	}
+	exclusions, ok := mediaOutputs["defaultExclusions"].([]any)
+	if !ok || !containsJSONValue(exclusions, "trace.zip") || !containsJSONValue(exclusions, "network.json") {
+		t.Fatalf("expected sensitive default exclusions, got %#v", mediaOutputs["defaultExclusions"])
+	}
+}
+
 func TestWriteDeveloperArtifactScaffoldResolvesAutoProfile(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
@@ -204,6 +276,11 @@ func containsJSONValue(values []any, want string) bool {
 		}
 	}
 	return false
+}
+
+func dirExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
 }
 
 func mustReadText(t *testing.T, path string) string {

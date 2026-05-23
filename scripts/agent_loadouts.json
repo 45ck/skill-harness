@@ -41,7 +41,10 @@
       "evaluation-report-writer",
       "frontier-model-context",
       "digital-expert-test",
-      "pre-ai-scarcity-thinking"
+      "pre-ai-scarcity-thinking",
+      "demo-social-cut",
+      "demo-slideshow-edit",
+      "demo-review-surface"
     ]
   },
   "system-modeler": {
@@ -201,7 +204,10 @@
       "frontier-model-context",
       "digital-expert-test",
       "legacy-automation-fallback",
-      "verification-first-delivery"
+      "verification-first-delivery",
+      "qa-to-demo",
+      "demo-review-surface",
+      "demo-story-packager"
     ]
   },
   "quality-reviewer": {
@@ -283,7 +289,9 @@
       "pre-ai-scarcity-thinking",
       "verification-first-delivery",
       "developer-artifact-shaper",
-      "artifact-handoff-pack"
+      "artifact-handoff-pack",
+      "demo-release-packager",
+      "demo-story-packager"
     ]
   },
   "delivery-manager-beads": {
@@ -302,7 +310,9 @@
       "pre-ai-scarcity-thinking",
       "verification-first-delivery",
       "developer-artifact-shaper",
-      "artifact-handoff-pack"
+      "artifact-handoff-pack",
+      "demo-release-packager",
+      "demo-story-packager"
     ]
   },
   "research-writer": {
@@ -321,7 +331,9 @@
       "developer-artifact-shaper",
       "model-review-artifact",
       "html-review-artifact",
-      "artifact-evidence-gate"
+      "artifact-evidence-gate",
+      "demo-review-surface",
+      "demo-story-packager"
     ]
   },
   "workflow-engineer": {
@@ -336,7 +348,9 @@
       "llm-default-architecture",
       "verification-first-delivery",
       "developer-artifact-shaper",
-      "artifact-handoff-pack"
+      "artifact-handoff-pack",
+      "demo-story-packager",
+      "demo-release-packager"
     ]
   }
 }

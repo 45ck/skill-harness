@@ -1,0 +1,4 @@
+interface:
+  display_name: "Demo Review Surface"
+  short_description: "Review demo media with evidence"
+  default_prompt: "Use $demo-review-surface to create a static review page for this demo media and evidence."

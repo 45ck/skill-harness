@@ -187,12 +187,13 @@ Choose a developer artifact profile:
 ./skill-harness setup-project --dir ../my-project --developer-artifacts-profile claude-desktop
 ./skill-harness setup-project --dir ../my-project --developer-artifacts-profile cli
 ./skill-harness setup-project --dir ../my-project --developer-artifacts-profile tui
+./skill-harness setup-project --dir ../my-project --developer-artifacts-profile media
 ./skill-harness setup-project --dir ../my-project --developer-artifacts-profile none
 ```
 
-Artifact profiles are guidance and scaffold settings, not a separate runtime. `auto` is the default and resolves to `dual`: canonical Markdown/TOON/specgraph sources plus optional generated review surfaces. Use `codex-app` or `claude-desktop` for desktop workflows with file-backed previews, `cli` or `tui` for terminal-heavy projects, and `none`, `--skip-artifacts`, or `--skip-developer-artifacts` for minimal projects. The shorter `--artifact-profile markdown|html|dual|none` form remains supported as an alias.
+Artifact profiles are guidance and scaffold settings, not a separate runtime. `auto` is the default and resolves to `dual`: canonical Markdown/TOON/specgraph sources plus optional generated review surfaces. Use `codex-app` or `claude-desktop` for desktop workflows with file-backed previews, `cli` or `tui` for terminal-heavy projects, `media` for source-backed demo and generated media review workflows, and `none`, `--skip-artifacts`, or `--skip-developer-artifacts` for minimal projects. The shorter `--artifact-profile media|markdown|html|dual|none` form remains supported as an alias.
 
-Developer artifact scaffolding also creates `docs/artifacts/artifacts.manifest.json` and `scripts/check-artifact-manifest.mjs`. Use the manifest to record source-backed generated views, including Mermaid, C4, UML-style, dependency, and architecture-space artifacts. Generated HTML should embed pre-rendered diagrams, such as inline SVG, instead of loading browser diagram runtimes by default.
+Developer artifact scaffolding also creates `docs/artifacts/artifacts.manifest.json` and `scripts/check-artifact-manifest.mjs`. Use the manifest to record source-backed generated views, including Mermaid, C4, UML-style, dependency, architecture-space, and demo media artifacts. Generated HTML should embed pre-rendered diagrams, such as inline SVG, instead of loading browser diagram runtimes by default. The `media` profile also creates `generated/media/` and `docs/artifacts/templates/demo-artifact.md`; generated media stays out of git by default.
 
 ### Validate installed agent dependencies
 
@@ -262,6 +263,7 @@ Agent-to-skill mapping lives in [docs/agent-loadouts.md](docs/agent-loadouts.md)
 - `design-tooling-skills` (embedded)
 - `integration-tooling-skills` (embedded)
 - `developer-artifact-skills` (embedded)
+- `demo-production-skills` (embedded)
 
 ## Shared doctrine companion
 
@@ -292,6 +294,7 @@ If another agent needs to install this repo or use it as the setup entrypoint, p
 - [cmd/skill-harness/main.go](cmd/skill-harness/main.go)
 - [AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md)
 - [docs/developer-artifacts.md](docs/developer-artifacts.md)
+- [docs/demo-production-media.md](docs/demo-production-media.md)
 - [docs/third-party-skill-intake.md](docs/third-party-skill-intake.md)
 - [packs/README.md](packs/README.md)
 - [scripts/dependencies.json](scripts/dependencies.json)

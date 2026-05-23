@@ -1,0 +1,4 @@
+interface:
+  display_name: "Demo Social Cut"
+  short_description: "Plan short silent demo cuts"
+  default_prompt: "Use $demo-social-cut to plan a short silent cut from this evidence-backed demo run."

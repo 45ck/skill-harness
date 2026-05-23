@@ -1,0 +1,4 @@
+interface:
+  display_name: "Demo Story Packager"
+  short_description: "Package demo runs with evidence"
+  default_prompt: "Use $demo-story-packager to package this completed demo run with source, media, evidence, and handoff notes."

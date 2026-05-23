@@ -1,0 +1,4 @@
+interface:
+  display_name: "Demo Release Packager"
+  short_description: "Package approved demo media"
+  default_prompt: "Use $demo-release-packager to assemble approved demo media, source, and evidence into a handoff bundle."

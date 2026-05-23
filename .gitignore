@@ -5,6 +5,7 @@ Thumbs.db
 social-preview.png
 dist/
 generated/review/
+generated/media/
 
 # Beads / Dolt files (added by bd init)
 .dolt/

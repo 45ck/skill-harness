@@ -69,6 +69,7 @@ const (
 	artifactProfileClaudeDesktop artifactProfile = "claude-desktop"
 	artifactProfileCLI           artifactProfile = "cli"
 	artifactProfileTUI           artifactProfile = "tui"
+	artifactProfileMedia         artifactProfile = "media"
 	artifactProfileNone          artifactProfile = "none"
 )
 
@@ -205,8 +206,8 @@ func runSetupProject(root string, args []string) {
 	skipClaudeSettings := fs.Bool("skip-claude-settings", false, "Do not write .claude/settings.json.")
 	skipArtifacts := fs.Bool("skip-artifacts", false, "Do not scaffold developer artifact guidance.")
 	skipDeveloperArtifacts := fs.Bool("skip-developer-artifacts", false, "Do not scaffold developer artifact guidance.")
-	artifactProfileValue := fs.String("artifact-profile", string(artifactProfileAuto), "Developer artifact profile: auto, markdown, html, dual, or none.")
-	developerArtifactsProfileValue := fs.String("developer-artifacts-profile", string(artifactProfileAuto), "Developer artifact profile: auto, codex-app, claude-desktop, cli, tui, markdown, html, dual, or none.")
+	artifactProfileValue := fs.String("artifact-profile", string(artifactProfileAuto), "Developer artifact profile: auto, media, markdown, html, dual, or none.")
+	developerArtifactsProfileValue := fs.String("developer-artifacts-profile", string(artifactProfileAuto), "Developer artifact profile: auto, codex-app, claude-desktop, cli, tui, media, markdown, html, dual, or none.")
 	installOnly := fs.Bool("install-only", false, "Install packages only; skip initialization commands.")
 	scopeValue := fs.String("scope", string(projectScopeAuto), "Setup scope: auto, root, or workspace.")
 	packageManagerValue := fs.String("package-manager", string(packageManagerAuto), "Package manager: auto, npm, pnpm, yarn, or bun.")
@@ -775,6 +776,8 @@ func parseArtifactProfile(value string) (artifactProfile, error) {
 		return artifactProfileCLI, nil
 	case artifactProfileTUI:
 		return artifactProfileTUI, nil
+	case artifactProfileMedia:
+		return artifactProfileMedia, nil
 	case artifactProfileNone:
 		return artifactProfileNone, nil
 	default:
@@ -1010,6 +1013,9 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 		filepath.Join(projectDir, ".skill-harness"),
 		filepath.Join(projectDir, "scripts"),
 	}
+	if profile == artifactProfileMedia {
+		dirs = append(dirs, filepath.Join(projectDir, "generated", "media"))
+	}
 	for _, dir := range dirs {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return err
@@ -1027,6 +1033,7 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 				"enabled":          true,
 				"requestedProfile": string(profile),
 				"profile":          string(effectiveProfile),
+				"specialization":   artifactSpecialization(profile),
 				"canonical": map[string]any{
 					"formats": []string{"markdown", "toon"},
 					"tooling": canonicalTooling,
@@ -1086,6 +1093,7 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 					"commitGenerated": false,
 					"openMode":        artifactOpenMode(profile),
 				},
+				"mediaOutputs": artifactMediaOutputs(profile),
 				"htmlPolicy": map[string]any{
 					"role":                  "generated-review-surface",
 					"selfContained":         true,
@@ -1110,7 +1118,11 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	if err := updatePackageScripts(projectDir, agentDocsEnabled); err != nil {
 		return err
 	}
-	if err := ensureGitignoreLines(projectDir, []string{"generated/review/"}); err != nil {
+	gitignoreLines := []string{"generated/review/"}
+	if profile == artifactProfileMedia {
+		gitignoreLines = append(gitignoreLines, "generated/media/")
+	}
+	if err := ensureGitignoreLines(projectDir, gitignoreLines); err != nil {
 		return err
 	}
 
@@ -1132,6 +1144,15 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	if !fileExists(modelTemplatePath) {
 		if err := os.WriteFile(modelTemplatePath, []byte(developerModelArtifactTemplate()), 0o644); err != nil {
 			return err
+		}
+	}
+
+	if profile == artifactProfileMedia {
+		demoTemplatePath := filepath.Join(projectDir, "docs", "artifacts", "templates", "demo-artifact.md")
+		if !fileExists(demoTemplatePath) {
+			if err := os.WriteFile(demoTemplatePath, []byte(developerDemoArtifactTemplate()), 0o644); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -1164,6 +1185,8 @@ func effectiveArtifactProfile(profile artifactProfile) artifactProfile {
 		return artifactProfileHTML
 	case artifactProfileCLI, artifactProfileTUI:
 		return artifactProfileMarkdown
+	case artifactProfileMedia:
+		return artifactProfileDual
 	default:
 		return profile
 	}
@@ -1171,12 +1194,39 @@ func effectiveArtifactProfile(profile artifactProfile) artifactProfile {
 
 func artifactOpenMode(profile artifactProfile) string {
 	switch profile {
-	case artifactProfileCodexApp, artifactProfileClaudeDesktop, artifactProfileHTML:
+	case artifactProfileCodexApp, artifactProfileClaudeDesktop, artifactProfileHTML, artifactProfileMedia:
 		return "file-preview"
 	case artifactProfileCLI, artifactProfileTUI, artifactProfileMarkdown:
 		return "path-or-command"
 	default:
 		return "when-supported"
+	}
+}
+
+func artifactSpecialization(profile artifactProfile) string {
+	if profile == artifactProfileMedia {
+		return "media-demo"
+	}
+	return ""
+}
+
+func artifactMediaOutputs(profile artifactProfile) map[string]any {
+	if profile != artifactProfileMedia {
+		return map[string]any{
+			"enabled": false,
+		}
+	}
+	return map[string]any{
+		"enabled":             true,
+		"outDir":              "generated/media",
+		"commitGenerated":     false,
+		"sourceBacked":        true,
+		"requireEvidence":     true,
+		"defaultStatus":       "draft",
+		"allowedStatuses":     []string{"draft", "needs-evidence", "approved", "rejected", "stale", "inconclusive"},
+		"defaultExclusions":   []string{"trace.zip", "*.har", "network.json", "console.json", "page-errors.json"},
+		"upstreamEvidence":    []string{"events.json", "verification.json", "quality.json", "qa-report.json", "review-bundle.json", "segment.evidence.json", "layout-safety.report.json"},
+		"approvedOutputKinds": []string{"mp4", "webm", "gif", "webp", "poster-frame", "frame-strip", "html-review"},
 	}
 }
 
@@ -1206,6 +1256,7 @@ Use this directory for durable developer artifacts and generated review surfaces
 - templates/ - local templates for recurring artifact types.
 - artifacts.manifest.json - provenance and freshness index for source-backed review artifacts.
 - ../../generated/review/ - generated HTML or rich review artifacts for humans.
+- ../../generated/media/ - generated demo media for media profile projects.
 
 ## Model And Diagram Policy
 
@@ -1214,6 +1265,14 @@ Use this directory for durable developer artifacts and generated review surfaces
 - Treat Mermaid C4 as a review notation and record the level explicitly: context, container, component, dynamic, or deployment.
 - Treat dependency graphs as generated evidence unless the project has a separate model source of truth.
 - Link every generated model view back to its source artifact, issue, and evidence.
+
+## Media And Demo Policy
+
+- Keep .demo.yaml, QA flows, reports, and source notes as canonical artifacts.
+- Treat MP4s, GIF/WebP previews, poster frames, and frame strips as generated outputs.
+- Store generated media under generated/media/ for media profile projects and keep it out of git by default.
+- Do not turn failed or inconclusive QA evidence into an approved product demo.
+- Exclude raw traces, HAR/network dumps, console logs, page errors, secrets, and customer data from handoff bundles unless explicitly redacted and approved.
 
 ## HTML Review Policy
 
@@ -1296,6 +1355,46 @@ Keep diagram source here or link to the canonical source artifact. Generated HTM
 - Source hash:
 - Renderer and version:
 - Last generated:
+`
+}
+
+func developerDemoArtifactTemplate() string {
+	return `# Demo Artifact: [Title]
+
+**Status:** Draft
+**Artifact type:** plan | handoff | evidence-pack | review-dashboard
+**Audience:** review | docs | release | social | repro
+**Canonical source:** [path to .demo.yaml, QA flow, report, or source artifact]
+**Run directory:** [path]
+**Generated media:** [generated/media/path]
+**Generated review:** [generated/review/path.html]
+
+## Purpose
+
+What this demo, silent cut, slideshow, or repro clip is meant to prove.
+
+## Source And Evidence
+
+- Demo spec:
+- QA report:
+- Events:
+- Verification:
+- Quality:
+- Analyzer evidence:
+
+## Media Outputs
+
+- MP4:
+- Poster:
+- Frame strip:
+- Review surface:
+
+## Safety And Promotion
+
+- Verdict source:
+- Exclusions reviewed:
+- Redactions:
+- Promotion destination:
 `
 }
 
@@ -1689,7 +1788,7 @@ func printUsage(loadouts loadoutConfig, deps dependencyConfig) {
 	fmt.Println("Commands:")
 	fmt.Println("  list [--agents] [--packs]")
 	fmt.Println("  install [--all] [--interactive] [--packs-only] [--agents-only] [--agents=a,b] [--packs=x,y]")
-	fmt.Println("  setup-project [--dir path] [--scope auto|root|workspace] [--package-manager auto|npm|pnpm|yarn|bun] [--developer-artifacts-profile auto|codex-app|claude-desktop|cli|tui|none] [--install-only] [--skip-noslop] [--skip-agent-docs] [--skip-beads] [--beads-worktrees] [--skip-developer-artifacts] [--skip-claude-settings]")
+	fmt.Println("  setup-project [--dir path] [--scope auto|root|workspace] [--package-manager auto|npm|pnpm|yarn|bun] [--developer-artifacts-profile auto|codex-app|claude-desktop|cli|tui|media|none] [--install-only] [--skip-noslop] [--skip-agent-docs] [--skip-beads] [--beads-worktrees] [--skip-developer-artifacts] [--skip-claude-settings]")
 	fmt.Println("  beads-worktrees [--dir path] [--force]")
 	fmt.Println("  update")
 	fmt.Println("  check [--all] [--interactive] [--agents=a,b]")

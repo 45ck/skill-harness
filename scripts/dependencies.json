@@ -104,6 +104,9 @@
     },
     "developer-artifact-skills": {
       "path": "packs/developer-artifact-skills"
+    },
+    "demo-production-skills": {
+      "path": "packs/demo-production-skills"
     }
   },
   "agents": {
@@ -126,7 +129,8 @@
         "hci-review-skill",
         "business-analysis-skills",
         "documentation-evidence-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "demo-production-skills"
       ]
     },
     "system-modeler": {
@@ -207,7 +211,8 @@
         "automation-testing-skills",
         "verification-test-design-skills",
         "documentation-evidence-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "demo-production-skills"
       ]
     },
     "quality-reviewer": {
@@ -251,7 +256,8 @@
         "deployment-release-skills",
         "maintenance-evolution-skills",
         "frontier-agent-playbook",
-        "developer-artifact-skills"
+        "developer-artifact-skills",
+        "demo-production-skills"
       ]
     },
     "delivery-manager-beads": {
@@ -262,7 +268,8 @@
         "deployment-release-skills",
         "maintenance-evolution-skills",
         "frontier-agent-playbook",
-        "developer-artifact-skills"
+        "developer-artifact-skills",
+        "demo-production-skills"
       ]
     },
     "research-writer": {
@@ -270,14 +277,16 @@
         "research-literature-review-skills",
         "documentation-evidence-skills",
         "frontier-agent-playbook",
-        "developer-artifact-skills"
+        "developer-artifact-skills",
+        "demo-production-skills"
       ]
     },
     "workflow-engineer": {
       "repos": [
         "coding-workflow-skills",
         "frontier-agent-playbook",
-        "developer-artifact-skills"
+        "developer-artifact-skills",
+        "demo-production-skills"
       ]
     }
   }
