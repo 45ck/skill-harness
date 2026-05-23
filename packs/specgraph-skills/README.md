@@ -1,6 +1,6 @@
 # specgraph-skills
 
-Embedded pack for [specgraph](https://github.com/45ck/agent-docs) (`@45ck/agent-docs`) day-to-day workflow.
+Embedded pack for [specgraph](https://github.com/45ck/agent-docs) (`github:45ck/agent-docs`) day-to-day workflow.
 
 Included skills:
 
@@ -15,7 +15,8 @@ Included skills:
 specgraph must be installed in the project:
 
 ```bash
-npm install @45ck/agent-docs
+npm install --save-dev github:45ck/agent-docs
+npx agent-docs init
 ```
 
 Or bootstrap an entire project (installs specgraph, Beads, noslop, git hooks):
@@ -33,7 +34,7 @@ Config file lives at `.specgraph/config.json` (falls back to `.agent-docs/config
 ### Via skill-harness
 
 ```bash
-./skill-harness install --packs specgraph-skills --packs-only
+./skill-harness install --packs=specgraph-skills --packs-only
 ```
 
 ### Manual
