@@ -128,6 +128,8 @@ node scripts/open-artifact-review.mjs --json --print
 
 The checker rejects common unsafe constructs including `<script>`, iframes, object/embed/form tags, meta refresh, external `src` / `href` / `action` references, and browser APIs such as `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, `sendBeacon`, `serviceWorker`, `document.cookie`, `localStorage`, and `sessionStorage`.
 
+The checker is not a secret scanner, data loss prevention tool, prompt-injection detector, or provenance reviewer. Review and redact generated artifacts before opening them in a browser, sharing them, committing them, or serving them through a local preview. Add a dedicated secret scan if a project needs enforceable leakage detection.
+
 ## Visual Source-First Artifacts
 
 Use visual-source-first artifacts when product, business, data, research, UX, or mockup work needs human visual inspection and agent-readable continuity.

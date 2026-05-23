@@ -1,5 +1,10 @@
 # Skill Harness Agent Guidance
 
+- `skill-harness` is the setup and install entrypoint for the 45ck agent workflow stack.
+- Primary CLI commands: `install`, `setup-project`, `check`, `beads-worktrees`, and `uninstall`.
+- Use `./skill-harness setup-project --dir <repo>` to bootstrap a target repo with noslop, agent-docs, Beads, developer artifacts, and optional UML-first model scaffolding.
+- Use `./skill-harness check --all` after shared-suite installation.
+- `AGENTS.md` and `CLAUDE.md` are maintainer/agent operating docs. Public contributor guidance lives in `CONTRIBUTING.md`, `SUPPORT.md`, `SECURITY.md`, and `CODE_OF_CONDUCT.md`.
 - Auto-detect model impact for engineering changes.
 - Fresh developer-artifact setup uses `--modeling-mode auto`, resolving to UML-first for new repos and preserving existing repos.
 - Canonical model sources live in repo-relative text files, usually `docs/artifacts/source/models/`.
@@ -10,4 +15,3 @@
 - Keep synthetic user or agent-simulation evidence distinct from real user/customer evidence.
 - Open generated HTML with the best available human surface: Codex Browser plugin in Codex app, Claude desktop preview/browser in Claude desktop, or `node scripts/open-artifact-review.mjs` for CLI/system-browser fallback.
 - Validate with `node scripts/check-model-artifact-policy.mjs` and `node scripts/check-artifact-html-policy.mjs`.
-- Public contribution and security guidance lives in `CONTRIBUTING.md`, `SUPPORT.md`, `SECURITY.md`, and `CODE_OF_CONDUCT.md`.
