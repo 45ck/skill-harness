@@ -33,4 +33,3 @@ Use this skill when work crosses real boundaries that one agent loadout should n
 ### Conflict Rules
 ### Evidence Gates
 ### Coordination Risks
-

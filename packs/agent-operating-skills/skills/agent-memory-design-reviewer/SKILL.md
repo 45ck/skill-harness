@@ -32,4 +32,3 @@ Use this skill when a project wants agents to remember lessons, retrieve prior w
 ### Revocation / Freshness
 ### Poisoning Risks
 ### Required Redactions
-

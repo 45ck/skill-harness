@@ -1,9 +1,13 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -108,7 +112,7 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
 
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, false); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -183,7 +187,7 @@ func TestWriteDeveloperArtifactScaffoldMediaProfile(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
 
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileMedia, true); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileMedia, true, true, false); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -239,7 +243,7 @@ func TestWriteDeveloperArtifactScaffoldAgentLoopProfile(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
 
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileAgentLoop, true); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileAgentLoop, true, true, false); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -285,6 +289,9 @@ func TestWriteDeveloperArtifactScaffoldAgentLoopProfile(t *testing.T) {
 	if agentLoop["traceDir"] != "generated/agent-runs" {
 		t.Fatalf("expected generated/agent-runs trace dir, got %#v", agentLoop["traceDir"])
 	}
+	if agentLoop["defaultIssueTool"] != "beads" {
+		t.Fatalf("expected beads issue tool, got %#v", agentLoop["defaultIssueTool"])
+	}
 	phases, ok := agentLoop["phases"].([]any)
 	if !ok || !containsJSONValue(phases, "sense") || !containsJSONValue(phases, "learn") {
 		t.Fatalf("expected sense/learn phases, got %#v", agentLoop["phases"])
@@ -302,11 +309,92 @@ func TestWriteDeveloperArtifactScaffoldAgentLoopProfile(t *testing.T) {
 	}
 }
 
+func TestWriteDeveloperArtifactScaffoldAgentLoopProfileWithoutBeads(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileAgentLoop, true, false, false); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(root, ".skill-harness", "project.json"))
+	if err != nil {
+		t.Fatalf("read config: %v", err)
+	}
+	var config map[string]any
+	if err := json.Unmarshal(data, &config); err != nil {
+		t.Fatalf("config should be valid JSON: %v", err)
+	}
+	agentLoop := developerArtifactsConfig(t, config)["agentLoop"].(map[string]any)
+	if agentLoop["defaultIssueTool"] != "explicit-human-request" {
+		t.Fatalf("expected explicit request issue tool, got %#v", agentLoop["defaultIssueTool"])
+	}
+	learningOutputs, ok := agentLoop["learningOutputs"].([]any)
+	if !ok {
+		t.Fatalf("expected learningOutputs array, got %#v", agentLoop["learningOutputs"])
+	}
+	if containsJSONValue(learningOutputs, "bd remember insight") {
+		t.Fatalf("did not expect Beads memory output when Beads is skipped: %#v", learningOutputs)
+	}
+	if !containsJSONValue(learningOutputs, "follow-up issue or source artifact") {
+		t.Fatalf("expected non-Beads fallback learning output, got %#v", learningOutputs)
+	}
+}
+
+func TestWriteDeveloperArtifactScaffoldModeling(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, true); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	for _, path := range []string{
+		filepath.Join(root, "docs", "artifacts", "source", "models"),
+		filepath.Join(root, "generated", "review", "models"),
+		filepath.Join(root, "docs", "artifacts", "templates", "model-diff-artifact.md"),
+		filepath.Join(root, "scripts", "check-model-artifact-policy.mjs"),
+	} {
+		if !fileExists(path) && !dirExists(path) {
+			t.Fatalf("expected modeling scaffold path %s", path)
+		}
+	}
+
+	data, err := os.ReadFile(filepath.Join(root, ".skill-harness", "project.json"))
+	if err != nil {
+		t.Fatalf("read config: %v", err)
+	}
+	var config map[string]any
+	if err := json.Unmarshal(data, &config); err != nil {
+		t.Fatalf("config should be valid JSON: %v", err)
+	}
+	artifacts := developerArtifactsConfig(t, config)
+	artifactTypes, ok := artifacts["artifactTypes"].([]any)
+	if !ok || !containsJSONValue(artifactTypes, "model-diff") {
+		t.Fatalf("expected model-diff artifact type, got %#v", artifacts["artifactTypes"])
+	}
+	modelPolicy, ok := artifacts["modelPolicy"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected model policy config, got %#v", artifacts["modelPolicy"])
+	}
+	umlPolicy, ok := modelPolicy["uml"].(map[string]any)
+	if !ok || umlPolicy["enabled"] != true {
+		t.Fatalf("expected enabled UML policy, got %#v", modelPolicy["uml"])
+	}
+	if umlPolicy["sourceDir"] != "docs/artifacts/source/models" {
+		t.Fatalf("expected model source dir, got %#v", umlPolicy["sourceDir"])
+	}
+	scripts := packageScripts(t, filepath.Join(root, "package.json"))
+	if scripts["models:review"] != "node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs" {
+		t.Fatalf("expected model review script, got %#v", scripts["models:review"])
+	}
+}
+
 func TestWriteDeveloperArtifactScaffoldResolvesAutoProfile(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
 
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileAuto, true); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileAuto, true, true, false); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -342,6 +430,7 @@ func TestWriteProjectSetupProof(t *testing.T) {
 	proof := buildProjectSetupProof(ctx, projectSetupProofOptions{
 		RequestedArtifactProfile: artifactProfileAgentLoop,
 		EffectiveArtifactProfile: artifactProfileDual,
+		EnableModeling:           true,
 		BeadsMode:                beadsSystem,
 		BeadsWorktrees:           true,
 	})
@@ -370,8 +459,14 @@ func TestWriteProjectSetupProof(t *testing.T) {
 	if decoded.Checks["agentLoopPolicy"].Command != "node scripts/check-agent-loop-policy.mjs" {
 		t.Fatalf("expected agent-loop check command, got %#v", decoded.Checks["agentLoopPolicy"])
 	}
+	if decoded.Checks["modelArtifactPolicy"].Command != "node scripts/check-model-artifact-policy.mjs" {
+		t.Fatalf("expected model artifact check command, got %#v", decoded.Checks["modelArtifactPolicy"])
+	}
 	if !containsString(decoded.GeneratedPaths, ".skill-harness/setup-proof.json") {
 		t.Fatalf("expected proof path in generated paths, got %#v", decoded.GeneratedPaths)
+	}
+	if !containsString(decoded.GeneratedPaths, "docs/artifacts/source/models/") {
+		t.Fatalf("expected model source path in generated paths, got %#v", decoded.GeneratedPaths)
 	}
 }
 

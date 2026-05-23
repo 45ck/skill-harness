@@ -37,4 +37,3 @@ Use `safe-to-act`, `ask-before-action`, `proposal-only`, or `blocked`.
 ### Human-Approval Actions
 ### Stop Conditions
 ### Required Policy Changes
-

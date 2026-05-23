@@ -8,7 +8,7 @@ Developer artifacts use this source-of-truth split:
 
 - canonical source: Markdown, TOON, specgraph / `agent-docs`, or existing project docs
 - generated review surface: static HTML under `generated/review/`
-- handoff evidence: linked files, Beads issues, tests, reports, logs, screenshots, or runtime proof
+- handoff evidence: linked files, issue tracker entries, tests, reports, logs, screenshots, or runtime proof
 - artifact provenance: `docs/artifacts/artifacts.manifest.json`
 
 HTML is never the only durable source for a decision. Edit the source first, then regenerate or discard the review surface.
@@ -138,7 +138,7 @@ The agent-loop profile keeps the normal source-first artifact model and adds:
 
 The loop uses two agents by default: a research/model agent to gather evidence and frame the gap, and a workflow/loop agent to implement a reversible slice, run gates, and propose durable learning. The human DRI remains responsible for scope, permission expansion, production data access, destructive actions, publishing, deployment, and final adoption.
 
-Generated traces and eval summaries stay out of git by default. Promote only redacted, source-backed summaries into durable docs, Beads issues, or `bd remember`.
+Generated traces and eval summaries stay out of git by default. Promote only redacted, source-backed summaries into durable docs, issue tracker entries, or the project memory mechanism.
 
 ## Skill Pack
 

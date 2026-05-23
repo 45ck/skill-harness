@@ -14,7 +14,7 @@ Use this skill when a project wants agents to improve a workflow, skill, prompt,
 3. Plan: choose one reversible improvement with explicit evidence.
 4. Act: change the smallest useful surface using existing project patterns.
 5. Gate: run tests, artifact checks, permission checks, and review gates.
-6. Learn: record a Beads issue, durable memory, skill update, or checker proposal only when evidence supports it.
+6. Learn: record a follow-up issue, durable memory, skill update, or checker proposal only when evidence supports it.
 
 ## Governance
 
@@ -34,4 +34,3 @@ Use this skill when a project wants agents to improve a workflow, skill, prompt,
 ### Human Approval Boundaries
 ### Learning Output
 ### Next Issue Or Memory
-

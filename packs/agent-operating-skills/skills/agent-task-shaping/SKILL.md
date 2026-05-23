@@ -34,4 +34,3 @@ Use this skill before launching an agentic implementation, research, review, or 
 - starting from tool availability instead of task outcome
 - asking a human for decisions the agent can resolve from repository evidence
 - adopting learnings without a traceable issue, test, policy check, or run receipt
-

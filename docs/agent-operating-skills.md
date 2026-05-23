@@ -43,7 +43,7 @@ This resolves to the normal `dual` artifact mode and adds:
 - `agent-loop:check` and `agent-loop:review` package scripts
 - agent-loop policy metadata in `.skill-harness/project.json`
 
-Generated run receipts stay out of git by default. Promote only summarized and redacted evidence into durable docs, Beads issues, or project memory.
+Generated run receipts stay out of git by default. Promote only summarized and redacted evidence into durable docs, issue tracker entries, or project memory.
 
 ## Loadout Wiring
 
@@ -54,4 +54,3 @@ The pack is wired into the agents that naturally operate or review agent workflo
 - QA, quality, security, delivery, research, and workflow agents for evidence, approval, memory, and tool governance
 
 Do not wire this pack into every loadout by default. Use it where agent workflow behavior is part of the job, not just because the work happens to be performed by an agent.
-

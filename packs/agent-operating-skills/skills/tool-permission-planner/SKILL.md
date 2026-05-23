@@ -33,4 +33,3 @@ Use this skill when an agent needs tools beyond local read-only reasoning.
 ### Approval Gates
 ### Audit Evidence
 ### Denied Capabilities
-
