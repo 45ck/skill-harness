@@ -112,7 +112,7 @@
       },
       "reviewSurface": "generated/review/product/generic-infographic-artifact-workflow-plan-2026-05-24.html",
       "renderer": "skill-harness artifact review generator",
-      "sourceHash": "096bdf3ffba1a4777c1d0cf0b0a0c22c638f843cbc608dd9cc87c527140ef290",
+      "sourceHash": "240e281825d3bfb7a50ba03fc2e1c642cfd9c73c9c84317e2576d817aed91674",
       "generatedAt": "2026-05-24"
     },
     {
@@ -192,7 +192,7 @@
       "abstractionLevel": "domain",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-domain-artifact-governance.html",
-      "sourceHash": "f7b72ebab9fc109533d60221da9a16283f7ed96743e236bfb116db765d7a3277",
+      "sourceHash": "09ff16c28e34095fedaa2e65783f9de92f70de0f075c1813160a63689237098f",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-24",
       "implementationTouchpoints": [
@@ -309,7 +309,7 @@
       "abstractionLevel": "design",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-component-scaffold-engine.html",
-      "sourceHash": "26170808cf58e64682e293da8eeb95240d1aec537524d63a016d2eb749d8c17a",
+      "sourceHash": "56123a56a5ae4511974e786fb1cfb6c10de02702b2a034033fc99bd44e909f1b",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-24",
       "implementationTouchpoints": [
