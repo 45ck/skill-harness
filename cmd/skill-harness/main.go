@@ -70,6 +70,7 @@ const (
 	artifactProfileCLI           artifactProfile = "cli"
 	artifactProfileTUI           artifactProfile = "tui"
 	artifactProfileMedia         artifactProfile = "media"
+	artifactProfileAgentLoop     artifactProfile = "agent-loop"
 	artifactProfileNone          artifactProfile = "none"
 )
 
@@ -80,6 +81,58 @@ type projectSetupContext struct {
 	Monorepo       bool
 	Scope          projectScope
 	PackageManager packageManager
+}
+
+type projectSetupProof struct {
+	Version        int                       `json:"version"`
+	Project        projectSetupProofProject  `json:"project"`
+	Profiles       projectSetupProofProfiles `json:"profiles"`
+	Tools          map[string]toolProof      `json:"tools"`
+	Checks         map[string]checkProof     `json:"checks"`
+	GeneratedPaths []string                  `json:"generatedPaths"`
+	Skipped        []string                  `json:"skipped"`
+}
+
+type projectSetupProofProject struct {
+	TargetDir      string         `json:"targetDir"`
+	OperationDir   string         `json:"operationDir"`
+	MonorepoRoot   string         `json:"monorepoRoot,omitempty"`
+	Monorepo       bool           `json:"monorepo"`
+	Scope          projectScope   `json:"scope"`
+	PackageManager packageManager `json:"packageManager"`
+}
+
+type projectSetupProofProfiles struct {
+	RequestedDeveloperArtifacts artifactProfile `json:"requestedDeveloperArtifacts"`
+	EffectiveDeveloperArtifacts artifactProfile `json:"effectiveDeveloperArtifacts"`
+}
+
+type toolProof struct {
+	Status  string   `json:"status"`
+	Mode    string   `json:"mode,omitempty"`
+	Package string   `json:"package,omitempty"`
+	Command string   `json:"command,omitempty"`
+	Paths   []string `json:"paths,omitempty"`
+}
+
+type checkProof struct {
+	Status  string `json:"status"`
+	Command string `json:"command,omitempty"`
+	Path    string `json:"path,omitempty"`
+}
+
+type projectSetupProofOptions struct {
+	RequestedArtifactProfile artifactProfile
+	EffectiveArtifactProfile artifactProfile
+	InstallOnly              bool
+	SkipNoslop               bool
+	SkipAgentDocs            bool
+	SkipBeads                bool
+	SkipClaudeSettings       bool
+	SkipArtifacts            bool
+	SkipDeveloperArtifacts   bool
+	BeadsWorktrees           bool
+	BeadsMode                beadsInstallMode
 }
 
 type beadsInstallMode string
@@ -206,8 +259,8 @@ func runSetupProject(root string, args []string) {
 	skipClaudeSettings := fs.Bool("skip-claude-settings", false, "Do not write .claude/settings.json.")
 	skipArtifacts := fs.Bool("skip-artifacts", false, "Do not scaffold developer artifact guidance.")
 	skipDeveloperArtifacts := fs.Bool("skip-developer-artifacts", false, "Do not scaffold developer artifact guidance.")
-	artifactProfileValue := fs.String("artifact-profile", string(artifactProfileAuto), "Developer artifact profile: auto, media, markdown, html, dual, or none.")
-	developerArtifactsProfileValue := fs.String("developer-artifacts-profile", string(artifactProfileAuto), "Developer artifact profile: auto, codex-app, claude-desktop, cli, tui, media, markdown, html, dual, or none.")
+	artifactProfileValue := fs.String("artifact-profile", string(artifactProfileAuto), "Developer artifact profile: auto, media, agent-loop, markdown, html, dual, or none.")
+	developerArtifactsProfileValue := fs.String("developer-artifacts-profile", string(artifactProfileAuto), "Developer artifact profile: auto, codex-app, claude-desktop, cli, tui, media, agent-loop, markdown, html, dual, or none.")
 	installOnly := fs.Bool("install-only", false, "Install packages only; skip initialization commands.")
 	scopeValue := fs.String("scope", string(projectScopeAuto), "Setup scope: auto, root, or workspace.")
 	packageManagerValue := fs.String("package-manager", string(packageManagerAuto), "Package manager: auto, npm, pnpm, yarn, or bun.")
@@ -252,7 +305,22 @@ func runSetupProject(root string, args []string) {
 		exitOnErr(allowAgentTeams(projectDir))
 	}
 
+	proofOptions := projectSetupProofOptions{
+		RequestedArtifactProfile: artifactProfile,
+		EffectiveArtifactProfile: effectiveArtifactProfile(artifactProfile),
+		InstallOnly:              *installOnly,
+		SkipNoslop:               *skipNoslop,
+		SkipAgentDocs:            *skipAgentDocs,
+		SkipBeads:                *skipBeads,
+		SkipClaudeSettings:       *skipClaudeSettings,
+		SkipArtifacts:            *skipArtifacts,
+		SkipDeveloperArtifacts:   *skipDeveloperArtifacts,
+		BeadsWorktrees:           *beadsWorktrees,
+		BeadsMode:                beadsMode,
+	}
+
 	if *installOnly {
+		exitOnErr(writeProjectSetupProof(ctx.OperationDir, buildProjectSetupProof(ctx, proofOptions)))
 		fmt.Println(projectSetupSummary("Installed project tooling", ctx))
 		return
 	}
@@ -276,6 +344,7 @@ func runSetupProject(root string, args []string) {
 		exitOnErr(runLocalTool(ctx.OperationDir, ctx.PackageManager, "agent-docs", "install-gates", "--quality"))
 	}
 
+	exitOnErr(writeProjectSetupProof(ctx.OperationDir, buildProjectSetupProof(ctx, proofOptions)))
 	fmt.Println(projectSetupSummary("Project setup complete", ctx))
 }
 
@@ -778,9 +847,15 @@ func parseArtifactProfile(value string) (artifactProfile, error) {
 		return artifactProfileTUI, nil
 	case artifactProfileMedia:
 		return artifactProfileMedia, nil
+	case artifactProfileAgentLoop:
+		return artifactProfileAgentLoop, nil
 	case artifactProfileNone:
 		return artifactProfileNone, nil
 	default:
+		normalized := strings.ToLower(strings.TrimSpace(value))
+		if normalized == "governed-agent" || normalized == "self-improving" || normalized == "self-improving-agent-loop" {
+			return artifactProfileAgentLoop, nil
+		}
 		return "", fmt.Errorf("unsupported artifact profile: %s", value)
 	}
 }
@@ -910,6 +985,183 @@ func projectSetupSummary(prefix string, ctx projectSetupContext) string {
 	)
 }
 
+func buildProjectSetupProof(ctx projectSetupContext, options projectSetupProofOptions) projectSetupProof {
+	artifactScaffolded := !options.InstallOnly &&
+		!options.SkipArtifacts &&
+		!options.SkipDeveloperArtifacts &&
+		options.RequestedArtifactProfile != artifactProfileNone
+
+	proof := projectSetupProof{
+		Version: 1,
+		Project: projectSetupProofProject{
+			TargetDir:      ctx.TargetDir,
+			OperationDir:   ctx.OperationDir,
+			MonorepoRoot:   ctx.MonorepoRoot,
+			Monorepo:       ctx.Monorepo,
+			Scope:          ctx.Scope,
+			PackageManager: ctx.PackageManager,
+		},
+		Profiles: projectSetupProofProfiles{
+			RequestedDeveloperArtifacts: options.RequestedArtifactProfile,
+			EffectiveDeveloperArtifacts: options.EffectiveArtifactProfile,
+		},
+		Tools: map[string]toolProof{
+			"packageManager": {
+				Status:  "available",
+				Command: string(ctx.PackageManager),
+			},
+			"setupProof": {
+				Status: "written",
+				Paths:  []string{".skill-harness/setup-proof.json"},
+			},
+		},
+		Checks: map[string]checkProof{
+			"setupProof": {
+				Status: "written",
+				Path:   ".skill-harness/setup-proof.json",
+			},
+		},
+		GeneratedPaths: []string{".skill-harness/setup-proof.json"},
+		Skipped:        []string{},
+	}
+
+	if options.SkipNoslop {
+		proof.Tools["noslop"] = toolProof{Status: "skipped", Package: "@45ck/noslop"}
+		proof.Skipped = append(proof.Skipped, "noslop")
+	} else if options.InstallOnly {
+		proof.Tools["noslop"] = toolProof{Status: "installed", Package: "@45ck/noslop"}
+	} else {
+		proof.Tools["noslop"] = toolProof{Status: "initialized", Package: "@45ck/noslop"}
+	}
+
+	if options.SkipAgentDocs {
+		proof.Tools["agentDocs"] = toolProof{Status: "skipped", Package: "github:45ck/agent-docs"}
+		proof.Checks["agentDocs"] = checkProof{Status: "skipped"}
+		proof.Skipped = append(proof.Skipped, "agent-docs")
+	} else if options.InstallOnly {
+		proof.Tools["agentDocs"] = toolProof{Status: "installed", Package: "github:45ck/agent-docs"}
+		proof.Checks["agentDocs"] = checkProof{Status: "not-run", Command: localToolCommand(ctx.PackageManager, "agent-docs", "check")}
+	} else {
+		proof.Tools["agentDocs"] = toolProof{
+			Status:  "quality-gates-installed",
+			Package: "github:45ck/agent-docs",
+			Command: localToolCommand(ctx.PackageManager, "agent-docs", "install-gates", "--quality"),
+		}
+		proof.Checks["agentDocs"] = checkProof{Status: "available", Command: localToolCommand(ctx.PackageManager, "agent-docs", "check")}
+	}
+
+	if options.SkipBeads {
+		proof.Tools["beads"] = toolProof{Status: "skipped"}
+		proof.Skipped = append(proof.Skipped, "beads")
+	} else if options.InstallOnly {
+		proof.Tools["beads"] = toolProof{Status: "installed", Mode: string(options.BeadsMode), Command: "bd init"}
+	} else {
+		proof.Tools["beads"] = toolProof{Status: "initialized", Mode: string(options.BeadsMode), Command: "bd init", Paths: []string{".beads/"}}
+		proof.GeneratedPaths = append(proof.GeneratedPaths, ".beads/")
+	}
+
+	if options.SkipClaudeSettings {
+		proof.Tools["claudeSettings"] = toolProof{Status: "skipped"}
+		proof.Skipped = append(proof.Skipped, "claude-settings")
+	} else {
+		proof.Tools["claudeSettings"] = toolProof{Status: "written", Paths: []string{relativeProofPath(ctx.OperationDir, filepath.Join(ctx.TargetDir, ".claude", "settings.json"))}}
+		proof.GeneratedPaths = append(proof.GeneratedPaths, relativeProofPath(ctx.OperationDir, filepath.Join(ctx.TargetDir, ".claude", "settings.json")))
+	}
+
+	if artifactScaffolded {
+		proof.Tools["developerArtifacts"] = toolProof{
+			Status: "scaffolded",
+			Paths: []string{
+				".skill-harness/project.json",
+				"docs/artifacts/",
+				"generated/review/",
+				"scripts/check-artifact-manifest.mjs",
+				"scripts/check-artifact-html-policy.mjs",
+			},
+		}
+		proof.GeneratedPaths = append(proof.GeneratedPaths,
+			".skill-harness/project.json",
+			"docs/artifacts/",
+			"generated/review/",
+			"scripts/check-artifact-manifest.mjs",
+			"scripts/check-artifact-html-policy.mjs",
+		)
+		proof.Checks["artifactManifest"] = checkProof{Status: "available", Command: "node scripts/check-artifact-manifest.mjs", Path: "scripts/check-artifact-manifest.mjs"}
+		proof.Checks["artifactHtmlPolicy"] = checkProof{Status: "available", Command: "node scripts/check-artifact-html-policy.mjs", Path: "scripts/check-artifact-html-policy.mjs"}
+		if options.RequestedArtifactProfile == artifactProfileMedia {
+			proof.GeneratedPaths = append(proof.GeneratedPaths, "generated/media/", "docs/artifacts/templates/demo-artifact.md")
+		}
+		if options.RequestedArtifactProfile == artifactProfileAgentLoop {
+			proof.GeneratedPaths = append(proof.GeneratedPaths,
+				"generated/agent-runs/",
+				"docs/artifacts/templates/agent-loop-artifact.md",
+				"docs/artifacts/source/agent-loop-playbook.md",
+				"scripts/check-agent-loop-policy.mjs",
+			)
+			proof.Checks["agentLoopPolicy"] = checkProof{Status: "available", Command: "node scripts/check-agent-loop-policy.mjs", Path: "scripts/check-agent-loop-policy.mjs"}
+		}
+	} else {
+		status := "skipped"
+		if options.RequestedArtifactProfile == artifactProfileNone {
+			status = "disabled"
+		}
+		proof.Tools["developerArtifacts"] = toolProof{Status: status}
+		proof.Checks["artifactManifest"] = checkProof{Status: status}
+		proof.Checks["artifactHtmlPolicy"] = checkProof{Status: status}
+		proof.Skipped = append(proof.Skipped, "developer-artifacts")
+	}
+
+	if !options.SkipBeads && !options.InstallOnly && options.BeadsWorktrees {
+		proof.Tools["beadsWorktrees"] = toolProof{Status: "installed", Paths: []string{"scripts/beads/bd.mjs", ".gitignore"}}
+		proof.GeneratedPaths = append(proof.GeneratedPaths, "scripts/beads/bd.mjs")
+	} else if !options.SkipBeads && !options.InstallOnly {
+		proof.Tools["beadsWorktrees"] = toolProof{Status: "skipped"}
+		proof.Skipped = append(proof.Skipped, "beads-worktrees")
+	}
+
+	sort.Strings(proof.GeneratedPaths)
+	proof.GeneratedPaths = unique(proof.GeneratedPaths)
+	sort.Strings(proof.Skipped)
+	proof.Skipped = unique(proof.Skipped)
+	return proof
+}
+
+func writeProjectSetupProof(projectDir string, proof projectSetupProof) error {
+	proofDir := filepath.Join(projectDir, ".skill-harness")
+	if err := os.MkdirAll(proofDir, 0o755); err != nil {
+		return err
+	}
+	data, err := json.MarshalIndent(proof, "", "  ")
+	if err != nil {
+		return err
+	}
+	data = append(data, '\n')
+	return os.WriteFile(filepath.Join(proofDir, "setup-proof.json"), data, 0o644)
+}
+
+func localToolCommand(manager packageManager, tool string, args ...string) string {
+	switch manager {
+	case packageManagerNpm:
+		return strings.Join(append([]string{"npx", tool}, args...), " ")
+	case packageManagerPnpm:
+		return strings.Join(append([]string{"pnpm", "exec", tool}, args...), " ")
+	case packageManagerYarn:
+		return strings.Join(append([]string{"yarn", "exec", tool}, args...), " ")
+	case packageManagerBun:
+		return strings.Join(append([]string{"bun", "x", tool}, args...), " ")
+	default:
+		return strings.Join(append([]string{string(manager), tool}, args...), " ")
+	}
+}
+
+func relativeProofPath(root, path string) string {
+	rel, err := filepath.Rel(root, path)
+	if err != nil || strings.HasPrefix(rel, "..") {
+		return path
+	}
+	return filepath.ToSlash(rel)
+}
+
 func writeMinimalPackageJSON(projectDir string) error {
 	base := strings.ToLower(filepath.Base(projectDir))
 	replacer := strings.NewReplacer(" ", "-", "_", "-", ".", "-", "/", "-", "\\", "-")
@@ -933,7 +1185,7 @@ func writeMinimalPackageJSON(projectDir string) error {
 	return os.WriteFile(filepath.Join(projectDir, "package.json"), content, 0o644)
 }
 
-func updatePackageScripts(projectDir string, agentDocsEnabled bool) error {
+func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile artifactProfile) error {
 	packagePath := filepath.Join(projectDir, "package.json")
 	data, err := os.ReadFile(packagePath)
 	if err != nil {
@@ -956,6 +1208,10 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool) error {
 		defaultScripts["docs:check"] = "agent-docs check"
 		defaultScripts["docs:generate"] = "agent-docs generate"
 		defaultScripts["docs:report"] = "agent-docs report"
+	}
+	if profile == artifactProfileAgentLoop {
+		defaultScripts["agent-loop:check"] = "node scripts/check-agent-loop-policy.mjs"
+		defaultScripts["agent-loop:review"] = "node scripts/check-agent-loop-policy.mjs && node scripts/check-artifact-manifest.mjs"
 	}
 	for name, command := range defaultScripts {
 		if _, exists := scripts[name]; !exists {
@@ -1016,6 +1272,9 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	if profile == artifactProfileMedia {
 		dirs = append(dirs, filepath.Join(projectDir, "generated", "media"))
 	}
+	if profile == artifactProfileAgentLoop {
+		dirs = append(dirs, filepath.Join(projectDir, "generated", "agent-runs"))
+	}
 	for _, dir := range dirs {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return err
@@ -1049,6 +1308,10 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 					"architecture-view",
 					"model-view",
 					"review-dashboard",
+					"agent-loop",
+					"trace-review",
+					"eval-report",
+					"learning-proposal",
 				},
 				"manifest": map[string]any{
 					"path":            "docs/artifacts/artifacts.manifest.json",
@@ -1094,6 +1357,7 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 					"openMode":        artifactOpenMode(profile),
 				},
 				"mediaOutputs": artifactMediaOutputs(profile),
+				"agentLoop":    artifactAgentLoopConfig(profile),
 				"htmlPolicy": map[string]any{
 					"role":                  "generated-review-surface",
 					"selfContained":         true,
@@ -1115,12 +1379,15 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	if err := os.WriteFile(filepath.Join(projectDir, ".skill-harness", "project.json"), data, 0o644); err != nil {
 		return err
 	}
-	if err := updatePackageScripts(projectDir, agentDocsEnabled); err != nil {
+	if err := updatePackageScripts(projectDir, agentDocsEnabled, profile); err != nil {
 		return err
 	}
 	gitignoreLines := []string{"generated/review/"}
 	if profile == artifactProfileMedia {
 		gitignoreLines = append(gitignoreLines, "generated/media/")
+	}
+	if profile == artifactProfileAgentLoop {
+		gitignoreLines = append(gitignoreLines, "generated/agent-runs/")
 	}
 	if err := ensureGitignoreLines(projectDir, gitignoreLines); err != nil {
 		return err
@@ -1156,6 +1423,21 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 		}
 	}
 
+	if profile == artifactProfileAgentLoop {
+		loopTemplatePath := filepath.Join(projectDir, "docs", "artifacts", "templates", "agent-loop-artifact.md")
+		if !fileExists(loopTemplatePath) {
+			if err := os.WriteFile(loopTemplatePath, []byte(developerAgentLoopArtifactTemplate()), 0o644); err != nil {
+				return err
+			}
+		}
+		playbookPath := filepath.Join(projectDir, "docs", "artifacts", "source", "agent-loop-playbook.md")
+		if !fileExists(playbookPath) {
+			if err := os.WriteFile(playbookPath, []byte(developerAgentLoopPlaybook()), 0o644); err != nil {
+				return err
+			}
+		}
+	}
+
 	manifestPath := filepath.Join(projectDir, "docs", "artifacts", "artifacts.manifest.json")
 	if !fileExists(manifestPath) {
 		if err := os.WriteFile(manifestPath, []byte(developerArtifactManifest()), 0o644); err != nil {
@@ -1172,7 +1454,16 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 
 	checkerPath := filepath.Join(projectDir, "scripts", "check-artifact-html-policy.mjs")
 	if !fileExists(checkerPath) {
-		return os.WriteFile(checkerPath, []byte(developerArtifactPolicyScript()), 0o644)
+		if err := os.WriteFile(checkerPath, []byte(developerArtifactPolicyScript()), 0o644); err != nil {
+			return err
+		}
+	}
+
+	if profile == artifactProfileAgentLoop {
+		loopCheckerPath := filepath.Join(projectDir, "scripts", "check-agent-loop-policy.mjs")
+		if !fileExists(loopCheckerPath) {
+			return os.WriteFile(loopCheckerPath, []byte(developerAgentLoopPolicyScript()), 0o644)
+		}
 	}
 	return nil
 }
@@ -1185,7 +1476,7 @@ func effectiveArtifactProfile(profile artifactProfile) artifactProfile {
 		return artifactProfileHTML
 	case artifactProfileCLI, artifactProfileTUI:
 		return artifactProfileMarkdown
-	case artifactProfileMedia:
+	case artifactProfileMedia, artifactProfileAgentLoop:
 		return artifactProfileDual
 	default:
 		return profile
@@ -1194,7 +1485,7 @@ func effectiveArtifactProfile(profile artifactProfile) artifactProfile {
 
 func artifactOpenMode(profile artifactProfile) string {
 	switch profile {
-	case artifactProfileCodexApp, artifactProfileClaudeDesktop, artifactProfileHTML, artifactProfileMedia:
+	case artifactProfileCodexApp, artifactProfileClaudeDesktop, artifactProfileHTML, artifactProfileMedia, artifactProfileAgentLoop:
 		return "file-preview"
 	case artifactProfileCLI, artifactProfileTUI, artifactProfileMarkdown:
 		return "path-or-command"
@@ -1204,10 +1495,14 @@ func artifactOpenMode(profile artifactProfile) string {
 }
 
 func artifactSpecialization(profile artifactProfile) string {
-	if profile == artifactProfileMedia {
+	switch profile {
+	case artifactProfileMedia:
 		return "media-demo"
+	case artifactProfileAgentLoop:
+		return "self-improving-agent-loop"
+	default:
+		return ""
 	}
-	return ""
 }
 
 func artifactMediaOutputs(profile artifactProfile) map[string]any {
@@ -1227,6 +1522,85 @@ func artifactMediaOutputs(profile artifactProfile) map[string]any {
 		"defaultExclusions":   []string{"trace.zip", "*.har", "network.json", "console.json", "page-errors.json"},
 		"upstreamEvidence":    []string{"events.json", "verification.json", "quality.json", "qa-report.json", "review-bundle.json", "segment.evidence.json", "layout-safety.report.json"},
 		"approvedOutputKinds": []string{"mp4", "webm", "gif", "webp", "poster-frame", "frame-strip", "html-review"},
+	}
+}
+
+func artifactAgentLoopConfig(profile artifactProfile) map[string]any {
+	if profile != artifactProfileAgentLoop {
+		return map[string]any{
+			"enabled": false,
+		}
+	}
+	return map[string]any{
+		"enabled":          true,
+		"loopName":         "self-improving-agent-loop",
+		"traceDir":         "generated/agent-runs",
+		"playbook":         "docs/artifacts/source/agent-loop-playbook.md",
+		"defaultIssueTool": "beads",
+		"ownerModel":       "human-dri-plus-agent-team",
+		"agents": []map[string]any{
+			{
+				"name": "research-model-agent",
+				"recommendedLoadouts": []string{
+					"research-writer",
+					"requirements-analyst-beads",
+				},
+				"owns": []string{"external-research", "internal-context-map", "problem-framing", "candidate-loop-brief"},
+			},
+			{
+				"name": "workflow-loop-agent",
+				"recommendedLoadouts": []string{
+					"workflow-engineer",
+					"software-architect-beads",
+				},
+				"owns": []string{"implementation-slice", "quality-gates", "trace-review", "learning-proposal"},
+			},
+		},
+		"phases": []string{
+			"sense",
+			"model",
+			"plan",
+			"act",
+			"gate",
+			"learn",
+		},
+		"sensors": []string{
+			"beads issues",
+			"git diffs",
+			"test and build output",
+			"artifact manifests",
+			"agent handoff notes",
+			"runtime traces",
+		},
+		"qualityGates": []string{
+			"issue claimed before mutation",
+			"tests or executable validators run",
+			"artifact manifest policy passes",
+			"HTML policy passes for generated review surfaces",
+			"human approval for irreversible or high-risk actions",
+		},
+		"learningOutputs": []string{
+			"beads issue",
+			"bd remember insight",
+			"agent-loop artifact",
+			"skill or loadout change proposal",
+			"regression test or checker update",
+		},
+		"humanApprovalRequiredFor": []string{
+			"secret or credential handling",
+			"production data access",
+			"permission expansion",
+			"destructive filesystem or database action",
+			"network-visible publishing",
+			"autonomous merge or deployment",
+		},
+		"riskControls": []string{
+			"least-privilege tools",
+			"bounded token and time budgets",
+			"reversible first slice",
+			"trace receipts for agent runs",
+			"explicit rollback or follow-up issue",
+		},
 	}
 }
 
@@ -1257,6 +1631,7 @@ Use this directory for durable developer artifacts and generated review surfaces
 - artifacts.manifest.json - provenance and freshness index for source-backed review artifacts.
 - ../../generated/review/ - generated HTML or rich review artifacts for humans.
 - ../../generated/media/ - generated demo media for media profile projects.
+- ../../generated/agent-runs/ - generated trace receipts and eval summaries for agent-loop profile projects.
 
 ## Model And Diagram Policy
 
@@ -1273,6 +1648,15 @@ Use this directory for durable developer artifacts and generated review surfaces
 - Store generated media under generated/media/ for media profile projects and keep it out of git by default.
 - Do not turn failed or inconclusive QA evidence into an approved product demo.
 - Exclude raw traces, HAR/network dumps, console logs, page errors, secrets, and customer data from handoff bundles unless explicitly redacted and approved.
+
+## Agent Loop Policy
+
+- Start from a Beads issue or an explicit human request before changing files.
+- Keep the durable loop playbook in source/agent-loop-playbook.md for agent-loop profile projects.
+- Store trace receipts, eval summaries, and run evidence under generated/agent-runs/ and keep them out of git by default.
+- Treat learning outputs as proposals until tests, policy checks, and the human DRI approve high-risk changes.
+- Record reusable lessons with bd remember instead of unmanaged memory files.
+- Do not expand tool permissions, publish, deploy, or run irreversible actions without explicit human approval.
 
 ## HTML Review Policy
 
@@ -1395,6 +1779,104 @@ What this demo, silent cut, slideshow, or repro clip is meant to prove.
 - Exclusions reviewed:
 - Redactions:
 - Promotion destination:
+`
+}
+
+func developerAgentLoopArtifactTemplate() string {
+	return `# Agent Loop Artifact: [Title]
+
+**Status:** Draft
+**Artifact type:** agent-loop | trace-review | eval-report | learning-proposal
+**Issue:** [beads issue id]
+**Human DRI:** [name]
+**Primary agents:** research-model-agent | workflow-loop-agent
+**Trace directory:** [generated/agent-runs/path]
+
+## Purpose
+
+What workflow, failure pattern, or improvement loop this artifact supports.
+
+## Loop Definition
+
+- Sensor:
+- Policy:
+- Tools:
+- Quality gate:
+- Learning output:
+
+## Evidence
+
+- Issues:
+- Source files:
+- Tests or validators:
+- Trace receipts:
+- Human approvals:
+
+## Findings
+
+- What worked:
+- What failed:
+- Missing tool, skill, data, or policy:
+- Regression risk:
+
+## Learning Proposal
+
+- Proposed change:
+- Expected measurable improvement:
+- Required gate before adoption:
+- Rollback:
+`
+}
+
+func developerAgentLoopPlaybook() string {
+	return `# Agent Loop Playbook
+
+This project uses the skill-harness agent-loop profile for governed, self-improving agent workflows.
+
+## Operating Model
+
+Use two agents by default:
+
+- Research/model agent: gathers external and internal evidence, maps the current workflow, and frames candidate loop improvements.
+- Workflow/loop agent: implements the smallest reversible slice, runs gates, records evidence, and proposes durable learning.
+
+The human DRI owns scope, risk acceptance, permission expansion, and final adoption.
+
+## Loop Shape
+
+1. Sense: gather Beads issues, git diffs, test output, artifact manifests, traces, and handoff notes.
+2. Model: identify the task type, expected trace shape, quality bar, and current failure mode.
+3. Plan: choose one reversible improvement with explicit done criteria.
+4. Act: make the smallest scoped change using existing repo patterns.
+5. Gate: run tests, artifact checks, and risk checks before claiming improvement.
+6. Learn: file follow-up issues, record durable memories with bd remember, and propose skill/loadout/checker updates only when evidence supports them.
+
+## Policy Boundaries
+
+Agents may propose improvements to prompts, skills, docs, tests, manifests, and workflow scripts.
+
+Agents must require human approval before:
+
+- expanding tool permissions
+- handling secrets or production data
+- deploying, publishing, or merging autonomously
+- running destructive actions
+- changing security, privacy, or compliance policy
+
+## Trace Receipts
+
+Store generated run evidence under generated/agent-runs/. A useful receipt captures:
+
+- issue id and human DRI
+- agents used
+- tools called
+- files changed
+- gates run
+- failures observed
+- learning proposed
+- token or time budget notes when available
+
+Keep generated receipts out of git by default. Promote only summarized, redacted evidence into durable docs or Beads when it matters.
 `
 }
 
@@ -1600,6 +2082,99 @@ console.log('Artifact HTML policy passed');
 `
 }
 
+func developerAgentLoopPolicyScript() string {
+	return `import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const configPath = path.join(root, '.skill-harness', 'project.json');
+const failures = [];
+
+function readJSON(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (error) {
+    failures.push('invalid or unreadable JSON: ' + path.relative(root, filePath) + ' (' + error.message + ')');
+    return {};
+  }
+}
+
+function expectArrayIncludes(values, required, label) {
+  if (!Array.isArray(values)) {
+    failures.push(label + ' must be an array');
+    return;
+  }
+  for (const value of required) {
+    if (!values.includes(value)) failures.push(label + ' missing required value: ' + value);
+  }
+}
+
+function resolveInsideRoot(relativePath, label) {
+  if (typeof relativePath !== 'string' || relativePath.trim() === '') {
+    failures.push(label + ' must be a non-empty repo-relative path');
+    return null;
+  }
+  if (path.isAbsolute(relativePath)) {
+    failures.push(label + ' must be repo-relative: ' + relativePath);
+    return null;
+  }
+  const resolved = path.resolve(root, relativePath);
+  if (!resolved.startsWith(root + path.sep) && resolved !== root) {
+    failures.push(label + ' escapes the repo root: ' + relativePath);
+    return null;
+  }
+  return resolved;
+}
+
+if (!fs.existsSync(configPath)) {
+  failures.push('missing .skill-harness/project.json');
+} else {
+  const config = readJSON(configPath);
+  const developerArtifacts = config.capabilities?.developerArtifacts;
+  const agentLoop = developerArtifacts?.agentLoop;
+
+  if (!developerArtifacts?.enabled) failures.push('developerArtifacts must be enabled');
+  if (developerArtifacts?.requestedProfile !== 'agent-loop') {
+    failures.push('requestedProfile must be agent-loop for this checker');
+  }
+  if (developerArtifacts?.profile !== 'dual') failures.push('agent-loop profile must resolve to dual');
+  if (developerArtifacts?.specialization !== 'self-improving-agent-loop') {
+    failures.push('specialization must be self-improving-agent-loop');
+  }
+  expectArrayIncludes(developerArtifacts?.artifactTypes, ['agent-loop', 'trace-review', 'eval-report', 'learning-proposal'], 'developerArtifacts.artifactTypes');
+
+  if (!agentLoop?.enabled) failures.push('agentLoop.enabled must be true');
+  expectArrayIncludes(agentLoop?.phases, ['sense', 'model', 'plan', 'act', 'gate', 'learn'], 'agentLoop.phases');
+  expectArrayIncludes(agentLoop?.qualityGates, ['issue claimed before mutation', 'tests or executable validators run'], 'agentLoop.qualityGates');
+  expectArrayIncludes(agentLoop?.learningOutputs, ['beads issue', 'bd remember insight'], 'agentLoop.learningOutputs');
+  expectArrayIncludes(agentLoop?.humanApprovalRequiredFor, ['permission expansion', 'destructive filesystem or database action'], 'agentLoop.humanApprovalRequiredFor');
+
+  const traceDir = resolveInsideRoot(agentLoop?.traceDir, 'agentLoop.traceDir');
+  if (traceDir && !fs.existsSync(traceDir)) failures.push('missing agentLoop.traceDir: ' + agentLoop.traceDir);
+
+  const playbook = resolveInsideRoot(agentLoop?.playbook, 'agentLoop.playbook');
+  if (playbook && !fs.existsSync(playbook)) failures.push('missing agent loop playbook: ' + agentLoop.playbook);
+
+  const template = path.join(root, 'docs', 'artifacts', 'templates', 'agent-loop-artifact.md');
+  if (!fs.existsSync(template)) failures.push('missing agent-loop artifact template');
+
+  const gitignorePath = path.join(root, '.gitignore');
+  const gitignore = fs.existsSync(gitignorePath) ? fs.readFileSync(gitignorePath, 'utf8') : '';
+  if (!gitignore.split(/\r?\n/).map((line) => line.trim()).includes('generated/agent-runs/')) {
+    failures.push('.gitignore must include generated/agent-runs/');
+  }
+}
+
+if (failures.length > 0) {
+  console.error('Agent loop policy failed:');
+  for (const failure of failures) console.error('- ' + failure);
+  process.exit(1);
+}
+
+console.log('Agent loop policy passed');
+`
+}
+
 func installBeads(projectDir string) (beadsInstallMode, error) {
 	if _, err := findBeadsBinary(); err == nil {
 		return beadsSystem, nil
@@ -1788,7 +2363,7 @@ func printUsage(loadouts loadoutConfig, deps dependencyConfig) {
 	fmt.Println("Commands:")
 	fmt.Println("  list [--agents] [--packs]")
 	fmt.Println("  install [--all] [--interactive] [--packs-only] [--agents-only] [--agents=a,b] [--packs=x,y]")
-	fmt.Println("  setup-project [--dir path] [--scope auto|root|workspace] [--package-manager auto|npm|pnpm|yarn|bun] [--developer-artifacts-profile auto|codex-app|claude-desktop|cli|tui|media|none] [--install-only] [--skip-noslop] [--skip-agent-docs] [--skip-beads] [--beads-worktrees] [--skip-developer-artifacts] [--skip-claude-settings]")
+	fmt.Println("  setup-project [--dir path] [--scope auto|root|workspace] [--package-manager auto|npm|pnpm|yarn|bun] [--developer-artifacts-profile auto|codex-app|claude-desktop|cli|tui|media|agent-loop|none] [--install-only] [--skip-noslop] [--skip-agent-docs] [--skip-beads] [--beads-worktrees] [--skip-developer-artifacts] [--skip-claude-settings]")
 	fmt.Println("  beads-worktrees [--dir path] [--force]")
 	fmt.Println("  update")
 	fmt.Println("  check [--all] [--interactive] [--agents=a,b]")

@@ -11,7 +11,9 @@
       "spec-writer",
       "frontier-model-context",
       "digital-expert-test",
-      "pre-ai-scarcity-thinking"
+      "pre-ai-scarcity-thinking",
+      "agent-task-shaping",
+      "context-engineering-planner"
     ]
   },
   "requirements-analyst-beads": {
@@ -26,7 +28,9 @@
       "spec-writer",
       "frontier-model-context",
       "digital-expert-test",
-      "pre-ai-scarcity-thinking"
+      "pre-ai-scarcity-thinking",
+      "agent-task-shaping",
+      "context-engineering-planner"
     ]
   },
   "ux-researcher": {
@@ -59,7 +63,9 @@
       "scenario-to-uml-transformer",
       "frontier-model-context",
       "digital-expert-test",
-      "model-review-artifact"
+      "model-review-artifact",
+      "context-engineering-planner",
+      "multi-agent-workflow-reviewer"
     ]
   },
   "system-modeler-beads": {
@@ -74,7 +80,9 @@
       "scenario-to-uml-transformer",
       "frontier-model-context",
       "digital-expert-test",
-      "model-review-artifact"
+      "model-review-artifact",
+      "context-engineering-planner",
+      "multi-agent-workflow-reviewer"
     ]
   },
   "software-architect": {
@@ -95,10 +103,15 @@
       "legacy-automation-fallback",
       "llm-default-architecture",
       "verification-first-delivery",
+      "self-improving-agent-loop",
       "developer-artifact-shaper",
       "model-review-artifact",
       "html-review-artifact",
-      "artifact-evidence-gate"
+      "artifact-evidence-gate",
+      "context-engineering-planner",
+      "autonomy-boundary-checker",
+      "tool-permission-planner",
+      "multi-agent-workflow-reviewer"
     ]
   },
   "software-architect-beads": {
@@ -119,10 +132,15 @@
       "legacy-automation-fallback",
       "llm-default-architecture",
       "verification-first-delivery",
+      "self-improving-agent-loop",
       "developer-artifact-shaper",
       "model-review-artifact",
       "html-review-artifact",
-      "artifact-evidence-gate"
+      "artifact-evidence-gate",
+      "context-engineering-planner",
+      "autonomy-boundary-checker",
+      "tool-permission-planner",
+      "multi-agent-workflow-reviewer"
     ]
   },
   "web-engineer": {
@@ -207,7 +225,8 @@
       "verification-first-delivery",
       "qa-to-demo",
       "demo-review-surface",
-      "demo-story-packager"
+      "demo-story-packager",
+      "agent-run-evidence-reviewer"
     ]
   },
   "quality-reviewer": {
@@ -224,8 +243,11 @@
       "frontier-model-context",
       "digital-expert-test",
       "legacy-automation-fallback",
+      "self-improving-agent-loop",
       "artifact-evidence-gate",
-      "artifact-handoff-pack"
+      "artifact-handoff-pack",
+      "autonomy-boundary-checker",
+      "agent-run-evidence-reviewer"
     ]
   },
   "security-reviewer": {
@@ -240,7 +262,10 @@
       "tool-permission-boundary-checker",
       "frontier-model-context",
       "digital-expert-test",
-      "verification-first-delivery"
+      "verification-first-delivery",
+      "autonomy-boundary-checker",
+      "tool-permission-planner",
+      "agent-memory-design-reviewer"
     ]
   },
   "security-reviewer-beads": {
@@ -255,7 +280,10 @@
       "tool-permission-boundary-checker",
       "frontier-model-context",
       "digital-expert-test",
-      "verification-first-delivery"
+      "verification-first-delivery",
+      "autonomy-boundary-checker",
+      "tool-permission-planner",
+      "agent-memory-design-reviewer"
     ]
   },
   "pentest-reviewer": {
@@ -288,10 +316,15 @@
       "digital-expert-test",
       "pre-ai-scarcity-thinking",
       "verification-first-delivery",
+      "self-improving-agent-loop",
       "developer-artifact-shaper",
       "artifact-handoff-pack",
       "demo-release-packager",
-      "demo-story-packager"
+      "demo-story-packager",
+      "agent-task-shaping",
+      "autonomy-boundary-checker",
+      "multi-agent-workflow-reviewer",
+      "agent-run-evidence-reviewer"
     ]
   },
   "delivery-manager-beads": {
@@ -309,10 +342,15 @@
       "digital-expert-test",
       "pre-ai-scarcity-thinking",
       "verification-first-delivery",
+      "self-improving-agent-loop",
       "developer-artifact-shaper",
       "artifact-handoff-pack",
       "demo-release-packager",
-      "demo-story-packager"
+      "demo-story-packager",
+      "agent-task-shaping",
+      "autonomy-boundary-checker",
+      "multi-agent-workflow-reviewer",
+      "agent-run-evidence-reviewer"
     ]
   },
   "research-writer": {
@@ -328,12 +366,15 @@
       "frontier-model-context",
       "digital-expert-test",
       "pre-ai-scarcity-thinking",
+      "self-improving-agent-loop",
       "developer-artifact-shaper",
       "model-review-artifact",
       "html-review-artifact",
       "artifact-evidence-gate",
       "demo-review-surface",
-      "demo-story-packager"
+      "demo-story-packager",
+      "context-engineering-planner",
+      "agent-run-evidence-reviewer"
     ]
   },
   "workflow-engineer": {
@@ -347,10 +388,18 @@
       "legacy-automation-fallback",
       "llm-default-architecture",
       "verification-first-delivery",
+      "self-improving-agent-loop",
       "developer-artifact-shaper",
       "artifact-handoff-pack",
       "demo-story-packager",
-      "demo-release-packager"
+      "demo-release-packager",
+      "agent-task-shaping",
+      "context-engineering-planner",
+      "autonomy-boundary-checker",
+      "tool-permission-planner",
+      "agent-memory-design-reviewer",
+      "multi-agent-workflow-reviewer",
+      "agent-run-evidence-reviewer"
     ]
   }
 }

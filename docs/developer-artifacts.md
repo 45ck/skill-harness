@@ -24,6 +24,7 @@ Default setup:
 This creates:
 
 - `.skill-harness/project.json`
+- `.skill-harness/setup-proof.json`
 - `docs/artifacts/artifacts.manifest.json`
 - `docs/artifacts/source/`
 - `docs/artifacts/templates/`
@@ -42,6 +43,8 @@ It also adds `generated/review/` to `.gitignore` and adds package scripts when a
 
 If `--skip-agent-docs` is used, the artifact scaffold still works, but it does not add scripts that call `agent-docs`.
 
+`.skill-harness/setup-proof.json` is the install evidence record for the setup run. It records the resolved target and operation directories, package manager, requested and effective artifact profile, tool initialization statuses, skipped capabilities, generated paths, Beads mode, and available check commands. Use it to distinguish a repo that merely has copied files from one where the harness recorded what it set up.
+
 ## Profiles
 
 Use `--developer-artifacts-profile` to select the target workflow:
@@ -54,6 +57,7 @@ Use `--developer-artifacts-profile` to select the target workflow:
 | `cli` | `markdown` | Terminal-heavy work where paths and Markdown are the primary interface |
 | `tui` | `markdown` | TUI work where HTML should remain secondary |
 | `media` | `dual` | Demo, QA, and generated media workflows where source-backed media and review surfaces are useful |
+| `agent-loop` | `dual` | Governed self-improving agent workflows with trace receipts, eval summaries, and learning proposals |
 | `markdown` | `markdown` | Alias for canonical-source-only workflows |
 | `html` | `html` | Alias for generated HTML review workflows |
 | `dual` | `dual` | Explicit source plus generated review workflow |
@@ -118,6 +122,24 @@ The media profile keeps the normal source-first artifact model and adds:
 
 Media outputs are generated artifacts, not canonical truth. Keep `.demo.yaml`, QA flows, QA reports, Markdown/TOON source notes, and manifest entries as the durable source. Failed or inconclusive QA evidence may become a repro or draft plan, but not an approved product demo. Exclude raw traces, HAR/network dumps, console logs, page errors, secrets, and customer data from demo handoff bundles unless they have been explicitly redacted and approved.
 
+## Agent Loop Artifacts
+
+Use `--developer-artifacts-profile agent-loop` for repos that want a governed self-improving agent workflow.
+
+The agent-loop profile keeps the normal source-first artifact model and adds:
+
+- `generated/agent-runs/`
+- `docs/artifacts/source/agent-loop-playbook.md`
+- `docs/artifacts/templates/agent-loop-artifact.md`
+- `scripts/check-agent-loop-policy.mjs`
+- `agent-loop:check` and `agent-loop:review` package scripts
+- `.skill-harness/project.json` agent-loop policy
+- `.gitignore` coverage for generated run receipts
+
+The loop uses two agents by default: a research/model agent to gather evidence and frame the gap, and a workflow/loop agent to implement a reversible slice, run gates, and propose durable learning. The human DRI remains responsible for scope, permission expansion, production data access, destructive actions, publishing, deployment, and final adoption.
+
+Generated traces and eval summaries stay out of git by default. Promote only redacted, source-backed summaries into durable docs, Beads issues, or `bd remember`.
+
 ## Skill Pack
 
 The embedded `developer-artifact-skills` pack provides:
@@ -138,6 +160,17 @@ The embedded `demo-production-skills` pack provides:
 - `demo-review-surface`: create static review surfaces for demo media and evidence
 - `qa-to-demo`: convert QA evidence into demo specs or clip plans without changing verdict semantics
 - `demo-release-packager`: assemble approved demo media into safe handoff bundles
+
+The embedded `agent-operating-skills` pack provides:
+
+- `self-improving-agent-loop`: design governed sense/model/plan/act/gate/learn loops
+- `agent-task-shaping`: convert vague work into a bounded agent task
+- `context-engineering-planner`: plan source context, evidence, memory, retrieval, and exclusions
+- `autonomy-boundary-checker`: decide where the agent can act, must ask, or must stop
+- `tool-permission-planner`: design least-privilege tool access and approval gates
+- `agent-memory-design-reviewer`: review durable memory, retrieval, staleness, privacy, and poisoning risk
+- `multi-agent-workflow-reviewer`: assign ownership, handoffs, conflict rules, and gates
+- `agent-run-evidence-reviewer`: review traces, logs, eval summaries, and learning proposals
 
 ## Evidence Rules
 
@@ -162,6 +195,8 @@ When changing this capability, update all of these together:
 - `docs/agent-loadouts.md`
 - `packs/developer-artifact-skills/`
 - `packs/demo-production-skills/`
+- `packs/agent-operating-skills/`
+- `docs/agent-operating-skills.md`
 - `README.md`
 - `AGENT_INSTRUCTIONS.md`
 

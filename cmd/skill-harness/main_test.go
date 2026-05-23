@@ -83,6 +83,27 @@ func TestParseArtifactProfileAcceptsMedia(t *testing.T) {
 	}
 }
 
+func TestParseArtifactProfileAcceptsAgentLoopAliases(t *testing.T) {
+	for _, value := range []string{"agent-loop", "governed-agent", "self-improving", "self-improving-agent-loop"} {
+		profile, err := parseArtifactProfile(value)
+		if err != nil {
+			t.Fatalf("parseArtifactProfile(%q) returned error: %v", value, err)
+		}
+		if profile != artifactProfileAgentLoop {
+			t.Fatalf("expected agent-loop profile for %q, got %q", value, profile)
+		}
+		if effectiveArtifactProfile(profile) != artifactProfileDual {
+			t.Fatalf("expected agent-loop to resolve to dual, got %q", effectiveArtifactProfile(profile))
+		}
+		if artifactSpecialization(profile) != "self-improving-agent-loop" {
+			t.Fatalf("expected self-improving-agent-loop specialization, got %q", artifactSpecialization(profile))
+		}
+		if artifactOpenMode(profile) != "file-preview" {
+			t.Fatalf("expected agent-loop open mode to use file-preview, got %q", artifactOpenMode(profile))
+		}
+	}
+}
+
 func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
@@ -214,6 +235,73 @@ func TestWriteDeveloperArtifactScaffoldMediaProfile(t *testing.T) {
 	}
 }
 
+func TestWriteDeveloperArtifactScaffoldAgentLoopProfile(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileAgentLoop, true); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	for _, path := range []string{
+		filepath.Join(root, "generated", "agent-runs"),
+		filepath.Join(root, "docs", "artifacts", "templates", "agent-loop-artifact.md"),
+		filepath.Join(root, "docs", "artifacts", "source", "agent-loop-playbook.md"),
+		filepath.Join(root, "scripts", "check-agent-loop-policy.mjs"),
+	} {
+		if !fileExists(path) && !dirExists(path) {
+			t.Fatalf("expected agent-loop scaffold path %s", path)
+		}
+	}
+	if !gitignoreHasLine(mustReadText(t, filepath.Join(root, ".gitignore")), "generated/agent-runs/") {
+		t.Fatal("expected generated agent run output to be gitignored")
+	}
+
+	data, err := os.ReadFile(filepath.Join(root, ".skill-harness", "project.json"))
+	if err != nil {
+		t.Fatalf("read config: %v", err)
+	}
+	var config map[string]any
+	if err := json.Unmarshal(data, &config); err != nil {
+		t.Fatalf("config should be valid JSON: %v", err)
+	}
+	artifacts := developerArtifactsConfig(t, config)
+	if artifacts["requestedProfile"] != string(artifactProfileAgentLoop) {
+		t.Fatalf("expected requested agent-loop profile, got %#v", artifacts["requestedProfile"])
+	}
+	if artifacts["profile"] != string(artifactProfileDual) {
+		t.Fatalf("expected effective dual profile, got %#v", artifacts["profile"])
+	}
+	if artifacts["specialization"] != "self-improving-agent-loop" {
+		t.Fatalf("expected self-improving-agent-loop specialization, got %#v", artifacts["specialization"])
+	}
+	agentLoop, ok := artifacts["agentLoop"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected agentLoop config, got %#v", artifacts["agentLoop"])
+	}
+	if agentLoop["enabled"] != true {
+		t.Fatalf("expected agent loop enabled, got %#v", agentLoop["enabled"])
+	}
+	if agentLoop["traceDir"] != "generated/agent-runs" {
+		t.Fatalf("expected generated/agent-runs trace dir, got %#v", agentLoop["traceDir"])
+	}
+	phases, ok := agentLoop["phases"].([]any)
+	if !ok || !containsJSONValue(phases, "sense") || !containsJSONValue(phases, "learn") {
+		t.Fatalf("expected sense/learn phases, got %#v", agentLoop["phases"])
+	}
+	approvalBoundaries, ok := agentLoop["humanApprovalRequiredFor"].([]any)
+	if !ok || !containsJSONValue(approvalBoundaries, "permission expansion") {
+		t.Fatalf("expected permission expansion approval boundary, got %#v", agentLoop["humanApprovalRequiredFor"])
+	}
+	scripts := packageScripts(t, filepath.Join(root, "package.json"))
+	if scripts["agent-loop:check"] != "node scripts/check-agent-loop-policy.mjs" {
+		t.Fatalf("expected agent loop check script, got %#v", scripts["agent-loop:check"])
+	}
+	if scripts["agent-loop:review"] != "node scripts/check-agent-loop-policy.mjs && node scripts/check-artifact-manifest.mjs" {
+		t.Fatalf("expected agent loop review script, got %#v", scripts["agent-loop:review"])
+	}
+}
+
 func TestWriteDeveloperArtifactScaffoldResolvesAutoProfile(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
@@ -236,6 +324,54 @@ func TestWriteDeveloperArtifactScaffoldResolvesAutoProfile(t *testing.T) {
 	}
 	if artifacts["profile"] != string(artifactProfileDual) {
 		t.Fatalf("expected effective dual profile, got %#v", artifacts["profile"])
+	}
+}
+
+func TestWriteProjectSetupProof(t *testing.T) {
+	root := t.TempDir()
+	target := filepath.Join(root, "apps", "web")
+	mustMkdirAll(t, target)
+	ctx := projectSetupContext{
+		TargetDir:      target,
+		OperationDir:   root,
+		MonorepoRoot:   root,
+		Monorepo:       true,
+		Scope:          projectScopeAuto,
+		PackageManager: packageManagerNpm,
+	}
+	proof := buildProjectSetupProof(ctx, projectSetupProofOptions{
+		RequestedArtifactProfile: artifactProfileAgentLoop,
+		EffectiveArtifactProfile: artifactProfileDual,
+		BeadsMode:                beadsSystem,
+		BeadsWorktrees:           true,
+	})
+
+	if err := writeProjectSetupProof(root, proof); err != nil {
+		t.Fatalf("writeProjectSetupProof returned error: %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(root, ".skill-harness", "setup-proof.json"))
+	if err != nil {
+		t.Fatalf("read setup proof: %v", err)
+	}
+	var decoded projectSetupProof
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("setup proof should be valid JSON: %v", err)
+	}
+	if decoded.Version != 1 {
+		t.Fatalf("expected proof version 1, got %d", decoded.Version)
+	}
+	if decoded.Profiles.RequestedDeveloperArtifacts != artifactProfileAgentLoop {
+		t.Fatalf("expected requested agent-loop profile, got %q", decoded.Profiles.RequestedDeveloperArtifacts)
+	}
+	if decoded.Tools["beads"].Status != "initialized" {
+		t.Fatalf("expected beads initialized, got %#v", decoded.Tools["beads"])
+	}
+	if decoded.Checks["agentLoopPolicy"].Command != "node scripts/check-agent-loop-policy.mjs" {
+		t.Fatalf("expected agent-loop check command, got %#v", decoded.Checks["agentLoopPolicy"])
+	}
+	if !containsString(decoded.GeneratedPaths, ".skill-harness/setup-proof.json") {
+		t.Fatalf("expected proof path in generated paths, got %#v", decoded.GeneratedPaths)
 	}
 }
 
@@ -270,6 +406,15 @@ func packageScripts(t *testing.T, packagePath string) map[string]any {
 }
 
 func containsJSONValue(values []any, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
+}
+
+func containsString(values []string, want string) bool {
 	for _, value := range values {
 		if value == want {
 			return true

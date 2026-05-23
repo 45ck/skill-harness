@@ -4,11 +4,11 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## requirements-analyst
 
-- Skills: problem-statement-refiner, assumptions-constraints-log, requirements-elicitation, requirements-interrogator, acceptance-criteria-writer, requirements-prioritizer, stakeholder-analysis, spec-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking
+- Skills: problem-statement-refiner, assumptions-constraints-log, requirements-elicitation, requirements-interrogator, acceptance-criteria-writer, requirements-prioritizer, stakeholder-analysis, spec-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, agent-task-shaping, context-engineering-planner
 
 ## requirements-analyst-beads
 
-- Skills: problem-statement-refiner, assumptions-constraints-log, requirements-elicitation, requirements-interrogator, acceptance-criteria-writer, requirements-prioritizer, stakeholder-analysis, spec-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking
+- Skills: problem-statement-refiner, assumptions-constraints-log, requirements-elicitation, requirements-interrogator, acceptance-criteria-writer, requirements-prioritizer, stakeholder-analysis, spec-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, agent-task-shaping, context-engineering-planner
 
 ## ux-researcher
 
@@ -16,19 +16,19 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## system-modeler
 
-- Skills: use-case-modeler, use-case-description-writer, sequence-diagram-builder, activity-diagram-builder, state-model-builder, domain-class-modeler, model-consistency-checker, scenario-to-uml-transformer, frontier-model-context, digital-expert-test, model-review-artifact
+- Skills: use-case-modeler, use-case-description-writer, sequence-diagram-builder, activity-diagram-builder, state-model-builder, domain-class-modeler, model-consistency-checker, scenario-to-uml-transformer, frontier-model-context, digital-expert-test, model-review-artifact, context-engineering-planner, multi-agent-workflow-reviewer
 
 ## system-modeler-beads
 
-- Skills: use-case-modeler, use-case-description-writer, sequence-diagram-builder, activity-diagram-builder, state-model-builder, domain-class-modeler, model-consistency-checker, scenario-to-uml-transformer, frontier-model-context, digital-expert-test, model-review-artifact
+- Skills: use-case-modeler, use-case-description-writer, sequence-diagram-builder, activity-diagram-builder, state-model-builder, domain-class-modeler, model-consistency-checker, scenario-to-uml-transformer, frontier-model-context, digital-expert-test, model-review-artifact, context-engineering-planner, multi-agent-workflow-reviewer
 
 ## software-architect
 
-- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate
+- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate, context-engineering-planner, autonomy-boundary-checker, tool-permission-planner, multi-agent-workflow-reviewer
 
 ## software-architect-beads
 
-- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate
+- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate, context-engineering-planner, autonomy-boundary-checker, tool-permission-planner, multi-agent-workflow-reviewer
 
 ## web-engineer
 
@@ -48,19 +48,19 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## qa-automation-engineer
 
-- Skills: unit-test-writer, integration-test-writer, api-test-suite-builder, ui-test-scenario-writer, fixture-and-test-data-builder, regression-suite-curator, test-readability-reviewer, test-plan-writer, frontier-model-context, digital-expert-test, legacy-automation-fallback, verification-first-delivery, qa-to-demo, demo-review-surface, demo-story-packager
+- Skills: unit-test-writer, integration-test-writer, api-test-suite-builder, ui-test-scenario-writer, fixture-and-test-data-builder, regression-suite-curator, test-readability-reviewer, test-plan-writer, frontier-model-context, digital-expert-test, legacy-automation-fallback, verification-first-delivery, qa-to-demo, demo-review-surface, demo-story-packager, agent-run-evidence-reviewer
 
 ## quality-reviewer
 
-- Skills: fagan-inspection, maintainability-reviewer, technical-debt-auditor, code-review-checklist-runner, review-severity-scorer, code-smell-detector, refactoring-candidate-ranker, quality-risk-register-builder, rework-plan-writer, frontier-model-context, digital-expert-test, legacy-automation-fallback, artifact-evidence-gate, artifact-handoff-pack
+- Skills: fagan-inspection, maintainability-reviewer, technical-debt-auditor, code-review-checklist-runner, review-severity-scorer, code-smell-detector, refactoring-candidate-ranker, quality-risk-register-builder, rework-plan-writer, frontier-model-context, digital-expert-test, legacy-automation-fallback, self-improving-agent-loop, artifact-evidence-gate, artifact-handoff-pack, autonomy-boundary-checker, agent-run-evidence-reviewer
 
 ## security-reviewer
 
-- Skills: threat-surface-mapper, trust-boundary-identifier, secure-by-design-reviewer, secrets-handling-checker, authn-authz-separator, token-auth-design-reviewer, prompt-injection-reviewer, tool-permission-boundary-checker, frontier-model-context, digital-expert-test, verification-first-delivery
+- Skills: threat-surface-mapper, trust-boundary-identifier, secure-by-design-reviewer, secrets-handling-checker, authn-authz-separator, token-auth-design-reviewer, prompt-injection-reviewer, tool-permission-boundary-checker, frontier-model-context, digital-expert-test, verification-first-delivery, autonomy-boundary-checker, tool-permission-planner, agent-memory-design-reviewer
 
 ## security-reviewer-beads
 
-- Skills: threat-surface-mapper, trust-boundary-identifier, secure-by-design-reviewer, secrets-handling-checker, authn-authz-separator, token-auth-design-reviewer, prompt-injection-reviewer, tool-permission-boundary-checker, frontier-model-context, digital-expert-test, verification-first-delivery
+- Skills: threat-surface-mapper, trust-boundary-identifier, secure-by-design-reviewer, secrets-handling-checker, authn-authz-separator, token-auth-design-reviewer, prompt-injection-reviewer, tool-permission-boundary-checker, frontier-model-context, digital-expert-test, verification-first-delivery, autonomy-boundary-checker, tool-permission-planner, agent-memory-design-reviewer
 
 ## pentest-reviewer
 
@@ -68,16 +68,16 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## delivery-manager
 
-- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack, demo-release-packager, demo-story-packager
+- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, artifact-handoff-pack, demo-release-packager, demo-story-packager, agent-task-shaping, autonomy-boundary-checker, multi-agent-workflow-reviewer, agent-run-evidence-reviewer
 
 ## delivery-manager-beads
 
-- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack, demo-release-packager, demo-story-packager
+- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, artifact-handoff-pack, demo-release-packager, demo-story-packager, agent-task-shaping, autonomy-boundary-checker, multi-agent-workflow-reviewer, agent-run-evidence-reviewer
 
 ## research-writer
 
-- Skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate, demo-review-surface, demo-story-packager
+- Skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, self-improving-agent-loop, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate, demo-review-surface, demo-story-packager, context-engineering-planner, agent-run-evidence-reviewer
 
 ## workflow-engineer
 
-- Skills: issue-driven-delivery, gh-review-followthrough, gh-actions-failure-triage, review-ready-check, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, artifact-handoff-pack, demo-story-packager, demo-release-packager
+- Skills: issue-driven-delivery, gh-review-followthrough, gh-actions-failure-triage, review-ready-check, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, artifact-handoff-pack, demo-story-packager, demo-release-packager, agent-task-shaping, context-engineering-planner, autonomy-boundary-checker, tool-permission-planner, agent-memory-design-reviewer, multi-agent-workflow-reviewer, agent-run-evidence-reviewer

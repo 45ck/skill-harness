@@ -107,6 +107,9 @@
     },
     "demo-production-skills": {
       "path": "packs/demo-production-skills"
+    },
+    "agent-operating-skills": {
+      "path": "packs/agent-operating-skills"
     }
   },
   "agents": {
@@ -114,14 +117,16 @@
       "repos": [
         "business-analysis-skills",
         "documentation-evidence-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "agent-operating-skills"
       ]
     },
     "requirements-analyst-beads": {
       "repos": [
         "business-analysis-skills",
         "documentation-evidence-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "agent-operating-skills"
       ]
     },
     "ux-researcher": {
@@ -139,7 +144,8 @@
         "business-analysis-skills",
         "software-architecture-skills",
         "frontier-agent-playbook",
-        "developer-artifact-skills"
+        "developer-artifact-skills",
+        "agent-operating-skills"
       ]
     },
     "system-modeler-beads": {
@@ -148,7 +154,8 @@
         "business-analysis-skills",
         "software-architecture-skills",
         "frontier-agent-playbook",
-        "developer-artifact-skills"
+        "developer-artifact-skills",
+        "agent-operating-skills"
       ]
     },
     "software-architect": {
@@ -159,7 +166,8 @@
         "documentation-evidence-skills",
         "frontier-agent-playbook",
         "integration-tooling-skills",
-        "developer-artifact-skills"
+        "developer-artifact-skills",
+        "agent-operating-skills"
       ]
     },
     "software-architect-beads": {
@@ -170,7 +178,8 @@
         "documentation-evidence-skills",
         "frontier-agent-playbook",
         "integration-tooling-skills",
-        "developer-artifact-skills"
+        "developer-artifact-skills",
+        "agent-operating-skills"
       ]
     },
     "web-engineer": {
@@ -212,7 +221,8 @@
         "verification-test-design-skills",
         "documentation-evidence-skills",
         "frontier-agent-playbook",
-        "demo-production-skills"
+        "demo-production-skills",
+        "agent-operating-skills"
       ]
     },
     "quality-reviewer": {
@@ -222,7 +232,8 @@
         "code-review-inspection-skills",
         "refactoring-code-smells-skills",
         "frontier-agent-playbook",
-        "developer-artifact-skills"
+        "developer-artifact-skills",
+        "agent-operating-skills"
       ]
     },
     "security-reviewer": {
@@ -230,7 +241,8 @@
         "security-engineering-skills",
         "authentication-cryptography-skills",
         "llm-agent-security-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "agent-operating-skills"
       ]
     },
     "security-reviewer-beads": {
@@ -238,7 +250,8 @@
         "security-engineering-skills",
         "authentication-cryptography-skills",
         "llm-agent-security-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "agent-operating-skills"
       ]
     },
     "pentest-reviewer": {
@@ -257,7 +270,8 @@
         "maintenance-evolution-skills",
         "frontier-agent-playbook",
         "developer-artifact-skills",
-        "demo-production-skills"
+        "demo-production-skills",
+        "agent-operating-skills"
       ]
     },
     "delivery-manager-beads": {
@@ -269,7 +283,8 @@
         "maintenance-evolution-skills",
         "frontier-agent-playbook",
         "developer-artifact-skills",
-        "demo-production-skills"
+        "demo-production-skills",
+        "agent-operating-skills"
       ]
     },
     "research-writer": {
@@ -278,7 +293,8 @@
         "documentation-evidence-skills",
         "frontier-agent-playbook",
         "developer-artifact-skills",
-        "demo-production-skills"
+        "demo-production-skills",
+        "agent-operating-skills"
       ]
     },
     "workflow-engineer": {
@@ -286,7 +302,8 @@
         "coding-workflow-skills",
         "frontier-agent-playbook",
         "developer-artifact-skills",
-        "demo-production-skills"
+        "demo-production-skills",
+        "agent-operating-skills"
       ]
     }
   }

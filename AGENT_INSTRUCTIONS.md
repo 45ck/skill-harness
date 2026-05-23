@@ -57,6 +57,8 @@ Default behavior:
 - run `bd init`
 - run `agent-docs install-gates --quality`
 - scaffold developer artifact guidance by default; `auto` resolves to a dual profile with canonical Markdown/TOON/specgraph sources, optional generated review surfaces, and an artifact provenance manifest
+- use `--developer-artifacts-profile agent-loop` for governed self-improving agent workflows with a loop playbook, trace/eval receipt directory, and policy checker
+- write `.skill-harness/setup-proof.json` as machine-readable evidence of selected profile, package manager, initialized tools, skipped capabilities, generated paths, Beads mode, and available check commands
 
 Useful variants:
 
@@ -75,6 +77,7 @@ Useful variants:
 ./skill-harness setup-project --dir path/to/project --developer-artifacts-profile cli
 ./skill-harness setup-project --dir path/to/project --developer-artifacts-profile tui
 ./skill-harness setup-project --dir path/to/project --developer-artifacts-profile media
+./skill-harness setup-project --dir path/to/project --developer-artifacts-profile agent-loop
 ```
 
 ## Frontier doctrine companion
@@ -93,6 +96,12 @@ For repo-local doctrine files, copy these into the target project after setup:
 - `CLAUDE.md`
 - `AGENT_INSTRUCTIONS.md`
 - `llms.txt`
+
+Use the embedded `agent-operating-skills` pack when frontier doctrine needs to become an operating workflow: task shaping, context engineering, autonomy boundaries, tool permissions, memory review, multi-agent handoffs, and agent run evidence review.
+
+```bash
+./skill-harness install --packs=agent-operating-skills --packs-only
+```
 
 ## Full Toolkit Setup
 
@@ -133,6 +142,7 @@ For the fully automated equivalent of the above, use the `setup-project` command
 - Record generated review surfaces in `docs/artifacts/artifacts.manifest.json` with source path, artifact type, evidence links, and freshness data when available.
 - For Mermaid, C4, UML-style, UWE-inspired, dependency, and architecture-space views, keep the diagram/model source durable and pre-render diagrams into HTML as inline SVG or static markup.
 - Do not add browser Mermaid runtimes, external scripts, or external assets to generated review HTML by default.
+- Use `--developer-artifacts-profile agent-loop` only for governed self-improving agent workflows; generated trace receipts belong under `generated/agent-runs/` and should stay out of git unless summarized and redacted.
 
 ## Rules
 
@@ -156,12 +166,14 @@ After project setup:
 - confirm `package.json` exists in the resolved setup directory
 - confirm `@45ck/noslop` and `agent-docs` were installed
 - confirm the initialization commands completed without error
+- inspect `.skill-harness/setup-proof.json` for the resolved scope, tool statuses, skipped capabilities, and check commands
 
 ## Reference files
 
 - [README.md](README.md)
 - [cmd/skill-harness/main.go](cmd/skill-harness/main.go)
 - [docs/developer-artifacts.md](docs/developer-artifacts.md)
+- [docs/agent-operating-skills.md](docs/agent-operating-skills.md)
 - [docs/demo-production-media.md](docs/demo-production-media.md)
 - [scripts/dependencies.json](scripts/dependencies.json)
 - [scripts/build_release.py](scripts/build_release.py)
