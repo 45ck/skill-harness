@@ -40,7 +40,7 @@ const externalReferencePattern = /\b(?:src|href|action)=["'](?:https?:|\/\/)/i;
 const allowedSvgPanZoomRuntime = fs.existsSync(path.join(root, 'node_modules', 'svg-pan-zoom', 'dist', 'svg-pan-zoom.min.js'))
   ? fs.readFileSync(path.join(root, 'node_modules', 'svg-pan-zoom', 'dist', 'svg-pan-zoom.min.js'), 'utf8')
   : '';
-const allowedSvgPanZoomInitializer = 'document.querySelectorAll("[data-svg-pan-zoom=true] svg").forEach(function(svg){svgPanZoom(svg,{controlIconsEnabled:true,fit:true,center:true,minZoom:.1,maxZoom:20,zoomScaleSensitivity:.25});});';
+const allowedSvgPanZoomInitializer = 'document.querySelectorAll("[data-svg-pan-zoom=true] svg").forEach(function(svg){svgPanZoom(svg,{controlIconsEnabled:true,fit:true,center:true,minZoom:.1,maxZoom:20,zoomScaleSensitivity:.25});});document.querySelectorAll(".viewer-badge").forEach(function(el){el.textContent="svg-pan-zoom active: drag, wheel, +/- controls";});document.documentElement.classList.add("svg-pan-zoom-active");';
 
 function walk(dir) {
   if (!fs.existsSync(dir)) return [];
