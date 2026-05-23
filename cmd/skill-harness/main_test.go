@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -759,6 +760,122 @@ func TestWriteProjectSetupProof(t *testing.T) {
 	}
 }
 
+func TestCLISetupProjectMediaProfileScaffoldsAndWiresTools(t *testing.T) {
+	binary := buildSkillHarnessBinary(t)
+	projectDir := t.TempDir()
+	mustWriteFile(t, filepath.Join(projectDir, "package.json"), "{\n  \"name\": \"fixture\",\n  \"private\": true\n}\n")
+	tooling := fakeTooling(t, "npm", "npx")
+
+	runSkillHarnessCLI(t, binary, tooling, "setup-project",
+		"--dir", projectDir,
+		"--package-manager", "npm",
+		"--developer-artifacts-profile", "media",
+		"--skip-beads",
+		"--skip-claude-settings",
+	)
+
+	commands := tooling.commands(t)
+	assertCommandContains(t, commands, "npm", "install -D @45ck/noslop github:45ck/agent-docs")
+	assertCommandContains(t, commands, "npx", "agent-docs init")
+	assertCommandContains(t, commands, "npx", "noslop init")
+	assertCommandContains(t, commands, "npx", "agent-docs install-gates --quality")
+
+	for _, path := range []string{
+		filepath.Join(projectDir, ".skill-harness", "project.json"),
+		filepath.Join(projectDir, ".skill-harness", "setup-proof.json"),
+		filepath.Join(projectDir, "docs", "artifacts", "artifacts.manifest.json"),
+		filepath.Join(projectDir, "docs", "artifacts", "templates", "demo-artifact.md"),
+		filepath.Join(projectDir, "generated", "media"),
+		filepath.Join(projectDir, "scripts", "check-artifact-manifest.mjs"),
+		filepath.Join(projectDir, "scripts", "check-artifact-html-policy.mjs"),
+		filepath.Join(projectDir, "scripts", "open-artifact-review.mjs"),
+	} {
+		if !fileExists(path) && !dirExists(path) {
+			t.Fatalf("expected setup-project to create %s", path)
+		}
+	}
+
+	var config map[string]any
+	if err := json.Unmarshal([]byte(mustReadText(t, filepath.Join(projectDir, ".skill-harness", "project.json"))), &config); err != nil {
+		t.Fatalf("project config should be valid JSON: %v", err)
+	}
+	artifacts := developerArtifactsConfig(t, config)
+	if artifacts["requestedProfile"] != string(artifactProfileMedia) {
+		t.Fatalf("expected requested media profile, got %#v", artifacts["requestedProfile"])
+	}
+	if artifacts["profile"] != string(artifactProfileDual) {
+		t.Fatalf("expected media to resolve to dual, got %#v", artifacts["profile"])
+	}
+
+	var proof projectSetupProof
+	if err := json.Unmarshal([]byte(mustReadText(t, filepath.Join(projectDir, ".skill-harness", "setup-proof.json"))), &proof); err != nil {
+		t.Fatalf("setup proof should be valid JSON: %v", err)
+	}
+	if proof.Tools["noslop"].Status != "initialized" {
+		t.Fatalf("expected noslop initialized proof, got %#v", proof.Tools["noslop"])
+	}
+	if proof.Tools["agentDocs"].Status != "quality-gates-installed" {
+		t.Fatalf("expected agent-docs quality gate proof, got %#v", proof.Tools["agentDocs"])
+	}
+	if proof.Tools["beads"].Status != "skipped" {
+		t.Fatalf("expected beads skipped proof, got %#v", proof.Tools["beads"])
+	}
+	if proof.Tools["claudeSettings"].Status != "skipped" {
+		t.Fatalf("expected claude settings skipped proof, got %#v", proof.Tools["claudeSettings"])
+	}
+	if !containsString(proof.GeneratedPaths, "generated/media/") {
+		t.Fatalf("expected media generated path in proof, got %#v", proof.GeneratedPaths)
+	}
+
+	scripts := packageScripts(t, filepath.Join(projectDir, "package.json"))
+	if scripts["artifacts:manifest:check"] != "node scripts/check-artifact-manifest.mjs" {
+		t.Fatalf("expected artifact manifest script, got %#v", scripts["artifacts:manifest:check"])
+	}
+	if scripts["artifacts:open"] != "node scripts/open-artifact-review.mjs" {
+		t.Fatalf("expected artifact open script, got %#v", scripts["artifacts:open"])
+	}
+}
+
+func TestCLIInstallPacksOnlyBootstrapsSelectedPack(t *testing.T) {
+	binary := buildSkillHarnessBinary(t)
+	tooling := fakeTooling(t, "python")
+
+	runSkillHarnessCLI(t, binary, tooling, "install", "--packs-only", "--packs", "developer-artifact-skills")
+
+	commands := tooling.commands(t)
+	assertCommandContains(t, commands, "python", "scripts"+string(os.PathSeparator)+"bootstrap_dependencies.py --repo developer-artifact-skills")
+	assertNoCommandContains(t, commands, "render_claude_agents.py")
+	assertNoCommandContains(t, commands, "render_codex_agents.py")
+	assertNoCommandContains(t, commands, "check_dependencies.py")
+}
+
+func TestCLIInstallAgentsOnlyRendersAndChecksSelectedAgent(t *testing.T) {
+	binary := buildSkillHarnessBinary(t)
+	tooling := fakeTooling(t, "python")
+
+	runSkillHarnessCLI(t, binary, tooling, "install", "--agents-only", "--agents", "requirements-analyst")
+
+	commands := tooling.commands(t)
+	assertNoCommandContains(t, commands, "bootstrap_dependencies.py")
+	assertCommandContains(t, commands, "python", "scripts"+string(os.PathSeparator)+"render_claude_agents.py --agent requirements-analyst")
+	assertCommandContains(t, commands, "python", "scripts"+string(os.PathSeparator)+"render_codex_agents.py --agent requirements-analyst")
+	assertCommandContains(t, commands, "python", "scripts"+string(os.PathSeparator)+"check_dependencies.py --agent requirements-analyst")
+}
+
+func TestCLIRenderAndCheckForwardAgentArgs(t *testing.T) {
+	binary := buildSkillHarnessBinary(t)
+	tooling := fakeTooling(t, "python")
+
+	runSkillHarnessCLI(t, binary, tooling, "render", "--agents", "requirements-analyst")
+	runSkillHarnessCLI(t, binary, tooling, "check", "--agents", "requirements-analyst")
+
+	commands := tooling.commands(t)
+	assertNoCommandContains(t, commands, "render_claude_agents.py")
+	assertCommandContains(t, commands, "python", "scripts"+string(os.PathSeparator)+"render_codex_agents.py --agent requirements-analyst")
+	assertCommandContains(t, commands, "python", "scripts"+string(os.PathSeparator)+"check_dependencies.py --agent requirements-analyst")
+	assertNoCommandContains(t, commands, "bootstrap_dependencies.py")
+}
+
 func developerArtifactsConfig(t *testing.T, config map[string]any) map[string]any {
 	t.Helper()
 	capabilities, ok := config["capabilities"].(map[string]any)
@@ -873,4 +990,129 @@ func runNodeScript(t *testing.T, root string, script string, wantSuccess bool, a
 		t.Fatalf("%s succeeded unexpectedly:\n%s", script, output)
 	}
 	return string(output)
+}
+
+type fakeToolingEnv struct {
+	binDir  string
+	logPath string
+}
+
+func buildSkillHarnessBinary(t *testing.T) string {
+	t.Helper()
+	outDir := t.TempDir()
+	binary := filepath.Join(outDir, "skill-harness-test"+exeSuffix())
+	cmd := exec.Command("go", "build", "-o", binary, "./cmd/skill-harness")
+	cmd.Dir = repoRootForTest(t)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("build skill-harness test binary: %v\n%s", err, output)
+	}
+	return binary
+}
+
+func runSkillHarnessCLI(t *testing.T, binary string, tooling fakeToolingEnv, args ...string) string {
+	t.Helper()
+	cmd := exec.Command(binary, args...)
+	cmd.Dir = repoRootForTest(t)
+	cmd.Env = append(os.Environ(),
+		"PATH="+tooling.binDir+string(os.PathListSeparator)+os.Getenv("PATH"),
+		"SKILL_HARNESS_COMMAND_LOG="+tooling.logPath,
+	)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("skill-harness %s failed: %v\n%s", strings.Join(args, " "), err, output)
+	}
+	return string(output)
+}
+
+func fakeTooling(t *testing.T, names ...string) fakeToolingEnv {
+	t.Helper()
+	root := t.TempDir()
+	binDir := filepath.Join(root, "bin")
+	mustMkdirAll(t, binDir)
+	logPath := filepath.Join(root, "commands.log")
+	for _, name := range names {
+		writeFakeTool(t, binDir, name)
+	}
+	return fakeToolingEnv{binDir: binDir, logPath: logPath}
+}
+
+func writeFakeTool(t *testing.T, binDir string, name string) {
+	t.Helper()
+	if runtime.GOOS == "windows" {
+		path := filepath.Join(binDir, name+".cmd")
+		content := "@echo off\r\n" +
+			"echo %~n0 %*>>\"%SKILL_HARNESS_COMMAND_LOG%\"\r\n" +
+			"exit /b 0\r\n"
+		mustWriteFile(t, path, content)
+		return
+	}
+	path := filepath.Join(binDir, name)
+	content := "#!/bin/sh\n" +
+		"printf '%s' \"$(basename \"$0\")\" >> \"$SKILL_HARNESS_COMMAND_LOG\"\n" +
+		"for arg in \"$@\"; do printf ' %s' \"$arg\" >> \"$SKILL_HARNESS_COMMAND_LOG\"; done\n" +
+		"printf '\\n' >> \"$SKILL_HARNESS_COMMAND_LOG\"\n"
+	mustWriteFile(t, path, content)
+	if err := os.Chmod(path, 0o755); err != nil {
+		t.Fatalf("chmod fake tool %s: %v", path, err)
+	}
+}
+
+func (env fakeToolingEnv) commands(t *testing.T) []string {
+	t.Helper()
+	if !fileExists(env.logPath) {
+		return nil
+	}
+	lines := strings.Split(strings.TrimSpace(mustReadText(t, env.logPath)), "\n")
+	out := []string{}
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line != "" {
+			out = append(out, line)
+		}
+	}
+	return out
+}
+
+func assertCommandContains(t *testing.T, commands []string, tool string, want string) {
+	t.Helper()
+	normalizedWant := normalizeCommandForAssert(want)
+	for _, command := range commands {
+		normalized := normalizeCommandForAssert(command)
+		if strings.HasPrefix(normalized, tool+" ") && strings.Contains(normalized, normalizedWant) {
+			return
+		}
+	}
+	t.Fatalf("expected %s command containing %q, got:\n%s", tool, want, strings.Join(commands, "\n"))
+}
+
+func assertNoCommandContains(t *testing.T, commands []string, want string) {
+	t.Helper()
+	normalizedWant := normalizeCommandForAssert(want)
+	for _, command := range commands {
+		if strings.Contains(normalizeCommandForAssert(command), normalizedWant) {
+			t.Fatalf("expected no command containing %q, got:\n%s", want, strings.Join(commands, "\n"))
+		}
+	}
+}
+
+func normalizeCommandForAssert(value string) string {
+	normalized := strings.ReplaceAll(strings.TrimSpace(value), "\\", "/")
+	return strings.ReplaceAll(normalized, "\"", "")
+}
+
+func repoRootForTest(t *testing.T) string {
+	t.Helper()
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	return root
+}
+
+func exeSuffix() string {
+	if runtime.GOOS == "windows" {
+		return ".exe"
+	}
+	return ""
 }
