@@ -55,6 +55,58 @@ Every generic artifact review page should show:
 - canonical source preview
 - source hash and renderer metadata
 
+## Open-Source Infographic Toolkit
+
+The renderer treats infographic projects as source/spec or generation-time helpers, not browser runtimes. Use all of the following as allowed choices:
+
+| Tool | Default Use | Review Output |
+|---|---|---|
+| Mermaid | authored architecture, process, sequence, model, and workflow diagrams | pre-rendered inline SVG or static markup |
+| Vega-Lite | default declarative chart grammar for metrics, comparisons, and evidence dashboards | static SVG generated from source specs |
+| Observable Plot | compact exploratory charts and statistical views | static SVG generated from source specs |
+| D3 | bespoke infographic layouts when canned charts are not expressive enough | static SVG generated during artifact generation |
+| Graphviz | node-edge dependency, lineage, and relationship maps | static SVG from DOT or structured edges |
+| Apache ECharts | richer dashboard chart families | generation-time static SVG/PNG or static equivalent only |
+| RAWGraphs | design-led unusual charts from tabular data | exported SVG copied into review output |
+| Chart.js | simple familiar charts when source data already matches Chart.js conventions | server-rendered/static output or equivalent |
+
+Generated HTML must not load these libraries in the browser. Agents should use `artifact-infographic` JSON fences or manifest `infographics` arrays so charts and graphs regenerate with the source.
+
+```artifact-infographic
+{
+  "title": "Toolkit Coverage",
+  "tool": "vega-lite",
+  "kind": "bar",
+  "summary": "All recommended open-source visualization options are represented in the source-first policy.",
+  "values": [
+    {"label": "Mermaid", "value": 1},
+    {"label": "Vega-Lite", "value": 1},
+    {"label": "Plot", "value": 1},
+    {"label": "D3", "value": 1},
+    {"label": "Graphviz", "value": 1},
+    {"label": "ECharts", "value": 1},
+    {"label": "RAWGraphs", "value": 1},
+    {"label": "Chart.js", "value": 1}
+  ]
+}
+```
+
+```artifact-infographic
+{
+  "title": "Static Review Lane",
+  "tool": "graphviz",
+  "kind": "graph",
+  "summary": "Infographic tools feed source specs or generation-time adapters; the browser receives static review markup.",
+  "edges": [
+    ["Canonical Source", "Infographic Spec"],
+    ["Infographic Spec", "Static Renderer"],
+    ["Static Renderer", "Generated HTML"],
+    ["Generated HTML", "HTML Policy Check"],
+    ["HTML Policy Check", "Human Review"]
+  ]
+}
+```
+
 ## Implementation Scope
 
 - Add `scripts/generate-artifact-review.mjs`.

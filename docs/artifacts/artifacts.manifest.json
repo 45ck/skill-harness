@@ -101,6 +101,7 @@
       "evidenceLinks": [
         "AGENTS.md",
         "docs/developer-artifacts.md",
+        "docs/artifact-infographic-toolkit.md",
         "scripts/generate-artifact-review.mjs",
         "scripts/check-artifact-manifest.mjs",
         "scripts/check-artifact-html-policy.mjs",
@@ -112,7 +113,7 @@
       },
       "reviewSurface": "generated/review/product/generic-infographic-artifact-workflow-plan-2026-05-24.html",
       "renderer": "skill-harness artifact review generator",
-      "sourceHash": "240e281825d3bfb7a50ba03fc2e1c642cfd9c73c9c84317e2576d817aed91674",
+      "sourceHash": "48b1657710f181f38f4e02268d1616925e1fb7f25ed64661712ea54328e060bf",
       "generatedAt": "2026-05-24"
     },
     {
