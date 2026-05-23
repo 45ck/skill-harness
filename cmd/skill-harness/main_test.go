@@ -554,6 +554,12 @@ func TestArtifactReviewOpenScriptPrintsDiscoveredTarget(t *testing.T) {
 	if !strings.Contains(output, "file://") || !strings.Contains(output, "generated/review/models/index.html") {
 		t.Fatalf("expected printed file URL for model review index, got:\n%s", output)
 	}
+	jsonOutput := runNodeScript(t, root, "scripts/open-artifact-review.mjs", true, "--json", "--print")
+	for _, want := range []string{`"hostAction":`, `"openMode": "print"`, `"repoPath": "generated/review/models/index.html"`, `"url": "file://`} {
+		if !strings.Contains(jsonOutput, want) {
+			t.Fatalf("expected JSON opener output to contain %q, got:\n%s", want, jsonOutput)
+		}
+	}
 }
 
 func TestModelArtifactPolicyBaselineAcceptsEvidenceModelsWithoutHTML(t *testing.T) {
