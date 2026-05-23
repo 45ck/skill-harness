@@ -32,6 +32,12 @@ Use this directory for durable developer artifacts and generated review surfaces
 - ../../generated/media/ - generated demo media for media profile projects.
 - ../../generated/agent-runs/ - generated trace receipts and eval summaries for agent-loop profile projects.
 
+## Examples
+
+- `source/product/sample-uwe-screenshot-atlas.md` demonstrates a synthetic Vibecord-style UWE navigation atlas with screenshot-backed nodes, action side effects, access branches, and generated review HTML.
+- `source/models/sample-uwe-navigation.md` is the paired UWE navigation model source.
+- `../../generated/review/product/sample-uwe-screenshot-atlas.html` and `../../generated/review/models/sample-uwe-navigation.html` show the generated review surfaces.
+
 ## Visual Source-First Policy
 
 - Use visual-source-first artifacts for product, business, data, research, and UX work when humans need to inspect structure, evidence, states, tradeoffs, or mockups.

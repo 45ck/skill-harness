@@ -31,6 +31,7 @@ This inventory covers the baseline models for the `skill-harness` suite entrypoi
 | `sh-component-scaffold-engine` | component | c4 | system-modeler | `docs/artifacts/source/models/sh-component-scaffold-engine.md` | `cmd/skill-harness/main.go`, `scripts/suite_graph.py`, `scripts/render_suite_docs.py`, `scripts/check_suite_drift.py`, `scripts/check-artifact-manifest.mjs`, `scripts/check-model-artifact-policy.mjs`, `scripts/check-artifact-html-policy.mjs`, `scripts/generate-artifact-review.mjs`, `scripts/generate-model-review.mjs`, `docs/agent-loadouts.md`, `docs/developer-artifacts.md` | `cmd/skill-harness/main_test.go`, `scripts/dependencies.json`, `scripts/agent_loadouts.json` | `generated/review/models/sh-component-scaffold-engine.html` |
 | `sh-state-artifact-freshness` | state | uml | system-modeler | `docs/artifacts/source/models/sh-state-artifact-freshness.md` | `docs/artifacts/artifacts.manifest.json`, `scripts/check-artifact-manifest.mjs`, `scripts/generate-artifact-review.mjs`, `scripts/generate-model-review.mjs`, `scripts/check-artifact-html-policy.mjs`, `scripts/open-artifact-review.mjs`, `.github/workflows/quality.yml`, `docs/developer-artifacts.md`, `docs/artifacts/source/models/model-inventory.md` | `docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md`, `.skill-harness/setup-proof.json` | `generated/review/models/sh-state-artifact-freshness.html` |
 | `sh-uwe-navigation-atlas` | component | uwe | system-modeler | `docs/artifacts/source/models/sh-uwe-navigation-atlas.md` | `cmd/skill-harness/main.go`, `scripts/generate-artifact-review.mjs`, `scripts/check-artifact-manifest.mjs`, `docs/artifacts/artifacts.manifest.json` | `docs/artifacts/source/product/e2e-product-system-atlas-workflow-2026-05-24.md`, `docs/developer-artifacts.md` | `generated/review/models/sh-uwe-navigation-atlas.html` |
+| `sample-uwe-navigation` | component | uwe | system-modeler | `docs/artifacts/source/models/sample-uwe-navigation.md` | `docs/artifacts/source/product/sample-uwe-screenshot-atlas.md`, `generated/review/evidence/sample-uwe-atlas/landing.svg`, `generated/review/evidence/sample-uwe-atlas/auth.svg`, `generated/review/evidence/sample-uwe-atlas/dashboard.svg` | `docs/artifacts/source/product/sample-uwe-screenshot-atlas.md` | `generated/review/models/sample-uwe-navigation.html` |
 
 ## Evidence
 
@@ -46,6 +47,7 @@ Regenerate model review HTML and rerun artifact checks after any listed touchpoi
 | --- | --- | --- |
 | 2026-05-23 | Created self-modeling baseline with six model views. | `docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md`, `cmd/skill-harness/main_test.go` |
 | 2026-05-24 | Added UWE navigation atlas model for screenshot-backed whole-app inspection. | `docs/artifacts/source/product/e2e-product-system-atlas-workflow-2026-05-24.md`, `docs/artifacts/source/models/sh-uwe-navigation-atlas.md` |
+| 2026-05-24 | Added synthetic UWE screenshot atlas example. | `docs/artifacts/source/product/sample-uwe-screenshot-atlas.md`, `docs/artifacts/source/models/sample-uwe-navigation.md` |
 
 ## Update Rule
 

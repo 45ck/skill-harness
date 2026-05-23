@@ -807,7 +807,18 @@ func TestArtifactReviewGeneratorEmbedsScreenshotEvidence(t *testing.T) {
 	}
 
 	sourcePath := filepath.Join(root, "docs", "artifacts", "source", "product", "atlas.md")
-	source := "# App Atlas\n\n## Purpose\n\nInspect a UWE navigation model with screenshot evidence.\n"
+	source := strings.Join([]string{
+		"# App Atlas",
+		"",
+		"## Purpose",
+		"",
+		"Inspect a UWE navigation model with screenshot evidence.",
+		"",
+		"```artifact-infographic",
+		"{\"title\":\"UWE Screenshot Nodes\",\"tool\":\"graphviz\",\"kind\":\"uwe-navigation\",\"navigationClasses\":[\"Visitor acquisition\"],\"nodes\":[{\"id\":\"Landing\",\"label\":\"Landing\",\"route\":\"/\",\"navigationClass\":\"Visitor acquisition\",\"facet\":\"navigation\",\"screenshot\":\"generated/review/evidence/atlas/landing.svg\"},{\"id\":\"Auth\",\"label\":\"Auth\",\"route\":\"/login\",\"navigationClass\":\"Visitor acquisition\",\"facet\":\"access\"}],\"edges\":[[\"Landing\",\"Auth\",\"sign in\"]]}",
+		"```",
+		"",
+	}, "\n")
 	mustWriteFile(t, sourcePath, source)
 	imagePath := filepath.Join(root, "generated", "review", "evidence", "atlas", "landing.svg")
 	mustWriteFile(t, imagePath, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><rect width="120" height="80" fill="#eef2f6"/><text x="16" y="42">Landing</text></svg>`)
@@ -834,7 +845,7 @@ func TestArtifactReviewGeneratorEmbedsScreenshotEvidence(t *testing.T) {
 	runNodeScript(t, root, "scripts/generate-artifact-review.mjs", true)
 	htmlPath := filepath.Join(root, "generated", "review", "product", "app-atlas.html")
 	html := mustReadText(t, htmlPath)
-	for _, want := range []string{"Screenshots And Evidence Images", "Landing page", "data:image/svg+xml;base64,"} {
+	for _, want := range []string{"Screenshots And Evidence Images", "Landing page", "data:image/svg+xml;base64,", "UWE Screenshot Nodes", "«navigation class» Visitor acquisition", "«navigation node»", "/login", "<image href=\"data:image/svg+xml;base64,"} {
 		if !strings.Contains(html, want) {
 			t.Fatalf("expected generated artifact HTML to contain %q", want)
 		}

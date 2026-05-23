@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<title>Model Review: sample-uwe-navigation</title>
+<style>
+:root{color-scheme:light dark;font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.5;--bg:#f7f8fa;--panel:#fff;--text:#17202a;--muted:#52616b;--line:#d9e2ec;--accent:#0f766e;--code:#102a43;--codeText:#f0f4f8}body{margin:0;color:var(--text);background:var(--bg)}main{max-width:1180px;margin:0 auto;padding:28px 18px 44px}.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr);gap:18px;align-items:start}.panel,section{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:8px}h1,h2,h3{line-height:1.2;margin:0 0 10px;letter-spacing:0}p{margin:0 0 12px}.muted{color:var(--muted)}table{width:100%;border-collapse:collapse;background:var(--panel)}th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:10px}code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow:auto;background:var(--code);color:var(--codeText);padding:16px;border-radius:6px}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.meta div{padding:9px 10px;background:#eef6f6;border:1px solid #c8e7e3;border-radius:6px}.tabs{margin-top:18px}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-weight:600}.tab-panel{display:none}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4),.tabs input:nth-of-type(5):checked~.tab-panels .tab-panel:nth-of-type(5){display:block}.diagram-card{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fbfdff}.diagram-header{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;background:#eef2f7;border-bottom:1px solid var(--line)}.diagram-body{padding:14px}.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.node{padding:10px 12px;border:1px solid #9fb3c8;border-radius:6px;background:#fff;min-width:88px;text-align:center}.arrow{color:var(--accent);font-weight:700}.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.gallery figure{margin:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}.gallery img{display:block;width:100%;height:auto}.gallery figcaption{padding:9px 10px;color:var(--muted)}.compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}@media (max-width:760px){.hero{grid-template-columns:1fr}.tab-labels label{flex:1 1 auto;text-align:center}}@media (prefers-color-scheme:dark){:root{--bg:#102a43;--panel:#1f2933;--text:#d9e2ec;--muted:#bcccdc;--line:#334e68;--accent:#5eead4}.meta div{background:#243b53;border-color:#486581}.diagram-header{background:#243b53}.diagram-card,.gallery figure,.node{background:#1f2933}}
+</style>
+</head>
+<body>
+<main>
+<div class="hero"><section><h1>Sample UWE Navigation Model</h1><p>This synthetic model shows how a screenshot-backed UWE atlas can represent navigable app states, access branches, and process actions.</p></section><section><h2>Review Focus</h2><div class="meta"><div><strong>Status</strong><br>ready</div><div><strong>Kind</strong><br>component</div><div><strong>Drift</strong><br>aligned</div><div><strong>Owner</strong><br>system-modeler</div></div></section></div><section class="meta"><div><strong>ID</strong><br>sample-uwe-navigation</div><div><strong>Status</strong><br>ready</div><div><strong>Model ID</strong><br>sample-uwe-navigation</div><div><strong>Kind</strong><br>component</div><div><strong>Method</strong><br>uwe</div><div><strong>Notation</strong><br>mermaid</div><div><strong>Source</strong><br>docs/artifacts/source/models/sample-uwe-navigation.md</div><div><strong>Owner</strong><br>system-modeler</div></section><div class="tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-visual" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-evidence" name="tabs" type="radio"><input id="tab-diff" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-visual">Visuals</label><label for="tab-source">Source</label><label for="tab-evidence">Evidence</label><label for="tab-diff">Diff</label></div><div class="tab-panels"><section class="tab-panel"><h2>Overview</h2><p>This synthetic model shows how a screenshot-backed UWE atlas can represent navigable app states, access branches, and process actions.</p><div class="meta"><div><strong>Abstraction</strong><br>design</div><div><strong>Review Surface</strong><br><a href="sample-uwe-navigation.html">generated/review/models/sample-uwe-navigation.html</a></div><div><strong>Implementation Touchpoints</strong><br><a href="../../../docs/artifacts/source/product/sample-uwe-screenshot-atlas.md">docs/artifacts/source/product/sample-uwe-screenshot-atlas.md</a>, <a href="../evidence/sample-uwe-atlas/landing.svg">generated/review/evidence/sample-uwe-atlas/landing.svg</a>, <a href="../evidence/sample-uwe-atlas/auth.svg">generated/review/evidence/sample-uwe-atlas/auth.svg</a>, <a href="../evidence/sample-uwe-atlas/dashboard.svg">generated/review/evidence/sample-uwe-atlas/dashboard.svg</a></div><div><strong>Doc Touchpoints</strong><br><a href="../../../docs/artifacts/templates/e2e-product-system-atlas.md">docs/artifacts/templates/e2e-product-system-atlas.md</a>, <a href="../../../docs/artifacts/source/models/model-inventory.md">docs/artifacts/source/models/model-inventory.md</a></div></div></section><section class="tab-panel"><h2>Visuals</h2><div class="diagram-card"><div class="diagram-header"><strong>mermaid component</strong><span class="muted">static preview, source-backed</span></div><div class="diagram-body"><svg role="img" aria-label="Static model diagram preview" viewBox="0 0 1500 190" xmlns="http://www.w3.org/2000/svg"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0f766e"/></marker></defs><line x1="146" y1="97" x2="179" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="436" y1="97" x2="469" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="581" y1="97" x2="614" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="871" y1="97" x2="904" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="871" y1="97" x2="1049" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="871" y1="97" x2="1194" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="1451" y1="97" x2="759" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><rect x="34" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="90" y="102" text-anchor="middle" font-size="12" fill="#17202a">Landing</text><rect x="179" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="235" y="102" text-anchor="middle" font-size="12" fill="#17202a">|sign in|getAuth</text><rect x="324" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="380" y="102" text-anchor="middle" font-size="12" fill="#17202a">getAuth</text><rect x="469" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="525" y="102" text-anchor="middle" font-size="12" fill="#17202a">Auth</text><rect x="614" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="670" y="102" text-anchor="middle" font-size="12" fill="#17202a">|valid member| Dashboa</text><rect x="759" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="815" y="102" text-anchor="middle" font-size="12" fill="#17202a">Dashboard</text><rect x="904" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="960" y="102" text-anchor="middle" font-size="12" fill="#17202a">Channels</text><rect x="1049" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="1105" y="102" text-anchor="middle" font-size="12" fill="#17202a">|admin| Settings</text><rect x="1194" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="1250" y="102" text-anchor="middle" font-size="12" fill="#17202a">|member denied| Denied</text><rect x="1339" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="1395" y="102" text-anchor="middle" font-size="12" fill="#17202a">Settings</text></svg></div></div><h3>Screenshots And Evidence Images</h3><div class="gallery"><figure><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NjAgNTQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlN5bnRoZXRpYyBsYW5kaW5nIHBhZ2Ugc2NyZWVuc2hvdCI+CiAgPHJlY3Qgd2lkdGg9Ijk2MCIgaGVpZ2h0PSI1NDAiIGZpbGw9IiNmNGY3ZmIiLz4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iOTYwIiBoZWlnaHQ9IjcyIiBmaWxsPSIjMTcyMDMzIi8+CiAgPHRleHQgeD0iNDAiIHk9IjQ1IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI2IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmZmZmIj5WaWJlY29yZDwvdGV4dD4KICA8cmVjdCB4PSI3NjAiIHk9IjIwIiB3aWR0aD0iODIiIGhlaWdodD0iMzQiIHJ4PSI2IiBmaWxsPSIjZmZmZmZmIi8+CiAgPHRleHQgeD0iNzgyIiB5PSI0MyIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzE3MjAzMyI+U2lnbiBpbjwvdGV4dD4KICA8cmVjdCB4PSI0MCIgeT0iMTI2IiB3aWR0aD0iNDIwIiBoZWlnaHQ9IjIyMCIgcng9IjgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2Q4ZGVlOCIvPgogIDx0ZXh0IHg9IjcyIiB5PSIxNzgiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMzQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPkJ1aWxkIGEgY29tbXVuaXR5IHNwYWNlPC90ZXh0PgogIDx0ZXh0IHg9IjcyIiB5PSIyMjIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM1YjY0NzIiPkxhbmRpbmcgbm9kZSBmb3IgYW5vbnltb3VzIHVzZXJzLjwvdGV4dD4KICA8cmVjdCB4PSI3MiIgeT0iMjY0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjQ0IiByeD0iNiIgZmlsbD0iIzBmNzY2ZSIvPgogIDx0ZXh0IHg9IjEwMSIgeT0iMjkyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmaWxsPSIjZmZmZmZmIj5HZXQgc3RhcnRlZDwvdGV4dD4KICA8cmVjdCB4PSI1MzAiIHk9IjEyNiIgd2lkdGg9IjM0MCIgaGVpZ2h0PSIyODYiIHJ4PSI4IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNkOGRlZTgiLz4KICA8cmVjdCB4PSI1NjIiIHk9IjE2NiIgd2lkdGg9IjI3NiIgaGVpZ2h0PSIzNCIgcng9IjUiIGZpbGw9IiNlOGVkZjQiLz4KICA8cmVjdCB4PSI1NjIiIHk9IjIyMiIgd2lkdGg9IjIyMCIgaGVpZ2h0PSIzNCIgcng9IjUiIGZpbGw9IiNlOGVkZjQiLz4KICA8cmVjdCB4PSI1NjIiIHk9IjI3OCIgd2lkdGg9IjI1MiIgaGVpZ2h0PSIzNCIgcng9IjUiIGZpbGw9IiNlOGVkZjQiLz4KICA8dGV4dCB4PSI1NjIiIHk9IjM3MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNSIgZmlsbD0iIzViNjQ3MiI+U2NyZWVuc2hvdCBldmlkZW5jZTogbGFuZGluZzwvdGV4dD4KPC9zdmc+Cg==" alt="Landing node"><figcaption>Landing node</figcaption></figure>
+<figure><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NjAgNTQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlN5bnRoZXRpYyBhdXRoZW50aWNhdGlvbiBzY3JlZW5zaG90Ij4KICA8cmVjdCB3aWR0aD0iOTYwIiBoZWlnaHQ9IjU0MCIgZmlsbD0iI2VlZjJmNiIvPgogIDxyZWN0IHg9IjMwMCIgeT0iNzgiIHdpZHRoPSIzNjAiIGhlaWdodD0iMzg0IiByeD0iOCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZDhkZWU4Ii8+CiAgPHRleHQgeD0iMzQ4IiB5PSIxMzgiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPlNpZ24gaW48L3RleHQ+CiAgPHRleHQgeD0iMzQ4IiB5PSIxNzQiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZpbGw9IiM1YjY0NzIiPkFjY2VzcyBub2RlIGZvciBhdXRoZW50aWNhdGVkIG5hdmlnYXRpb24uPC90ZXh0PgogIDxyZWN0IHg9IjM0OCIgeT0iMjE0IiB3aWR0aD0iMjY0IiBoZWlnaHQ9IjQ0IiByeD0iNiIgZmlsbD0iI2Y3ZjlmYyIgc3Ryb2tlPSIjYjljN2RjIi8+CiAgPHRleHQgeD0iMzY2IiB5PSIyNDIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM1YjY0NzIiPmVtYWlsQGV4YW1wbGUuY29tPC90ZXh0PgogIDxyZWN0IHg9IjM0OCIgeT0iMjc4IiB3aWR0aD0iMjY0IiBoZWlnaHQ9IjQ0IiByeD0iNiIgZmlsbD0iI2Y3ZjlmYyIgc3Ryb2tlPSIjYjljN2RjIi8+CiAgPHRleHQgeD0iMzY2IiB5PSIzMDYiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM1YjY0NzIiPnBhc3N3b3JkPC90ZXh0PgogIDxyZWN0IHg9IjM0OCIgeT0iMzUwIiB3aWR0aD0iMjY0IiBoZWlnaHQ9IjQ2IiByeD0iNiIgZmlsbD0iIzI0NTdjNSIvPgogIDx0ZXh0IHg9IjQ1NSIgeT0iMzc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmaWxsPSIjZmZmZmZmIj5Db250aW51ZTwvdGV4dD4KPC9zdmc+Cg==" alt="Auth node"><figcaption>Auth node</figcaption></figure>
+<figure><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NjAgNTQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlN5bnRoZXRpYyBkYXNoYm9hcmQgc2NyZWVuc2hvdCI+CiAgPHJlY3Qgd2lkdGg9Ijk2MCIgaGVpZ2h0PSI1NDAiIGZpbGw9IiNmNGY3ZmIiLz4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjIwIiBoZWlnaHQ9IjU0MCIgZmlsbD0iIzE3MjAzMyIvPgogIDx0ZXh0IHg9IjI4IiB5PSI0OCIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2ZmZmZmZiI+VmliZWNvcmQ8L3RleHQ+CiAgPHJlY3QgeD0iMjQiIHk9Ijk2IiB3aWR0aD0iMTcyIiBoZWlnaHQ9IjM2IiByeD0iNiIgZmlsbD0iIzBmNzY2ZSIvPgogIDx0ZXh0IHg9IjQ0IiB5PSIxMjAiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNmZmZmZmYiPkRhc2hib2FyZDwvdGV4dD4KICA8dGV4dCB4PSI0NCIgeT0iMTc0IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjZGNlNmYxIj5DaGFubmVsczwvdGV4dD4KICA8dGV4dCB4PSI0NCIgeT0iMjE4IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjZGNlNmYxIj5NZW1iZXJzPC90ZXh0PgogIDx0ZXh0IHg9IjQ0IiB5PSIyNjIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNkY2U2ZjEiPlNldHRpbmdzPC90ZXh0PgogIDx0ZXh0IHg9IjI2MCIgeT0iNzIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMzAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPkNvbW11bml0eSBEYXNoYm9hcmQ8L3RleHQ+CiAgPHJlY3QgeD0iMjYwIiB5PSIxMTIiIHdpZHRoPSIyODIiIGhlaWdodD0iMTUwIiByeD0iOCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZDhkZWU4Ii8+CiAgPHRleHQgeD0iMjg2IiB5PSIxNTgiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPkNoYW5uZWxzPC90ZXh0PgogIDx0ZXh0IHg9IjI4NiIgeT0iMTk2IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE1IiBmaWxsPSIjNWI2NDcyIj5DcmVhdGUsIGpvaW4sIG9yIGluc3BlY3Qgcm9vbXMuPC90ZXh0PgogIDxyZWN0IHg9IjU3OCIgeT0iMTEyIiB3aWR0aD0iMjgyIiBoZWlnaHQ9IjE1MCIgcng9IjgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2Q4ZGVlOCIvPgogIDx0ZXh0IHg9IjYwNCIgeT0iMTU4IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTcyMDMzIj5BY3Rpdml0eTwvdGV4dD4KICA8dGV4dCB4PSI2MDQiIHk9IjE5NiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNSIgZmlsbD0iIzViNjQ3MiI+UnVudGltZSBlZmZlY3RzIGFuZCBldmVudHMuPC90ZXh0PgogIDxyZWN0IHg9IjI2MCIgeT0iMzAyIiB3aWR0aD0iNjAwIiBoZWlnaHQ9IjExNiIgcng9IjgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2Q4ZGVlOCIvPgogIDx0ZXh0IHg9IjI4NiIgeT0iMzUwIiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNWI2NDcyIj5TY3JlZW5zaG90IGV2aWRlbmNlOiBhdXRoZW50aWNhdGVkIGRhc2hib2FyZDwvdGV4dD4KPC9zdmc+Cg==" alt="Dashboard node"><figcaption>Dashboard node</figcaption></figure></div></section><section class="tab-panel"><h2>Canonical Source</h2><p><a href="../../../docs/artifacts/source/models/sample-uwe-navigation.md">docs/artifacts/source/models/sample-uwe-navigation.md</a></p><pre>---
+artifactType: model-view
+modelId: sample-uwe-navigation
+modelKind: component
+method: uwe
+notation: mermaid
+abstractionLevel: design
+owner: system-modeler
+facets:
+  - content
+  - navigation
+  - presentation
+  - process
+  - access
+  - adaptation
+implementationTouchpoints:
+  - docs/artifacts/source/product/sample-uwe-screenshot-atlas.md
+  - generated/review/evidence/sample-uwe-atlas/landing.svg
+  - generated/review/evidence/sample-uwe-atlas/auth.svg
+  - generated/review/evidence/sample-uwe-atlas/dashboard.svg
+docTouchpoints:
+  - docs/artifacts/templates/e2e-product-system-atlas.md
+  - docs/artifacts/source/models/model-inventory.md
+evidenceLinks:
+  - docs/artifacts/source/product/sample-uwe-screenshot-atlas.md
+  - generated/review/evidence/sample-uwe-atlas/landing.svg
+  - generated/review/evidence/sample-uwe-atlas/auth.svg
+  - generated/review/evidence/sample-uwe-atlas/dashboard.svg
+reviewRequired: true
+updateTriggers:
+  - sample atlas source changes
+  - screenshot evidence changes
+  - UWE atlas template changes
+driftVerdict: aligned
+---
+
+# Sample UWE Navigation Model
+
+This synthetic model shows how a screenshot-backed UWE atlas can represent navigable app states, access branches, and process actions.
+
+## Purpose
+
+Provide a small working example of the UWE navigation pattern that can be copied into target repos and replaced with real app routes and screenshots.
+
+## Source Model
+
+```mermaid
+flowchart LR
+  Landing[&quot;landing\n/&quot;]
+  Auth[&quot;auth\n/login&quot;]
+  Dashboard[&quot;dashboard\n/app&quot;]
+  Channels[&quot;channels\n/app/channels&quot;]
+  Settings[&quot;settings\n/app/settings&quot;]
+  Denied[&quot;access denied&quot;]
+
+  Landing --&gt;|sign in|getAuth[Auth]
+  getAuth --&gt; Auth
+  Auth --&gt;|valid member| Dashboard
+  Dashboard --&gt; Channels
+  Dashboard --&gt;|admin| Settings
+  Dashboard --&gt;|member denied| Denied
+  Settings --&gt; Dashboard
+```
+
+## UWE Facet Mapping
+
+| Node | Content | Navigation | Presentation | Process | Access | Adaptation |
+| --- | --- | --- | --- | --- | --- | --- |
+| landing | marketing copy | public entry | landing screenshot | get started | anonymous | desktop/mobile variants |
+| auth | credential fields | login route | auth screenshot | authenticate | anonymous to member | password recovery branch |
+| dashboard | community/channel data | authenticated hub | dashboard screenshot | open channels/settings | member/admin | role-specific nav |
+| settings | settings data | admin branch | not captured | update settings | admin only | feature flags |
+
+## Screenshot Evidence
+
+| Node | Evidence |
+| --- | --- |
+| landing | `generated/review/evidence/sample-uwe-atlas/landing.svg` |
+| auth | `generated/review/evidence/sample-uwe-atlas/auth.svg` |
+| dashboard | `generated/review/evidence/sample-uwe-atlas/dashboard.svg` |
+| settings | evidence gap |
+
+## Invariants
+
+- Navigation nodes should map to user-reachable route or UI states.
+- Each node should have screenshot evidence or an explicit gap.
+- Role-sensitive links must show allowed and denied branches.
+- Process actions should link to expected side effects in the product atlas.
+- Synthetic evidence must be labelled as synthetic.
+
+## Freshness
+
+Update this model when the sample product atlas, screenshot evidence, or UWE atlas template changes.
+</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../docs/artifacts/source/product/sample-uwe-screenshot-atlas.md">docs/artifacts/source/product/sample-uwe-screenshot-atlas.md</a></li><li><a href="../evidence/sample-uwe-atlas/landing.svg">generated/review/evidence/sample-uwe-atlas/landing.svg</a></li><li><a href="../evidence/sample-uwe-atlas/auth.svg">generated/review/evidence/sample-uwe-atlas/auth.svg</a></li><li><a href="../evidence/sample-uwe-atlas/dashboard.svg">generated/review/evidence/sample-uwe-atlas/dashboard.svg</a></li></ul><h3>Update Triggers</h3><ul><li>sample atlas source changes</li><li>screenshot evidence changes</li><li>UWE atlas template changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br></div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-24</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
+</main>
+</body>
+</html>

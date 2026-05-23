@@ -34,13 +34,50 @@ artifact-infographic:
     {
       "title": "UWE Navigation Graph",
       "tool": "graphviz",
-      "kind": "graph",
-      "summary": "Navigable app nodes and role-sensitive links. Keep this as a bounded navigation model, not a giant whole-system UML diagram.",
+      "kind": "uwe-navigation",
+      "summary": "Navigable app nodes grouped by UWE navigation class with screenshots embedded inside the UWE navigation nodes. Keep this bounded, not a giant whole-system UML diagram.",
+      "navigationClasses": [
+        "Visitor acquisition and access",
+        "Authenticated app flow",
+        "Utilities and admin"
+      ],
+      "nodes": [
+        {
+          "id": "Landing",
+          "label": "Landing",
+          "route": "/",
+          "navigationClass": "Visitor acquisition and access",
+          "facet": "navigation",
+          "role": "anonymous",
+          "effect": "session unchanged",
+          "screenshot": "generated/review/evidence/[app]/landing.png"
+        },
+        {
+          "id": "Auth",
+          "label": "Auth",
+          "route": "/login",
+          "navigationClass": "Visitor acquisition and access",
+          "facet": "access",
+          "role": "anonymous",
+          "effect": "session created on success",
+          "screenshot": "generated/review/evidence/[app]/auth.png"
+        },
+        {
+          "id": "Dashboard",
+          "label": "Dashboard",
+          "route": "/app",
+          "navigationClass": "Authenticated app flow",
+          "facet": "content",
+          "role": "member",
+          "effect": "account/project data read",
+          "screenshot": "generated/review/evidence/[app]/dashboard.png"
+        }
+      ],
       "edges": [
-        ["Landing", "Auth"],
-        ["Auth", "Dashboard"],
-        ["Dashboard", "Primary Workflow"],
-        ["Primary Workflow", "Result State"]
+        ["Landing", "Auth", "sign in"],
+        ["Auth", "Dashboard", "valid session"],
+        ["Dashboard", "Primary Workflow", "primary action"],
+        ["Primary Workflow", "Result State", "success"]
       ]
     }
 

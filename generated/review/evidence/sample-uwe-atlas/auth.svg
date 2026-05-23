@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Synthetic authentication screenshot">
+  <rect width="960" height="540" fill="#eef2f6"/>
+  <rect x="300" y="78" width="360" height="384" rx="8" fill="#ffffff" stroke="#d8dee8"/>
+  <text x="348" y="138" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" fill="#172033">Sign in</text>
+  <text x="348" y="174" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#5b6472">Access node for authenticated navigation.</text>
+  <rect x="348" y="214" width="264" height="44" rx="6" fill="#f7f9fc" stroke="#b9c7dc"/>
+  <text x="366" y="242" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#5b6472">email@example.com</text>
+  <rect x="348" y="278" width="264" height="44" rx="6" fill="#f7f9fc" stroke="#b9c7dc"/>
+  <text x="366" y="306" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#5b6472">password</text>
+  <rect x="348" y="350" width="264" height="46" rx="6" fill="#2457c5"/>
+  <text x="455" y="379" font-family="Segoe UI, Arial, sans-serif" font-size="16" fill="#ffffff">Continue</text>
+</svg>

@@ -4001,13 +4001,50 @@ artifact-infographic:
     {
       "title": "UWE Navigation Graph",
       "tool": "graphviz",
-      "kind": "graph",
-      "summary": "Navigable app nodes and role-sensitive links. Keep this as a bounded navigation model, not a giant whole-system UML diagram.",
+      "kind": "uwe-navigation",
+      "summary": "Navigable app nodes grouped by UWE navigation class with screenshots embedded inside the UWE navigation nodes. Keep this bounded, not a giant whole-system UML diagram.",
+      "navigationClasses": [
+        "Visitor acquisition and access",
+        "Authenticated app flow",
+        "Utilities and admin"
+      ],
+      "nodes": [
+        {
+          "id": "Landing",
+          "label": "Landing",
+          "route": "/",
+          "navigationClass": "Visitor acquisition and access",
+          "facet": "navigation",
+          "role": "anonymous",
+          "effect": "session unchanged",
+          "screenshot": "generated/review/evidence/[app]/landing.png"
+        },
+        {
+          "id": "Auth",
+          "label": "Auth",
+          "route": "/login",
+          "navigationClass": "Visitor acquisition and access",
+          "facet": "access",
+          "role": "anonymous",
+          "effect": "session created on success",
+          "screenshot": "generated/review/evidence/[app]/auth.png"
+        },
+        {
+          "id": "Dashboard",
+          "label": "Dashboard",
+          "route": "/app",
+          "navigationClass": "Authenticated app flow",
+          "facet": "content",
+          "role": "member",
+          "effect": "account/project data read",
+          "screenshot": "generated/review/evidence/[app]/dashboard.png"
+        }
+      ],
       "edges": [
-        ["Landing", "Auth"],
-        ["Auth", "Dashboard"],
-        ["Dashboard", "Primary Workflow"],
-        ["Primary Workflow", "Result State"]
+        ["Landing", "Auth", "sign in"],
+        ["Auth", "Dashboard", "valid session"],
+        ["Dashboard", "Primary Workflow", "primary action"],
+        ["Primary Workflow", "Result State", "success"]
       ]
     }
 
@@ -4669,7 +4706,16 @@ function graphData(spec) {
     if (edge.to) nodeIds.add(edge.to);
   }
   const nodes = Array.isArray(spec.nodes) && spec.nodes.length > 0
-    ? spec.nodes.map((node) => typeof node === 'string' ? { id: node, label: node } : { id: String(node.id ?? node.name ?? node.label), label: String(node.label ?? node.name ?? node.id) })
+    ? spec.nodes.map((node) => typeof node === 'string' ? { id: node, label: node } : {
+      id: String(node.id ?? node.name ?? node.label),
+      label: String(node.label ?? node.name ?? node.id),
+      route: node.route ? String(node.route) : '',
+      facet: node.facet ? String(node.facet) : '',
+      role: node.role ? String(node.role) : '',
+      navigationClass: node.navigationClass || node.lane || node.class ? String(node.navigationClass ?? node.lane ?? node.class) : '',
+      effect: node.effect || node.sideEffect ? String(node.effect ?? node.sideEffect) : '',
+      screenshot: node.screenshot || node.image || node.visualEvidence || '',
+    })
     : [...nodeIds].map((id) => ({ id, label: id }));
   return { nodes: nodes.slice(0, 12), edges: edges.filter((edge) => edge.from && edge.to).slice(0, 18) };
 }
@@ -4712,6 +4758,8 @@ function renderLineSvg(spec) {
 function renderGraphSvg(spec) {
   const graph = graphData(spec);
   if (graph.nodes.length === 0) return '<p class="muted">No graph nodes or edges were provided for this infographic spec.</p>';
+  const kind = String(spec.kind ?? spec.mark ?? spec.type ?? '').toLowerCase();
+  if (kind === 'uwe-navigation' || kind === 'uwe' || graph.nodes.some((node) => node.screenshot)) return renderUweNavigationSvg(spec, graph);
   const cx = 360;
   const cy = 170;
   const radius = 104;
@@ -4730,6 +4778,75 @@ function renderGraphSvg(spec) {
     return '<g><circle cx="' + pos.x.toFixed(1) + '" cy="' + pos.y.toFixed(1) + '" r="30" fill="#effaf8" stroke="#0f766e" stroke-width="2"></circle><text x="' + pos.x.toFixed(1) + '" y="' + (pos.y + 4).toFixed(1) + '" text-anchor="middle" font-size="11" fill="#1f2937">' + escapeHtml(node.label.slice(0, 12)) + '</text></g>';
   }).join('');
   return '<svg class="infographic-chart" viewBox="0 0 720 340" role="img" aria-label="' + escapeAttribute(spec.title ?? 'relationship graph') + '">' + edges + nodes + '</svg>';
+}
+
+function renderUweNavigationSvg(spec, graph) {
+  const cardWidth = 210;
+  const cardHeight = 168;
+  const gapX = 42;
+  const gapY = 34;
+  const laneGap = 32;
+  const lanePadding = 18;
+  const explicitClasses = Array.isArray(spec.navigationClasses ?? spec.lanes ?? spec.classes)
+    ? (spec.navigationClasses ?? spec.lanes ?? spec.classes).map((item) => typeof item === 'string' ? item : (item.label ?? item.id ?? item.name)).filter(Boolean).map(String)
+    : [];
+  const discoveredClasses = graph.nodes.map((node) => node.navigationClass || 'Navigation').filter((value, index, all) => all.indexOf(value) === index);
+  const classNames = [...explicitClasses, ...discoveredClasses.filter((name) => !explicitClasses.includes(name))];
+  const lanes = classNames.map((name) => {
+    const nodes = graph.nodes.filter((node) => (node.navigationClass || 'Navigation') === name);
+    return { name, nodes: nodes.length > 0 ? nodes : [] };
+  }).filter((lane) => lane.nodes.length > 0);
+  const cols = Math.min(4, Math.max(1, ...lanes.map((lane) => lane.nodes.length)));
+  const laneWidth = cols * cardWidth + (cols - 1) * gapX + lanePadding * 2;
+  const positions = new Map();
+  let yCursor = 50;
+  for (const lane of lanes) {
+    lane.y = yCursor;
+    lane.rows = Math.max(1, Math.ceil(lane.nodes.length / cols));
+    lane.height = lane.rows * cardHeight + (lane.rows - 1) * gapY + lanePadding * 2 + 34;
+    lane.nodes.forEach((node, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      positions.set(node.id, {
+        x: lanePadding + col * (cardWidth + gapX),
+        y: lane.y + lanePadding + 34 + row * (cardHeight + gapY),
+      });
+    });
+    yCursor += lane.height + laneGap;
+  }
+  const width = laneWidth;
+  const height = Math.max(260, yCursor + 4);
+  const laneRects = lanes.map((lane) =>
+    '<g><rect x="4" y="' + lane.y + '" width="' + (laneWidth - 8) + '" height="' + lane.height + '" rx="8" fill="#f8fafc" stroke="#cbd5e1"></rect>' +
+    '<text x="20" y="' + (lane.y + 24) + '" font-size="13" font-weight="800" fill="#334155">«navigation class» ' + escapeHtml(lane.name.slice(0, 80)) + '</text></g>'
+  ).join('');
+  const edges = graph.edges.map((edge) => {
+    const from = positions.get(edge.from);
+    const to = positions.get(edge.to);
+    if (!from || !to) return '';
+    const x1 = from.x + cardWidth;
+    const y1 = from.y + cardHeight / 2;
+    const x2 = to.x;
+    const y2 = to.y + cardHeight / 2;
+    const labelX = (x1 + x2) / 2;
+    const labelY = (y1 + y2) / 2 - 5;
+    return '<g><line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="#64748b" stroke-width="2" marker-end="url(#arrowHead)"></line>' +
+      (edge.label ? '<text x="' + labelX.toFixed(1) + '" y="' + labelY.toFixed(1) + '" text-anchor="middle" font-size="10" fill="#334155">' + escapeHtml(edge.label.slice(0, 34)) + '</text>' : '') + '</g>';
+  }).join('');
+  const nodes = graph.nodes.map((node) => {
+    const pos = positions.get(node.id);
+    const dataUrl = imageDataUrl(node.screenshot);
+    const image = dataUrl
+      ? '<image href="' + escapeAttribute(dataUrl) + '" x="' + (pos.x + 10) + '" y="' + (pos.y + 34) + '" width="' + (cardWidth - 20) + '" height="96" preserveAspectRatio="xMidYMid meet"></image>'
+      : '<rect x="' + (pos.x + 10) + '" y="' + (pos.y + 34) + '" width="' + (cardWidth - 20) + '" height="96" rx="6" fill="#eef2f6" stroke="#d8dee8"></rect><text x="' + (pos.x + cardWidth / 2) + '" y="' + (pos.y + 86) + '" text-anchor="middle" font-size="11" fill="#64748b">no screenshot</text>';
+    return '<g><rect x="' + pos.x + '" y="' + pos.y + '" width="' + cardWidth + '" height="' + cardHeight + '" rx="8" fill="#ffffff" stroke="#9fb3c8" stroke-width="1.5"></rect>' +
+      '<rect x="' + pos.x + '" y="' + pos.y + '" width="' + cardWidth + '" height="25" rx="8" fill="#effaf8"></rect>' +
+      '<text x="' + (pos.x + 10) + '" y="' + (pos.y + 17) + '" font-size="11" font-weight="800" fill="#0f766e">«navigation node»</text>' +
+      image +
+      '<text x="' + (pos.x + 10) + '" y="' + (pos.y + 146) + '" font-size="12" font-weight="800" fill="#111827">' + escapeHtml(node.label.slice(0, 26)) + '</text>' +
+      '<text x="' + (pos.x + 10) + '" y="' + (pos.y + 160) + '" font-size="10" fill="#334155">' + escapeHtml((node.route || node.facet || node.role || 'navigationNode').slice(0, 34)) + '</text></g>';
+  }).join('');
+  return '<svg class="infographic-chart" viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="' + escapeAttribute(spec.title ?? 'UWE navigation screenshot model') + '"><defs><marker id="arrowHead" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 Z" fill="#64748b"></path></marker></defs>' + laneRects + edges + nodes + '</svg>';
 }
 
 function renderInfographicSpec(spec, index) {

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<title>Sample UWE Screenshot Atlas</title>
+<style>
+:root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;--bg:#eef2f6;--panel:#fff;--text:#1f2937;--muted:#5b6472;--line:#d8dee8;--navy:#172033;--teal:#0f766e;--blue:#2457c5;--amber:#a15c07;--green:#16794b;--red:#b42318;--violet:#6546a3}*{box-sizing:border-box}body{margin:0;color:var(--text);background:var(--bg)}a{color:#174ea6}header{background:var(--navy);color:#fff;padding:28px;border-bottom:6px solid var(--teal)}header h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:0}header p{max-width:1040px;margin:0;color:#dce6f1}main{max-width:1240px;margin:0 auto;padding:18px}h2,h3{margin:0 0 10px;line-height:1.2;letter-spacing:0}p{margin:0 0 12px}.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{border:1px solid var(--line);border-top:5px solid var(--teal);border-radius:8px;padding:12px;background:#fff;min-height:104px}.metric strong{display:block;font-size:28px;line-height:1;margin-bottom:6px}.metric span{color:var(--muted);font-size:13px}.blue{border-top-color:var(--blue)}.amber{border-top-color:var(--amber)}.green{border-top-color:var(--green)}.violet{border-top-color:var(--violet)}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:650}.tab-panel{display:none;margin-top:14px}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4){display:block}.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.step{border:1px solid var(--line);border-radius:8px;background:#f9fbfd;padding:12px;min-height:96px}.step strong{display:block;margin-bottom:5px}.step span,.muted{color:var(--muted)}.bar-row{display:grid;grid-template-columns:172px minmax(0,1fr) 52px;gap:10px;align-items:center;margin:10px 0}.bar-track{height:18px;background:#e8edf4;border-radius:999px;overflow:hidden}.bar{display:block;height:100%;border-radius:999px;background:var(--teal)}.w100{width:100%}.w80{width:80%}.w60{width:60%}.w40{width:40%}.w20{width:20%}.toolkit-grid,.chart-grid,.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.tool-card,.chart-panel{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px}.tool-card strong,.tool-card span,.tool-card em{display:block}.tool-card span{color:var(--muted);font-size:13px}.tool-card em{margin-top:6px;color:#334155;font-size:12px;font-style:normal}.chart-head{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}.tool-badge{display:inline-flex;border:1px solid #b9c7dc;background:#f4f7fb;border-radius:999px;padding:2px 8px;color:#334155;font-size:12px;font-weight:700;white-space:nowrap}.infographic-chart{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff;margin-top:8px}figure{margin:0;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}figure img{display:block;width:100%;height:auto}figcaption{padding:9px 10px;color:var(--muted);font-size:13px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid var(--line);text-align:left;vertical-align:top;padding:9px}th{background:#f7f9fc}pre{white-space:pre-wrap;overflow:auto;background:#101828;color:#e5edf7;padding:14px;border-radius:8px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#eef2f6;border:1px solid #dae2ec;border-radius:4px;padding:1px 4px}ul,ol{margin:8px 0 0 20px;padding:0}li{margin:4px 0}.callout{border-left:5px solid var(--teal);background:#effaf8;padding:12px 14px;border-radius:7px;margin:12px 0}@media(max-width:920px){.grid,.metrics{grid-template-columns:1fr}main{padding:12px}.bar-row{grid-template-columns:1fr}.chart-head{display:block}.tool-badge{margin-bottom:8px}}
+</style>
+</head>
+<body>
+<header><h1>Sample UWE Screenshot Atlas</h1><p>This is a synthetic Vibecord-style example showing how a UWE navigation model can become a screenshot-backed inspection artifact. It is not evidence from the real Vibecord app.</p></header><main><section class="grid"><div class="panel"><h2>Review Verdict</h2><p>This is a synthetic Vibecord-style example showing how a UWE navigation model can become a screenshot-backed inspection artifact. It is not evidence from the real Vibecord app.</p><div class="callout"><strong>Source first:</strong> edit <a href="../../../docs/artifacts/source/product/sample-uwe-screenshot-atlas.md">docs/artifacts/source/product/sample-uwe-screenshot-atlas.md</a> before regenerating this review surface.</div></div><div class="metrics"><div class="metric green"><strong>ready</strong><span>Status</span></div><div class="metric blue"><strong>5</strong><span>Evidence links</span></div><div class="metric amber"><strong>8</strong><span>Major sections</span></div><div class="metric violet"><strong>product</strong><span>Artifact family</span></div></div></section><section class="panel"><h2>Infographic Snapshot</h2><div class="bar-row"><span>Evidence coverage</span><span class="bar-track"><span class="bar w100"></span></span><strong>5</strong></div><div class="bar-row"><span>Source depth</span><span class="bar-track"><span class="bar w100"></span></span><strong>8</strong></div><div class="bar-row"><span>Update triggers</span><span class="bar-track"><span class="bar w60"></span></span><strong>3</strong></div></section><section class="panel"><h2>Open-Source Infographic Toolkit</h2><p class="muted">These tools are allowed as source/spec or generation-time renderers. The generated HTML does not load their browser runtimes.</p><div class="toolkit-grid"><div class="tool-card"><strong>Mermaid</strong><span>architecture, workflow, sequence, and model diagrams</span><em>pre-rendered inline SVG or static markup</em></div><div class="tool-card"><strong>Vega-Lite</strong><span>default declarative charts for metrics, comparisons, and evidence dashboards</span><em>static SVG generated from source specs</em></div><div class="tool-card"><strong>Observable Plot</strong><span>compact exploratory charts and statistical views</span><em>static SVG generated from source specs</em></div><div class="tool-card"><strong>D3</strong><span>custom infographic layouts when canned charts are not expressive enough</span><em>static SVG generated during artifact generation</em></div><div class="tool-card"><strong>Graphviz</strong><span>node-edge dependency, lineage, and relationship maps</span><em>static SVG generated from DOT or structured edges</em></div><div class="tool-card"><strong>Apache ECharts</strong><span>dashboard-style chart families when a richer chart grammar is useful</span><em>static SVG or PNG generated outside the browser runtime</em></div><div class="tool-card"><strong>RAWGraphs</strong><span>design-led or unusual infographic forms using tabular data</span><em>exported SVG copied into the generated review surface</em></div><div class="tool-card"><strong>Chart.js</strong><span>simple familiar charts when existing source data already matches Chart.js conventions</span><em>server-rendered image or static SVG equivalent</em></div></div></section><section class="panel"><h2>Static Infographic Specs</h2><div class="chart-grid"><article class="chart-panel"><div class="chart-head"><h3>Sample UWE Navigation Graph</h3><span class="tool-badge">graphviz</span></div><p>A bounded UWE navigation graph with navigation classes and screenshots embedded inside the navigational nodes.</p><svg class="infographic-chart" viewBox="0 0 498 864" role="img" aria-label="Sample UWE Navigation Graph"><defs><marker id="arrowHead" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 Z" fill="#64748b"></path></marker></defs><g><rect x="4" y="50" width="490" height="238" rx="8" fill="#f8fafc" stroke="#cbd5e1"></rect><text x="20" y="74" font-size="13" font-weight="800" fill="#334155">«navigation class» Visitor acquisition and access</text></g><g><rect x="4" y="320" width="490" height="238" rx="8" fill="#f8fafc" stroke="#cbd5e1"></rect><text x="20" y="344" font-size="13" font-weight="800" fill="#334155">«navigation class» Authenticated workspace flow</text></g><g><rect x="4" y="590" width="490" height="238" rx="8" fill="#f8fafc" stroke="#cbd5e1"></rect><text x="20" y="614" font-size="13" font-weight="800" fill="#334155">«navigation class» Workspace utilities and admin</text></g><g><line x1="228.0" y1="186.0" x2="270.0" y2="186.0" stroke="#64748b" stroke-width="2" marker-end="url(#arrowHead)"></line><text x="249.0" y="181.0" text-anchor="middle" font-size="10" fill="#334155">sign in</text></g><g><line x1="480.0" y1="186.0" x2="18.0" y2="456.0" stroke="#64748b" stroke-width="2" marker-end="url(#arrowHead)"></line><text x="249.0" y="316.0" text-anchor="middle" font-size="10" fill="#334155">valid session</text></g><g><line x1="228.0" y1="456.0" x2="270.0" y2="456.0" stroke="#64748b" stroke-width="2" marker-end="url(#arrowHead)"></line><text x="249.0" y="451.0" text-anchor="middle" font-size="10" fill="#334155">open channels</text></g><g><line x1="228.0" y1="456.0" x2="18.0" y2="726.0" stroke="#64748b" stroke-width="2" marker-end="url(#arrowHead)"></line><text x="123.0" y="586.0" text-anchor="middle" font-size="10" fill="#334155">admin only</text></g><g><line x1="228.0" y1="726.0" x2="18.0" y2="456.0" stroke="#64748b" stroke-width="2" marker-end="url(#arrowHead)"></line><text x="123.0" y="586.0" text-anchor="middle" font-size="10" fill="#334155">back</text></g><g><rect x="18" y="102" width="210" height="168" rx="8" fill="#ffffff" stroke="#9fb3c8" stroke-width="1.5"></rect><rect x="18" y="102" width="210" height="25" rx="8" fill="#effaf8"></rect><text x="28" y="119" font-size="11" font-weight="800" fill="#0f766e">«navigation node»</text><image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NjAgNTQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlN5bnRoZXRpYyBsYW5kaW5nIHBhZ2Ugc2NyZWVuc2hvdCI+CiAgPHJlY3Qgd2lkdGg9Ijk2MCIgaGVpZ2h0PSI1NDAiIGZpbGw9IiNmNGY3ZmIiLz4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iOTYwIiBoZWlnaHQ9IjcyIiBmaWxsPSIjMTcyMDMzIi8+CiAgPHRleHQgeD0iNDAiIHk9IjQ1IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI2IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmZmZmIj5WaWJlY29yZDwvdGV4dD4KICA8cmVjdCB4PSI3NjAiIHk9IjIwIiB3aWR0aD0iODIiIGhlaWdodD0iMzQiIHJ4PSI2IiBmaWxsPSIjZmZmZmZmIi8+CiAgPHRleHQgeD0iNzgyIiB5PSI0MyIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzE3MjAzMyI+U2lnbiBpbjwvdGV4dD4KICA8cmVjdCB4PSI0MCIgeT0iMTI2IiB3aWR0aD0iNDIwIiBoZWlnaHQ9IjIyMCIgcng9IjgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2Q4ZGVlOCIvPgogIDx0ZXh0IHg9IjcyIiB5PSIxNzgiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMzQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPkJ1aWxkIGEgY29tbXVuaXR5IHNwYWNlPC90ZXh0PgogIDx0ZXh0IHg9IjcyIiB5PSIyMjIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM1YjY0NzIiPkxhbmRpbmcgbm9kZSBmb3IgYW5vbnltb3VzIHVzZXJzLjwvdGV4dD4KICA8cmVjdCB4PSI3MiIgeT0iMjY0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjQ0IiByeD0iNiIgZmlsbD0iIzBmNzY2ZSIvPgogIDx0ZXh0IHg9IjEwMSIgeT0iMjkyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmaWxsPSIjZmZmZmZmIj5HZXQgc3RhcnRlZDwvdGV4dD4KICA8cmVjdCB4PSI1MzAiIHk9IjEyNiIgd2lkdGg9IjM0MCIgaGVpZ2h0PSIyODYiIHJ4PSI4IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNkOGRlZTgiLz4KICA8cmVjdCB4PSI1NjIiIHk9IjE2NiIgd2lkdGg9IjI3NiIgaGVpZ2h0PSIzNCIgcng9IjUiIGZpbGw9IiNlOGVkZjQiLz4KICA8cmVjdCB4PSI1NjIiIHk9IjIyMiIgd2lkdGg9IjIyMCIgaGVpZ2h0PSIzNCIgcng9IjUiIGZpbGw9IiNlOGVkZjQiLz4KICA8cmVjdCB4PSI1NjIiIHk9IjI3OCIgd2lkdGg9IjI1MiIgaGVpZ2h0PSIzNCIgcng9IjUiIGZpbGw9IiNlOGVkZjQiLz4KICA8dGV4dCB4PSI1NjIiIHk9IjM3MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNSIgZmlsbD0iIzViNjQ3MiI+U2NyZWVuc2hvdCBldmlkZW5jZTogbGFuZGluZzwvdGV4dD4KPC9zdmc+Cg==" x="28" y="136" width="190" height="96" preserveAspectRatio="xMidYMid meet"></image><text x="28" y="248" font-size="12" font-weight="800" fill="#111827">Landing</text><text x="28" y="262" font-size="10" fill="#334155">/</text></g><g><rect x="270" y="102" width="210" height="168" rx="8" fill="#ffffff" stroke="#9fb3c8" stroke-width="1.5"></rect><rect x="270" y="102" width="210" height="25" rx="8" fill="#effaf8"></rect><text x="280" y="119" font-size="11" font-weight="800" fill="#0f766e">«navigation node»</text><image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NjAgNTQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlN5bnRoZXRpYyBhdXRoZW50aWNhdGlvbiBzY3JlZW5zaG90Ij4KICA8cmVjdCB3aWR0aD0iOTYwIiBoZWlnaHQ9IjU0MCIgZmlsbD0iI2VlZjJmNiIvPgogIDxyZWN0IHg9IjMwMCIgeT0iNzgiIHdpZHRoPSIzNjAiIGhlaWdodD0iMzg0IiByeD0iOCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZDhkZWU4Ii8+CiAgPHRleHQgeD0iMzQ4IiB5PSIxMzgiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPlNpZ24gaW48L3RleHQ+CiAgPHRleHQgeD0iMzQ4IiB5PSIxNzQiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZpbGw9IiM1YjY0NzIiPkFjY2VzcyBub2RlIGZvciBhdXRoZW50aWNhdGVkIG5hdmlnYXRpb24uPC90ZXh0PgogIDxyZWN0IHg9IjM0OCIgeT0iMjE0IiB3aWR0aD0iMjY0IiBoZWlnaHQ9IjQ0IiByeD0iNiIgZmlsbD0iI2Y3ZjlmYyIgc3Ryb2tlPSIjYjljN2RjIi8+CiAgPHRleHQgeD0iMzY2IiB5PSIyNDIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM1YjY0NzIiPmVtYWlsQGV4YW1wbGUuY29tPC90ZXh0PgogIDxyZWN0IHg9IjM0OCIgeT0iMjc4IiB3aWR0aD0iMjY0IiBoZWlnaHQ9IjQ0IiByeD0iNiIgZmlsbD0iI2Y3ZjlmYyIgc3Ryb2tlPSIjYjljN2RjIi8+CiAgPHRleHQgeD0iMzY2IiB5PSIzMDYiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM1YjY0NzIiPnBhc3N3b3JkPC90ZXh0PgogIDxyZWN0IHg9IjM0OCIgeT0iMzUwIiB3aWR0aD0iMjY0IiBoZWlnaHQ9IjQ2IiByeD0iNiIgZmlsbD0iIzI0NTdjNSIvPgogIDx0ZXh0IHg9IjQ1NSIgeT0iMzc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmaWxsPSIjZmZmZmZmIj5Db250aW51ZTwvdGV4dD4KPC9zdmc+Cg==" x="280" y="136" width="190" height="96" preserveAspectRatio="xMidYMid meet"></image><text x="280" y="248" font-size="12" font-weight="800" fill="#111827">Auth</text><text x="280" y="262" font-size="10" fill="#334155">/login</text></g><g><rect x="18" y="372" width="210" height="168" rx="8" fill="#ffffff" stroke="#9fb3c8" stroke-width="1.5"></rect><rect x="18" y="372" width="210" height="25" rx="8" fill="#effaf8"></rect><text x="28" y="389" font-size="11" font-weight="800" fill="#0f766e">«navigation node»</text><image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NjAgNTQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlN5bnRoZXRpYyBkYXNoYm9hcmQgc2NyZWVuc2hvdCI+CiAgPHJlY3Qgd2lkdGg9Ijk2MCIgaGVpZ2h0PSI1NDAiIGZpbGw9IiNmNGY3ZmIiLz4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjIwIiBoZWlnaHQ9IjU0MCIgZmlsbD0iIzE3MjAzMyIvPgogIDx0ZXh0IHg9IjI4IiB5PSI0OCIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2ZmZmZmZiI+VmliZWNvcmQ8L3RleHQ+CiAgPHJlY3QgeD0iMjQiIHk9Ijk2IiB3aWR0aD0iMTcyIiBoZWlnaHQ9IjM2IiByeD0iNiIgZmlsbD0iIzBmNzY2ZSIvPgogIDx0ZXh0IHg9IjQ0IiB5PSIxMjAiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNmZmZmZmYiPkRhc2hib2FyZDwvdGV4dD4KICA8dGV4dCB4PSI0NCIgeT0iMTc0IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjZGNlNmYxIj5DaGFubmVsczwvdGV4dD4KICA8dGV4dCB4PSI0NCIgeT0iMjE4IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjZGNlNmYxIj5NZW1iZXJzPC90ZXh0PgogIDx0ZXh0IHg9IjQ0IiB5PSIyNjIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNkY2U2ZjEiPlNldHRpbmdzPC90ZXh0PgogIDx0ZXh0IHg9IjI2MCIgeT0iNzIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMzAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPkNvbW11bml0eSBEYXNoYm9hcmQ8L3RleHQ+CiAgPHJlY3QgeD0iMjYwIiB5PSIxMTIiIHdpZHRoPSIyODIiIGhlaWdodD0iMTUwIiByeD0iOCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZDhkZWU4Ii8+CiAgPHRleHQgeD0iMjg2IiB5PSIxNTgiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPkNoYW5uZWxzPC90ZXh0PgogIDx0ZXh0IHg9IjI4NiIgeT0iMTk2IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE1IiBmaWxsPSIjNWI2NDcyIj5DcmVhdGUsIGpvaW4sIG9yIGluc3BlY3Qgcm9vbXMuPC90ZXh0PgogIDxyZWN0IHg9IjU3OCIgeT0iMTEyIiB3aWR0aD0iMjgyIiBoZWlnaHQ9IjE1MCIgcng9IjgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2Q4ZGVlOCIvPgogIDx0ZXh0IHg9IjYwNCIgeT0iMTU4IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTcyMDMzIj5BY3Rpdml0eTwvdGV4dD4KICA8dGV4dCB4PSI2MDQiIHk9IjE5NiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNSIgZmlsbD0iIzViNjQ3MiI+UnVudGltZSBlZmZlY3RzIGFuZCBldmVudHMuPC90ZXh0PgogIDxyZWN0IHg9IjI2MCIgeT0iMzAyIiB3aWR0aD0iNjAwIiBoZWlnaHQ9IjExNiIgcng9IjgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2Q4ZGVlOCIvPgogIDx0ZXh0IHg9IjI4NiIgeT0iMzUwIiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNWI2NDcyIj5TY3JlZW5zaG90IGV2aWRlbmNlOiBhdXRoZW50aWNhdGVkIGRhc2hib2FyZDwvdGV4dD4KPC9zdmc+Cg==" x="28" y="406" width="190" height="96" preserveAspectRatio="xMidYMid meet"></image><text x="28" y="518" font-size="12" font-weight="800" fill="#111827">Dashboard</text><text x="28" y="532" font-size="10" fill="#334155">/app</text></g><g><rect x="270" y="372" width="210" height="168" rx="8" fill="#ffffff" stroke="#9fb3c8" stroke-width="1.5"></rect><rect x="270" y="372" width="210" height="25" rx="8" fill="#effaf8"></rect><text x="280" y="389" font-size="11" font-weight="800" fill="#0f766e">«navigation node»</text><rect x="280" y="406" width="190" height="96" rx="6" fill="#eef2f6" stroke="#d8dee8"></rect><text x="375" y="458" text-anchor="middle" font-size="11" fill="#64748b">no screenshot</text><text x="280" y="518" font-size="12" font-weight="800" fill="#111827">Channels</text><text x="280" y="532" font-size="10" fill="#334155">/app/channels</text></g><g><rect x="18" y="642" width="210" height="168" rx="8" fill="#ffffff" stroke="#9fb3c8" stroke-width="1.5"></rect><rect x="18" y="642" width="210" height="25" rx="8" fill="#effaf8"></rect><text x="28" y="659" font-size="11" font-weight="800" fill="#0f766e">«navigation node»</text><rect x="28" y="676" width="190" height="96" rx="6" fill="#eef2f6" stroke="#d8dee8"></rect><text x="123" y="728" text-anchor="middle" font-size="11" fill="#64748b">no screenshot</text><text x="28" y="788" font-size="12" font-weight="800" fill="#111827">Settings</text><text x="28" y="802" font-size="10" fill="#334155">/app/settings</text></g></svg></article><article class="chart-panel"><div class="chart-head"><h3>Sample Coverage</h3><span class="tool-badge">vega-lite</span></div><p>Synthetic coverage values show what a real atlas should make visible.</p><svg class="infographic-chart" viewBox="0 0 720 300" role="img" aria-label="Sample Coverage"><line x1="58" y1="248" x2="700" y2="248" stroke="#d8dee8"></line><line x1="58" y1="28" x2="58" y2="248" stroke="#d8dee8"></line><rect x="90.6" y="113.0" width="86.8" height="135.0" rx="5" fill="#0f766e"></rect><text x="134.0" y="105.0" text-anchor="middle" font-size="12" fill="#1f2937">3</text><text x="134.0" y="274" text-anchor="middle" font-size="11" fill="#5b6472">Nodes</text><rect x="214.6" y="113.0" width="86.8" height="135.0" rx="5" fill="#0f766e"></rect><text x="258.0" y="105.0" text-anchor="middle" font-size="12" fill="#1f2937">3</text><text x="258.0" y="274" text-anchor="middle" font-size="11" fill="#5b6472">Screens</text><rect x="338.6" y="68.0" width="86.8" height="180.0" rx="5" fill="#0f766e"></rect><text x="382.0" y="60.0" text-anchor="middle" font-size="12" fill="#1f2937">4</text><text x="382.0" y="274" text-anchor="middle" font-size="11" fill="#5b6472">Actions</text><rect x="462.6" y="158.0" width="86.8" height="90.0" rx="5" fill="#0f766e"></rect><text x="506.0" y="150.0" text-anchor="middle" font-size="12" fill="#1f2937">2</text><text x="506.0" y="274" text-anchor="middle" font-size="11" fill="#5b6472">Roles</text><rect x="586.6" y="203.0" width="86.8" height="45.0" rx="5" fill="#0f766e"></rect><text x="630.0" y="195.0" text-anchor="middle" font-size="12" fill="#1f2937">1</text><text x="630.0" y="274" text-anchor="middle" font-size="11" fill="#5b6472">Runtime</text></svg></article></div></section><section class="panel"><h2>Screenshots And Evidence Images</h2><div class="gallery"><figure><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NjAgNTQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlN5bnRoZXRpYyBsYW5kaW5nIHBhZ2Ugc2NyZWVuc2hvdCI+CiAgPHJlY3Qgd2lkdGg9Ijk2MCIgaGVpZ2h0PSI1NDAiIGZpbGw9IiNmNGY3ZmIiLz4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iOTYwIiBoZWlnaHQ9IjcyIiBmaWxsPSIjMTcyMDMzIi8+CiAgPHRleHQgeD0iNDAiIHk9IjQ1IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI2IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmZmZmIj5WaWJlY29yZDwvdGV4dD4KICA8cmVjdCB4PSI3NjAiIHk9IjIwIiB3aWR0aD0iODIiIGhlaWdodD0iMzQiIHJ4PSI2IiBmaWxsPSIjZmZmZmZmIi8+CiAgPHRleHQgeD0iNzgyIiB5PSI0MyIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzE3MjAzMyI+U2lnbiBpbjwvdGV4dD4KICA8cmVjdCB4PSI0MCIgeT0iMTI2IiB3aWR0aD0iNDIwIiBoZWlnaHQ9IjIyMCIgcng9IjgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2Q4ZGVlOCIvPgogIDx0ZXh0IHg9IjcyIiB5PSIxNzgiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMzQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPkJ1aWxkIGEgY29tbXVuaXR5IHNwYWNlPC90ZXh0PgogIDx0ZXh0IHg9IjcyIiB5PSIyMjIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM1YjY0NzIiPkxhbmRpbmcgbm9kZSBmb3IgYW5vbnltb3VzIHVzZXJzLjwvdGV4dD4KICA8cmVjdCB4PSI3MiIgeT0iMjY0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjQ0IiByeD0iNiIgZmlsbD0iIzBmNzY2ZSIvPgogIDx0ZXh0IHg9IjEwMSIgeT0iMjkyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmaWxsPSIjZmZmZmZmIj5HZXQgc3RhcnRlZDwvdGV4dD4KICA8cmVjdCB4PSI1MzAiIHk9IjEyNiIgd2lkdGg9IjM0MCIgaGVpZ2h0PSIyODYiIHJ4PSI4IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNkOGRlZTgiLz4KICA8cmVjdCB4PSI1NjIiIHk9IjE2NiIgd2lkdGg9IjI3NiIgaGVpZ2h0PSIzNCIgcng9IjUiIGZpbGw9IiNlOGVkZjQiLz4KICA8cmVjdCB4PSI1NjIiIHk9IjIyMiIgd2lkdGg9IjIyMCIgaGVpZ2h0PSIzNCIgcng9IjUiIGZpbGw9IiNlOGVkZjQiLz4KICA8cmVjdCB4PSI1NjIiIHk9IjI3OCIgd2lkdGg9IjI1MiIgaGVpZ2h0PSIzNCIgcng9IjUiIGZpbGw9IiNlOGVkZjQiLz4KICA8dGV4dCB4PSI1NjIiIHk9IjM3MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNSIgZmlsbD0iIzViNjQ3MiI+U2NyZWVuc2hvdCBldmlkZW5jZTogbGFuZGluZzwvdGV4dD4KPC9zdmc+Cg==" alt="Synthetic landing page screenshot"><figcaption>Synthetic landing navigation node</figcaption></figure>
+<figure><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NjAgNTQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlN5bnRoZXRpYyBhdXRoZW50aWNhdGlvbiBzY3JlZW5zaG90Ij4KICA8cmVjdCB3aWR0aD0iOTYwIiBoZWlnaHQ9IjU0MCIgZmlsbD0iI2VlZjJmNiIvPgogIDxyZWN0IHg9IjMwMCIgeT0iNzgiIHdpZHRoPSIzNjAiIGhlaWdodD0iMzg0IiByeD0iOCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZDhkZWU4Ii8+CiAgPHRleHQgeD0iMzQ4IiB5PSIxMzgiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPlNpZ24gaW48L3RleHQ+CiAgPHRleHQgeD0iMzQ4IiB5PSIxNzQiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZpbGw9IiM1YjY0NzIiPkFjY2VzcyBub2RlIGZvciBhdXRoZW50aWNhdGVkIG5hdmlnYXRpb24uPC90ZXh0PgogIDxyZWN0IHg9IjM0OCIgeT0iMjE0IiB3aWR0aD0iMjY0IiBoZWlnaHQ9IjQ0IiByeD0iNiIgZmlsbD0iI2Y3ZjlmYyIgc3Ryb2tlPSIjYjljN2RjIi8+CiAgPHRleHQgeD0iMzY2IiB5PSIyNDIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM1YjY0NzIiPmVtYWlsQGV4YW1wbGUuY29tPC90ZXh0PgogIDxyZWN0IHg9IjM0OCIgeT0iMjc4IiB3aWR0aD0iMjY0IiBoZWlnaHQ9IjQ0IiByeD0iNiIgZmlsbD0iI2Y3ZjlmYyIgc3Ryb2tlPSIjYjljN2RjIi8+CiAgPHRleHQgeD0iMzY2IiB5PSIzMDYiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM1YjY0NzIiPnBhc3N3b3JkPC90ZXh0PgogIDxyZWN0IHg9IjM0OCIgeT0iMzUwIiB3aWR0aD0iMjY0IiBoZWlnaHQ9IjQ2IiByeD0iNiIgZmlsbD0iIzI0NTdjNSIvPgogIDx0ZXh0IHg9IjQ1NSIgeT0iMzc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmaWxsPSIjZmZmZmZmIj5Db250aW51ZTwvdGV4dD4KPC9zdmc+Cg==" alt="Synthetic authentication screenshot"><figcaption>Synthetic authentication access node</figcaption></figure>
+<figure><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NjAgNTQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlN5bnRoZXRpYyBkYXNoYm9hcmQgc2NyZWVuc2hvdCI+CiAgPHJlY3Qgd2lkdGg9Ijk2MCIgaGVpZ2h0PSI1NDAiIGZpbGw9IiNmNGY3ZmIiLz4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjIwIiBoZWlnaHQ9IjU0MCIgZmlsbD0iIzE3MjAzMyIvPgogIDx0ZXh0IHg9IjI4IiB5PSI0OCIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2ZmZmZmZiI+VmliZWNvcmQ8L3RleHQ+CiAgPHJlY3QgeD0iMjQiIHk9Ijk2IiB3aWR0aD0iMTcyIiBoZWlnaHQ9IjM2IiByeD0iNiIgZmlsbD0iIzBmNzY2ZSIvPgogIDx0ZXh0IHg9IjQ0IiB5PSIxMjAiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNmZmZmZmYiPkRhc2hib2FyZDwvdGV4dD4KICA8dGV4dCB4PSI0NCIgeT0iMTc0IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjZGNlNmYxIj5DaGFubmVsczwvdGV4dD4KICA8dGV4dCB4PSI0NCIgeT0iMjE4IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjZGNlNmYxIj5NZW1iZXJzPC90ZXh0PgogIDx0ZXh0IHg9IjQ0IiB5PSIyNjIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNkY2U2ZjEiPlNldHRpbmdzPC90ZXh0PgogIDx0ZXh0IHg9IjI2MCIgeT0iNzIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMzAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPkNvbW11bml0eSBEYXNoYm9hcmQ8L3RleHQ+CiAgPHJlY3QgeD0iMjYwIiB5PSIxMTIiIHdpZHRoPSIyODIiIGhlaWdodD0iMTUwIiByeD0iOCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZDhkZWU4Ii8+CiAgPHRleHQgeD0iMjg2IiB5PSIxNTgiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSwgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNzIwMzMiPkNoYW5uZWxzPC90ZXh0PgogIDx0ZXh0IHg9IjI4NiIgeT0iMTk2IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE1IiBmaWxsPSIjNWI2NDcyIj5DcmVhdGUsIGpvaW4sIG9yIGluc3BlY3Qgcm9vbXMuPC90ZXh0PgogIDxyZWN0IHg9IjU3OCIgeT0iMTEyIiB3aWR0aD0iMjgyIiBoZWlnaHQ9IjE1MCIgcng9IjgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2Q4ZGVlOCIvPgogIDx0ZXh0IHg9IjYwNCIgeT0iMTU4IiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTcyMDMzIj5BY3Rpdml0eTwvdGV4dD4KICA8dGV4dCB4PSI2MDQiIHk9IjE5NiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNSIgZmlsbD0iIzViNjQ3MiI+UnVudGltZSBlZmZlY3RzIGFuZCBldmVudHMuPC90ZXh0PgogIDxyZWN0IHg9IjI2MCIgeT0iMzAyIiB3aWR0aD0iNjAwIiBoZWlnaHQ9IjExNiIgcng9IjgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2Q4ZGVlOCIvPgogIDx0ZXh0IHg9IjI4NiIgeT0iMzUwIiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNWI2NDcyIj5TY3JlZW5zaG90IGV2aWRlbmNlOiBhdXRoZW50aWNhdGVkIGRhc2hib2FyZDwvdGV4dD4KPC9zdmc+Cg==" alt="Synthetic dashboard screenshot"><figcaption>Synthetic authenticated dashboard node</figcaption></figure></div></section><section class="panel"><h2>Source-To-Review Flow</h2><div class="flow"><div class="step"><strong>Canonical Source</strong><span>docs/artifacts/source/product/sample-uwe-screenshot-atlas.md</span></div><div class="step"><strong>Generated HTML</strong><span>generated/review/product/sample-uwe-screenshot-atlas.html</span></div><div class="step"><strong>Evidence</strong><span>5 linked item(s)</span></div><div class="step"><strong>Freshness</strong><span>2026-05-23</span></div></div></section><section class="panel tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-evidence" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-metadata" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-evidence">Evidence</label><label for="tab-source">Source</label><label for="tab-metadata">Metadata</label></div><div class="tab-panels"><div class="tab-panel"><h2>Review Sections</h2><ol><li>Purpose</li><li>Scope</li><li>UWE Navigation Nodes</li><li>Navigation Links</li><li>Presentation Evidence</li><li>Action And Side-Effect Matrix</li><li>Access And Adaptation</li><li>Runtime Evidence</li></ol></div><div class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../docs/artifacts/source/product/e2e-product-system-atlas-workflow-2026-05-24.md">docs/artifacts/source/product/e2e-product-system-atlas-workflow-2026-05-24.md</a></li><li><a href="../../../docs/artifacts/source/models/sample-uwe-navigation.md">docs/artifacts/source/models/sample-uwe-navigation.md</a></li><li><a href="../evidence/sample-uwe-atlas/landing.svg">generated/review/evidence/sample-uwe-atlas/landing.svg</a></li><li><a href="../evidence/sample-uwe-atlas/auth.svg">generated/review/evidence/sample-uwe-atlas/auth.svg</a></li><li><a href="../evidence/sample-uwe-atlas/dashboard.svg">generated/review/evidence/sample-uwe-atlas/dashboard.svg</a></li></ul></div><div class="tab-panel"><h2>Canonical Source</h2><p><a href="../../../docs/artifacts/source/product/sample-uwe-screenshot-atlas.md">docs/artifacts/source/product/sample-uwe-screenshot-atlas.md</a></p><pre>---
+artifactType: e2e-product-system-atlas
+family: product
+owner: system-modeler
+reviewRequired: true
+evidenceLinks:
+  - docs/artifacts/source/product/e2e-product-system-atlas-workflow-2026-05-24.md
+  - docs/artifacts/source/models/sample-uwe-navigation.md
+  - generated/review/evidence/sample-uwe-atlas/landing.svg
+  - generated/review/evidence/sample-uwe-atlas/auth.svg
+  - generated/review/evidence/sample-uwe-atlas/dashboard.svg
+---
+
+# Sample UWE Screenshot Atlas
+
+This is a synthetic Vibecord-style example showing how a UWE navigation model can become a screenshot-backed inspection artifact. It is not evidence from the real Vibecord app.
+
+## Purpose
+
+Demonstrate the reusable shape: navigation nodes are the spine, screenshots make each node inspectable, actions show process behavior, and side effects connect UI actions to runtime or data changes.
+
+## Scope
+
+| Field | Value |
+| --- | --- |
+| Product boundary | synthetic community app example |
+| Environment | generated sample evidence only |
+| Roles | anonymous, member, admin |
+| Included entry points | landing, sign-in, dashboard |
+| Exclusions | real Vibecord routes, production data, real auth secrets |
+| Data safety | screenshots are synthetic SVGs |
+
+## UWE Navigation Nodes
+
+| Node ID | Route or state | UWE facet | Role(s) | Screenshot evidence | Primary actions | Expected side effects |
+| --- | --- | --- | --- | --- | --- | --- |
+| landing | `/` | navigation + presentation | anonymous | `generated/review/evidence/sample-uwe-atlas/landing.svg` | sign in, get started | route transition, no session mutation |
+| auth | `/login` | access + process | anonymous | `generated/review/evidence/sample-uwe-atlas/auth.svg` | submit credentials, recover password | session token on success, validation errors on failure |
+| dashboard | `/app` | content + navigation + presentation | member, admin | `generated/review/evidence/sample-uwe-atlas/dashboard.svg` | open channels, view activity, open settings | API fetch, membership read, activity query |
+
+## Navigation Links
+
+```artifact-infographic
+{
+  &quot;title&quot;: &quot;Sample UWE Navigation Graph&quot;,
+  &quot;tool&quot;: &quot;graphviz&quot;,
+  &quot;kind&quot;: &quot;uwe-navigation&quot;,
+  &quot;summary&quot;: &quot;A bounded UWE navigation graph with navigation classes and screenshots embedded inside the navigational nodes.&quot;,
+  &quot;navigationClasses&quot;: [
+    &quot;Visitor acquisition and access&quot;,
+    &quot;Authenticated workspace flow&quot;,
+    &quot;Workspace utilities and admin&quot;
+  ],
+  &quot;nodes&quot;: [
+    {
+      &quot;id&quot;: &quot;Landing&quot;,
+      &quot;label&quot;: &quot;Landing&quot;,
+      &quot;route&quot;: &quot;/&quot;,
+      &quot;navigationClass&quot;: &quot;Visitor acquisition and access&quot;,
+      &quot;facet&quot;: &quot;navigation&quot;,
+      &quot;role&quot;: &quot;anonymous&quot;,
+      &quot;effect&quot;: &quot;route transition only&quot;,
+      &quot;screenshot&quot;: &quot;generated/review/evidence/sample-uwe-atlas/landing.svg&quot;
+    },
+    {
+      &quot;id&quot;: &quot;Auth&quot;,
+      &quot;label&quot;: &quot;Auth&quot;,
+      &quot;route&quot;: &quot;/login&quot;,
+      &quot;navigationClass&quot;: &quot;Visitor acquisition and access&quot;,
+      &quot;facet&quot;: &quot;access&quot;,
+      &quot;role&quot;: &quot;anonymous&quot;,
+      &quot;effect&quot;: &quot;session token on success&quot;,
+      &quot;screenshot&quot;: &quot;generated/review/evidence/sample-uwe-atlas/auth.svg&quot;
+    },
+    {
+      &quot;id&quot;: &quot;Dashboard&quot;,
+      &quot;label&quot;: &quot;Dashboard&quot;,
+      &quot;route&quot;: &quot;/app&quot;,
+      &quot;navigationClass&quot;: &quot;Authenticated workspace flow&quot;,
+      &quot;facet&quot;: &quot;content&quot;,
+      &quot;role&quot;: &quot;member&quot;,
+      &quot;effect&quot;: &quot;membership and activity read&quot;,
+      &quot;screenshot&quot;: &quot;generated/review/evidence/sample-uwe-atlas/dashboard.svg&quot;
+    },
+    {
+      &quot;id&quot;: &quot;Channels&quot;,
+      &quot;label&quot;: &quot;Channels&quot;,
+      &quot;route&quot;: &quot;/app/channels&quot;,
+      &quot;navigationClass&quot;: &quot;Authenticated workspace flow&quot;,
+      &quot;facet&quot;: &quot;navigation&quot;,
+      &quot;role&quot;: &quot;member&quot;,
+      &quot;effect&quot;: &quot;channel list query&quot;
+    },
+    {
+      &quot;id&quot;: &quot;Settings&quot;,
+      &quot;label&quot;: &quot;Settings&quot;,
+      &quot;route&quot;: &quot;/app/settings&quot;,
+      &quot;navigationClass&quot;: &quot;Workspace utilities and admin&quot;,
+      &quot;facet&quot;: &quot;access&quot;,
+      &quot;role&quot;: &quot;admin&quot;,
+      &quot;effect&quot;: &quot;authorization check&quot;
+    }
+  ],
+  &quot;edges&quot;: [
+    [&quot;Landing&quot;, &quot;Auth&quot;, &quot;sign in&quot;],
+    [&quot;Auth&quot;, &quot;Dashboard&quot;, &quot;valid session&quot;],
+    [&quot;Dashboard&quot;, &quot;Channels&quot;, &quot;open channels&quot;],
+    [&quot;Dashboard&quot;, &quot;Settings&quot;, &quot;admin only&quot;],
+    [&quot;Settings&quot;, &quot;Dashboard&quot;, &quot;back&quot;]
+  ]
+}
+```
+
+## Presentation Evidence
+
+The manifest lists three synthetic screenshots. A real repo should replace these with Playwright captures from an authorized test environment:
+
+| Screenshot | Node | Purpose |
+| --- | --- | --- |
+| `landing.svg` | landing | anonymous entry state |
+| `auth.svg` | auth | access/process state |
+| `dashboard.svg` | dashboard | authenticated navigation state |
+
+## Action And Side-Effect Matrix
+
+| Action ID | Node | Trigger | Expected UI result | Data effect | Runtime effect | Evidence | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ACT-001 | landing | click sign in | auth node visible | none | route transition | landing + auth screenshots | pass |
+| ACT-002 | auth | submit valid credentials | dashboard visible | session created | auth API call, session cookie/token | auth + dashboard screenshots | synthetic |
+| ACT-003 | dashboard | open channels | channel list visible | membership/channel read | API fetch and cache update | dashboard screenshot | untested |
+| ACT-004 | dashboard | open settings as member | access denied or member settings visible | settings read only | authorization check | not captured | inconclusive |
+
+## Access And Adaptation
+
+| Branch | Expected behavior | Evidence state |
+| --- | --- | --- |
+| anonymous | can reach landing and auth only | captured |
+| member | can reach dashboard and member channels | dashboard captured |
+| admin | can reach dashboard, members, moderation, settings | not captured |
+| mobile viewport | navigation should collapse without hiding primary actions | not captured |
+| feature flag disabled | flagged routes should be absent or disabled | not captured |
+
+## Runtime Evidence
+
+| Area | Expected evidence in a real app | Sample state |
+| --- | --- | --- |
+| Deployed URL | app URL, commit, build ID | omitted |
+| Health | smoke check or health endpoint | omitted |
+| Data stores | test user, community, channel rows | synthetic only |
+| Jobs/events | activity event after login or channel action | synthetic only |
+| Integrations | email/webhook/analytics evidence when relevant | omitted |
+
+## Manual QA Sequence
+
+1. Capture landing in desktop and mobile viewports.
+2. Navigate to auth and capture empty, invalid, and valid states.
+3. Sign in with a test member and capture the dashboard.
+4. Exercise all visible dashboard actions once with safe test data.
+5. Repeat role-sensitive paths for admin and denied member branches.
+6. Record side effects for API calls, session state, data rows, jobs, and integrations.
+7. Mark any missing branch `untested` or `inconclusive`.
+
+```artifact-infographic
+{
+  &quot;title&quot;: &quot;Sample Coverage&quot;,
+  &quot;tool&quot;: &quot;vega-lite&quot;,
+  &quot;kind&quot;: &quot;bar&quot;,
+  &quot;summary&quot;: &quot;Synthetic coverage values show what a real atlas should make visible.&quot;,
+  &quot;values&quot;: [
+    {&quot;label&quot;: &quot;Nodes&quot;, &quot;value&quot;: 3},
+    {&quot;label&quot;: &quot;Screens&quot;, &quot;value&quot;: 3},
+    {&quot;label&quot;: &quot;Actions&quot;, &quot;value&quot;: 4},
+    {&quot;label&quot;: &quot;Roles&quot;, &quot;value&quot;: 2},
+    {&quot;label&quot;: &quot;Runtime&quot;, &quot;value&quot;: 1}
+  ]
+}
+```
+
+## Reuse Across Repos
+
+To use this pattern in another repo:
+
+1. Run `skill-harness setup-project --modeling-mode uml-first`.
+2. Copy `docs/artifacts/templates/e2e-product-system-atlas.md` into a new product source.
+3. Capture screenshots under `generated/review/evidence/&lt;app&gt;/`.
+4. Add screenshots to the manifest under `screenshots`, `images`, or `visualEvidence`.
+5. Add or update the paired UWE model source under `docs/artifacts/source/models/`.
+6. Run `npm run artifacts:review` and `npm run models:review`.
+
+## Readiness
+
+This sample is ready as a demonstration artifact, not as product evidence. Real app atlases must replace synthetic screenshots and sample verdicts with authorized captures, manual QA output, and runtime evidence.
+</pre></div><div class="tab-panel"><h2>Metadata</h2><table><tbody><tr><th>ID</th><td>sample-uwe-screenshot-atlas</td></tr><tr><th>Type</th><td>e2e-product-system-atlas</td></tr><tr><th>Owner</th><td>system-modeler</td></tr><tr><th>Renderer</th><td>skill-harness artifact review generator</td></tr><tr><th>Source hash</th><td>cfdc8dc1fcd94e061ab5368c406b52b16e33673fdc82ad9a07201c7c4486b757</td></tr></tbody></table></div></div></section></main>
+</body>
+</html>

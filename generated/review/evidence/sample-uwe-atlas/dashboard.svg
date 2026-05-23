@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Synthetic dashboard screenshot">
+  <rect width="960" height="540" fill="#f4f7fb"/>
+  <rect x="0" y="0" width="220" height="540" fill="#172033"/>
+  <text x="28" y="48" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff">Vibecord</text>
+  <rect x="24" y="96" width="172" height="36" rx="6" fill="#0f766e"/>
+  <text x="44" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#ffffff">Dashboard</text>
+  <text x="44" y="174" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#dce6f1">Channels</text>
+  <text x="44" y="218" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#dce6f1">Members</text>
+  <text x="44" y="262" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#dce6f1">Settings</text>
+  <text x="260" y="72" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700" fill="#172033">Community Dashboard</text>
+  <rect x="260" y="112" width="282" height="150" rx="8" fill="#ffffff" stroke="#d8dee8"/>
+  <text x="286" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#172033">Channels</text>
+  <text x="286" y="196" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#5b6472">Create, join, or inspect rooms.</text>
+  <rect x="578" y="112" width="282" height="150" rx="8" fill="#ffffff" stroke="#d8dee8"/>
+  <text x="604" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#172033">Activity</text>
+  <text x="604" y="196" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#5b6472">Runtime effects and events.</text>
+  <rect x="260" y="302" width="600" height="116" rx="8" fill="#ffffff" stroke="#d8dee8"/>
+  <text x="286" y="350" font-family="Segoe UI, Arial, sans-serif" font-size="16" fill="#5b6472">Screenshot evidence: authenticated dashboard</text>
+</svg>

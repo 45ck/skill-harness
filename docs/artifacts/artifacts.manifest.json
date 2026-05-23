@@ -464,6 +464,114 @@
         "CI quality gate changes"
       ],
       "driftVerdict": "aligned"
+    },
+    {
+      "id": "sample-uwe-screenshot-atlas",
+      "title": "Sample UWE Screenshot Atlas",
+      "type": "e2e-product-system-atlas",
+      "family": "product",
+      "source": "docs/artifacts/source/product/sample-uwe-screenshot-atlas.md",
+      "status": "ready",
+      "owner": "system-modeler",
+      "reviewRequired": true,
+      "reviewSurface": "generated/review/product/sample-uwe-screenshot-atlas.html",
+      "renderer": "skill-harness artifact review generator",
+      "evidenceLinks": [
+        "docs/artifacts/source/product/e2e-product-system-atlas-workflow-2026-05-24.md",
+        "docs/artifacts/source/models/sample-uwe-navigation.md",
+        "generated/review/evidence/sample-uwe-atlas/landing.svg",
+        "generated/review/evidence/sample-uwe-atlas/auth.svg",
+        "generated/review/evidence/sample-uwe-atlas/dashboard.svg"
+      ],
+      "screenshots": [
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/landing.svg",
+          "caption": "Synthetic landing navigation node",
+          "alt": "Synthetic landing page screenshot"
+        },
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/auth.svg",
+          "caption": "Synthetic authentication access node",
+          "alt": "Synthetic authentication screenshot"
+        },
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/dashboard.svg",
+          "caption": "Synthetic authenticated dashboard node",
+          "alt": "Synthetic dashboard screenshot"
+        }
+      ],
+      "updateTriggers": [
+        "sample atlas source changes",
+        "sample screenshot evidence changes",
+        "UWE atlas renderer behavior changes"
+      ],
+      "freshness": {
+        "generatedAt": "2026-05-23",
+        "sourceFirst": true
+      },
+      "sourceHash": "cfdc8dc1fcd94e061ab5368c406b52b16e33673fdc82ad9a07201c7c4486b757",
+      "generatedAt": "2026-05-23"
+    },
+    {
+      "id": "sample-uwe-navigation",
+      "title": "Sample UWE Navigation Model",
+      "type": "model-view",
+      "source": "docs/artifacts/source/models/sample-uwe-navigation.md",
+      "status": "ready",
+      "modelId": "sample-uwe-navigation",
+      "modelKind": "component",
+      "method": "uwe",
+      "notation": "mermaid",
+      "abstractionLevel": "design",
+      "owner": "system-modeler",
+      "facets": [
+        "content",
+        "navigation",
+        "presentation",
+        "process",
+        "access",
+        "adaptation"
+      ],
+      "reviewSurface": "generated/review/models/sample-uwe-navigation.html",
+      "renderer": "skill-harness model review generator",
+      "generatedAt": "2026-05-24",
+      "implementationTouchpoints": [
+        "docs/artifacts/source/product/sample-uwe-screenshot-atlas.md",
+        "generated/review/evidence/sample-uwe-atlas/landing.svg",
+        "generated/review/evidence/sample-uwe-atlas/auth.svg",
+        "generated/review/evidence/sample-uwe-atlas/dashboard.svg"
+      ],
+      "docTouchpoints": [
+        "docs/artifacts/templates/e2e-product-system-atlas.md",
+        "docs/artifacts/source/models/model-inventory.md"
+      ],
+      "evidenceLinks": [
+        "docs/artifacts/source/product/sample-uwe-screenshot-atlas.md",
+        "generated/review/evidence/sample-uwe-atlas/landing.svg",
+        "generated/review/evidence/sample-uwe-atlas/auth.svg",
+        "generated/review/evidence/sample-uwe-atlas/dashboard.svg"
+      ],
+      "visualEvidence": [
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/landing.svg",
+          "caption": "Landing node"
+        },
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/auth.svg",
+          "caption": "Auth node"
+        },
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/dashboard.svg",
+          "caption": "Dashboard node"
+        }
+      ],
+      "reviewRequired": true,
+      "updateTriggers": [
+        "sample atlas source changes",
+        "screenshot evidence changes",
+        "UWE atlas template changes"
+      ],
+      "driftVerdict": "aligned"
     }
   ]
 }

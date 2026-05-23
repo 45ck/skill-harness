@@ -8,6 +8,8 @@ social-preview.png
 dist/
 generated/review/*
 !generated/review/*.html
+!generated/review/evidence/
+!generated/review/evidence/**
 !generated/review/models/
 !generated/review/models/*.html
 generated/review/models/*.png
