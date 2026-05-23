@@ -1240,6 +1240,9 @@ func TestCLIUpdateProjectWritesAgentStackLock(t *testing.T) {
 	if result.Lock.Profile != "minimal" || result.Lock.OverlayHash == "" {
 		t.Fatalf("expected agent-stack lock with profile and overlay hash, got %#v", result.Lock)
 	}
+	if !agentStackSurfaceStatus(result.Lock.Surfaces, ".skill-harness/agent-stack.lock.json", "present") {
+		t.Fatalf("expected lock surface to be present, got %#v", result.Lock.Surfaces)
+	}
 	if !containsString(result.Lock.OptOuts.DisabledAgents, "workflow-engineer") {
 		t.Fatalf("expected disabled agent in lock opt-outs, got %#v", result.Lock.OptOuts)
 	}
@@ -1457,6 +1460,15 @@ func containsString(values []string, want string) bool {
 func hasRepoFinding(findings []repoFinding, code string) bool {
 	for _, finding := range findings {
 		if finding.Code == code {
+			return true
+		}
+	}
+	return false
+}
+
+func agentStackSurfaceStatus(surfaces []agentStackSurfaceLock, path, status string) bool {
+	for _, surface := range surfaces {
+		if surface.Path == path && surface.Status == status {
 			return true
 		}
 	}
