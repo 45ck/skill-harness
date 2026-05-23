@@ -476,7 +476,7 @@
       "reviewRequired": true,
       "reviewSurface": "generated/review/product/sample-uwe-screenshot-atlas.html",
       "renderer": "skill-harness artifact review generator",
-      "htmlInteractionLane": "reviewed-svg-pan-zoom",
+      "htmlInteractionLane": "reviewed-uwe-workspace",
       "evidenceLinks": [
         "docs/artifacts/source/product/e2e-product-system-atlas-workflow-2026-05-24.md",
         "docs/artifacts/source/models/sample-uwe-navigation.md",
@@ -528,7 +528,7 @@
         "generatedAt": "2026-05-23",
         "sourceFirst": true
       },
-      "sourceHash": "67da354a9b79adfb9de0757bb0d92d96fd7f9a09fed4ddfdfaf164c9b6e64e6f",
+      "sourceHash": "35bd74eca92fc2875858067f521a5115bab7603fed31356122ff51b719a67aa8",
       "generatedAt": "2026-05-23"
     },
     {

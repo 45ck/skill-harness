@@ -24,7 +24,7 @@ Demonstrate the reusable shape: navigation nodes are the spine, screenshots make
 
 ## Renderer Contract
 
-This atlas is intentionally OSS-first. The source graph is converted to DOT and rendered with Graphviz through `@viz-js/viz`; Skill Harness only injects screenshot evidence into UML node compartments after the renderer has produced SVG. The HTML review surface opts into the reviewed `svg-pan-zoom` lane so the large generated SVG can be panned and zoomed without a custom viewer or network-loaded scripts.
+This atlas is intentionally OSS-first. The source graph is rendered first as a Cytoscape.js + dagre workspace for pan, zoom, package focus, and node inspection. The same source is also converted to DOT and rendered with Graphviz through `@viz-js/viz`; Skill Harness only injects screenshot evidence into UML node compartments after the renderer has produced SVG. The HTML review surface opts into the reviewed `reviewed-uwe-workspace` lane so the bundled graph viewer works without CDN scripts or network access.
 
 ## Scope
 
@@ -69,6 +69,7 @@ This atlas is intentionally OSS-first. The source graph is converted to DOT and 
       "navigationClass": "Visitor acquisition and access",
       "facet": "navigation",
       "role": "anonymous",
+      "actions": "sign in, get started",
       "effect": "route transition only",
       "screenshot": "generated/review/evidence/sample-uwe-atlas/landing.svg"
     },
@@ -79,6 +80,7 @@ This atlas is intentionally OSS-first. The source graph is converted to DOT and 
       "navigationClass": "Visitor acquisition and access",
       "facet": "access",
       "role": "anonymous",
+      "actions": "submit credentials, recover password",
       "effect": "session token on success",
       "screenshot": "generated/review/evidence/sample-uwe-atlas/auth.svg"
     },
@@ -89,6 +91,7 @@ This atlas is intentionally OSS-first. The source graph is converted to DOT and 
       "navigationClass": "Authenticated workspace flow",
       "facet": "content",
       "role": "member",
+      "actions": "open channels, view activity, open settings",
       "effect": "membership and activity read",
       "screenshot": "generated/review/evidence/sample-uwe-atlas/dashboard.svg"
     },
@@ -99,6 +102,7 @@ This atlas is intentionally OSS-first. The source graph is converted to DOT and 
       "navigationClass": "Authenticated workspace flow",
       "facet": "navigation",
       "role": "member",
+      "actions": "inspect rooms, select channel",
       "effect": "channel list query",
       "screenshot": "generated/review/evidence/sample-uwe-atlas/channels.svg"
     },
@@ -109,6 +113,7 @@ This atlas is intentionally OSS-first. The source graph is converted to DOT and 
       "navigationClass": "Workspace utilities and admin",
       "facet": "access",
       "role": "admin",
+      "actions": "change settings, save",
       "effect": "authorization check",
       "screenshot": "generated/review/evidence/sample-uwe-atlas/settings.svg"
     },
@@ -119,6 +124,7 @@ This atlas is intentionally OSS-first. The source graph is converted to DOT and 
       "navigationClass": "Workspace utilities and admin",
       "facet": "adaptation",
       "role": "member",
+      "actions": "back to app",
       "effect": "blocked settings mutation",
       "screenshot": "generated/review/evidence/sample-uwe-atlas/denied.svg"
     }

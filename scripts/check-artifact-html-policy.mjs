@@ -12,6 +12,9 @@ const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manife
 const reviewedSvgPanZoomSurfaces = new Set((manifest.artifacts ?? [])
   .filter((artifact) => artifact.htmlInteractionLane === 'reviewed-svg-pan-zoom' && typeof artifact.reviewSurface === 'string')
   .map((artifact) => path.normalize(path.resolve(root, artifact.reviewSurface))));
+const reviewedUweWorkspaceSurfaces = new Set((manifest.artifacts ?? [])
+  .filter((artifact) => artifact.htmlInteractionLane === 'reviewed-uwe-workspace' && typeof artifact.reviewSurface === 'string')
+  .map((artifact) => path.normalize(path.resolve(root, artifact.reviewSurface))));
 
 const blockedTagPatterns = [
   /<iframe\b/i,
@@ -41,6 +44,18 @@ const allowedSvgPanZoomRuntime = fs.existsSync(path.join(root, 'node_modules', '
   ? fs.readFileSync(path.join(root, 'node_modules', 'svg-pan-zoom', 'dist', 'svg-pan-zoom.min.js'), 'utf8')
   : '';
 const allowedSvgPanZoomInitializer = 'document.querySelectorAll("[data-svg-pan-zoom=true] svg").forEach(function(svg){svgPanZoom(svg,{controlIconsEnabled:true,fit:true,center:true,minZoom:.1,maxZoom:20,zoomScaleSensitivity:.25});});document.querySelectorAll(".viewer-badge").forEach(function(el){el.textContent="svg-pan-zoom active: drag, wheel, +/- controls";});document.documentElement.classList.add("svg-pan-zoom-active");';
+const allowedCytoscapeRuntime = fs.existsSync(path.join(root, 'node_modules', 'cytoscape', 'dist', 'cytoscape.min.js'))
+  ? fs.readFileSync(path.join(root, 'node_modules', 'cytoscape', 'dist', 'cytoscape.min.js'), 'utf8')
+  : '';
+const allowedDagreRuntime = fs.existsSync(path.join(root, 'node_modules', 'dagre', 'dist', 'dagre.min.js'))
+  ? fs.readFileSync(path.join(root, 'node_modules', 'dagre', 'dist', 'dagre.min.js'), 'utf8')
+  : '';
+const allowedCytoscapeDagreRuntime = fs.existsSync(path.join(root, 'node_modules', 'cytoscape-dagre', 'cytoscape-dagre.js'))
+  ? fs.readFileSync(path.join(root, 'node_modules', 'cytoscape-dagre', 'cytoscape-dagre.js'), 'utf8')
+  : '';
+const allowedUweWorkspaceRuntime = fs.existsSync(path.join(root, 'scripts', 'uwe-workspace-runtime.js'))
+  ? fs.readFileSync(path.join(root, 'scripts', 'uwe-workspace-runtime.js'), 'utf8')
+  : '';
 
 function walk(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -57,14 +72,23 @@ function checkFile(filePath) {
   const html = fs.readFileSync(filePath, 'utf8');
   const failures = [];
   const reviewedSvgPanZoom = reviewedSvgPanZoomSurfaces.has(path.normalize(path.resolve(filePath)));
-  const expectedCsp = reviewedSvgPanZoom ? reviewedSvgPanZoomCsp : requiredCsp;
+  const reviewedUweWorkspace = reviewedUweWorkspaceSurfaces.has(path.normalize(path.resolve(filePath)));
+  const expectedCsp = reviewedSvgPanZoom || reviewedUweWorkspace ? reviewedSvgPanZoomCsp : requiredCsp;
   if (!html.includes('Content-Security-Policy') || !html.includes(expectedCsp)) failures.push('missing required CSP meta tag');
   const scriptMatches = [...html.matchAll(/<script>([\s\S]*?)<\/script>/gi)].map((match) => match[1]);
-  if (!reviewedSvgPanZoom && scriptMatches.length > 0) failures.push('blocked script tag');
+  if (!reviewedSvgPanZoom && !reviewedUweWorkspace && scriptMatches.length > 0) failures.push('blocked script tag');
   if (reviewedSvgPanZoom) {
     if (scriptMatches.length !== 2) failures.push('reviewed-svg-pan-zoom requires exactly two inline scripts');
     if (scriptMatches[0] !== allowedSvgPanZoomRuntime) failures.push('reviewed-svg-pan-zoom runtime does not match bundled svg-pan-zoom');
     if (scriptMatches[1] !== allowedSvgPanZoomInitializer) failures.push('reviewed-svg-pan-zoom initializer is not the approved static initializer');
+  }
+  if (reviewedUweWorkspace) {
+    if (scriptMatches.length !== 5) failures.push('reviewed-uwe-workspace requires exactly five inline scripts');
+    if (scriptMatches[0] !== allowedSvgPanZoomRuntime) failures.push('reviewed-uwe-workspace svg-pan-zoom runtime does not match bundled dependency');
+    if (scriptMatches[1] !== allowedCytoscapeRuntime) failures.push('reviewed-uwe-workspace Cytoscape runtime does not match bundled dependency');
+    if (scriptMatches[2] !== allowedDagreRuntime) failures.push('reviewed-uwe-workspace dagre runtime does not match bundled dependency');
+    if (scriptMatches[3] !== allowedCytoscapeDagreRuntime) failures.push('reviewed-uwe-workspace cytoscape-dagre runtime does not match bundled dependency');
+    if (scriptMatches[4] !== allowedUweWorkspaceRuntime) failures.push('reviewed-uwe-workspace initializer does not match scripts/uwe-workspace-runtime.js');
   }
   for (const pattern of blockedTagPatterns) if (pattern.test(html)) failures.push('blocked tag or preload pattern: ' + pattern);
   for (const pattern of blockedApiPatterns) if (pattern.test(html)) failures.push('blocked browser API: ' + pattern);

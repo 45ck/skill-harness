@@ -3073,6 +3073,15 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile arti
 	if _, exists := devDependencies["svg-pan-zoom"]; !exists {
 		devDependencies["svg-pan-zoom"] = "^3.6.2"
 	}
+	if _, exists := devDependencies["cytoscape"]; !exists {
+		devDependencies["cytoscape"] = "3.29.2"
+	}
+	if _, exists := devDependencies["dagre"]; !exists {
+		devDependencies["dagre"] = "0.8.5"
+	}
+	if _, exists := devDependencies["cytoscape-dagre"]; !exists {
+		devDependencies["cytoscape-dagre"] = "2.5.0"
+	}
 	defaultScripts := map[string]string{
 		"artifacts:check":          "node scripts/generate-artifact-review.mjs --check && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
 		"artifacts:generate":       "node scripts/generate-artifact-review.mjs",
@@ -3373,6 +3382,12 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	reviewGeneratorPath := filepath.Join(projectDir, "scripts", "generate-artifact-review.mjs")
 	if !fileExists(reviewGeneratorPath) {
 		if err := os.WriteFile(reviewGeneratorPath, []byte(developerArtifactReviewGeneratorScript()), 0o644); err != nil {
+			return err
+		}
+	}
+	uweWorkspaceRuntimePath := filepath.Join(projectDir, "scripts", "uwe-workspace-runtime.js")
+	if !fileExists(uweWorkspaceRuntimePath) {
+		if err := os.WriteFile(uweWorkspaceRuntimePath, []byte(developerArtifactUweWorkspaceRuntimeScript()), 0o644); err != nil {
 			return err
 		}
 	}
@@ -4518,6 +4533,34 @@ const svgPanZoomRuntime = (() => {
     return '';
   }
 })();
+const cytoscapeRuntime = (() => {
+  try {
+    return fs.readFileSync(path.join(root, 'node_modules', 'cytoscape', 'dist', 'cytoscape.min.js'), 'utf8');
+  } catch {
+    return '';
+  }
+})();
+const dagreRuntime = (() => {
+  try {
+    return fs.readFileSync(path.join(root, 'node_modules', 'dagre', 'dist', 'dagre.min.js'), 'utf8');
+  } catch {
+    return '';
+  }
+})();
+const cytoscapeDagreRuntime = (() => {
+  try {
+    return fs.readFileSync(path.join(root, 'node_modules', 'cytoscape-dagre', 'cytoscape-dagre.js'), 'utf8');
+  } catch {
+    return '';
+  }
+})();
+const uweWorkspaceRuntime = (() => {
+  try {
+    return fs.readFileSync(path.join(root, 'scripts', 'uwe-workspace-runtime.js'), 'utf8');
+  } catch {
+    return '';
+  }
+})();
 const configuredInfographicTools = Array.isArray(developerArtifacts.infographicPolicy?.tools)
   ? developerArtifacts.infographicPolicy.tools
   : defaultInfographicTools;
@@ -4745,9 +4788,12 @@ function graphData(spec) {
       navigationClass: node.navigationClass || node.lane || node.class ? String(node.navigationClass ?? node.lane ?? node.class) : '',
       effect: node.effect || node.sideEffect ? String(node.effect ?? node.sideEffect) : '',
       screenshot: node.screenshot || node.image || node.visualEvidence || '',
+      actions: node.actions || node.primaryActions || node.action ? String(node.actions ?? node.primaryActions ?? node.action) : '',
+      stereotype: node.stereotype || node.stereo ? String(node.stereotype ?? node.stereo) : '',
+      type: node.type || node.facet ? String(node.type ?? node.facet) : ''
     })
     : [...nodeIds].map((id) => ({ id, label: id }));
-  return { nodes: nodes.slice(0, 12), edges: edges.filter((edge) => edge.from && edge.to).slice(0, 18) };
+  return { nodes, edges: edges.filter((edge) => edge.from && edge.to) };
 }
 
 function renderBarSvg(spec) {
@@ -4930,6 +4976,41 @@ function renderZoomableUmlSvg(visual, index) {
     '</div>';
 }
 
+function uweStereotype(node) {
+  if (node.stereotype) return node.stereotype;
+  const type = String(node.type || node.facet || '').toLowerCase();
+  if (type.includes('process')) return '«processClass»';
+  if (type.includes('menu')) return '«menu»';
+  if (type.includes('query')) return '«query»';
+  if (type.includes('index')) return '«index»';
+  if (type.includes('external')) return '«externalNode»';
+  if (type.includes('adaptation')) return '«navigationClass» {adaptation}';
+  if (type.includes('access')) return '«accessPrimitive»';
+  return '«navigationClass»';
+}
+
+function renderUweWorkspace(spec, graph, index) {
+  const workspaceId = 'uwe-workspace-' + index;
+  const packages = [...new Set(graph.nodes.map((node) => node.navigationClass || 'Navigation'))];
+  const first = graph.nodes[0] ?? {};
+  const packageButtons = packages.map((name) => '<button type="button" data-uwe-action="package:' + escapeAttribute(name) + '">' + escapeHtml(name.slice(0, 28)) + '</button>').join('');
+  const nodeButtons = graph.nodes.map((node) => '<button type="button" data-uwe-focus-node="' + escapeAttribute(node.id) + '">' + escapeHtml((node.label || node.id).slice(0, 24)) + '</button>').join('');
+  const nodeData = graph.nodes.map((node) => {
+    const dataUrl = imageDataUrl(node.screenshot) || '';
+    return '<span data-uwe-node data-uwe-id="' + escapeAttribute(node.id) + '" data-uwe-label="' + escapeAttribute(node.label || node.id) + '" data-uwe-stereo="' + escapeAttribute(uweStereotype(node)) + '" data-uwe-type="' + escapeAttribute(node.type || node.facet || 'navigation') + '" data-uwe-package="' + escapeAttribute(node.navigationClass || 'Navigation') + '" data-uwe-route="' + escapeAttribute(node.route || '') + '" data-uwe-role="' + escapeAttribute(node.role || '') + '" data-uwe-actions="' + escapeAttribute(node.actions || 'Inspect this node and outgoing UWE links.') + '" data-uwe-effect="' + escapeAttribute(node.effect || '') + '" data-uwe-screenshot="' + escapeAttribute(dataUrl) + '"></span>';
+  }).join('');
+  const edgeData = graph.edges.map((edge) => '<span data-uwe-edge data-uwe-from="' + escapeAttribute(edge.from) + '" data-uwe-to="' + escapeAttribute(edge.to) + '" data-uwe-label="' + escapeAttribute(edge.label || '«navigationLink»') + '"></span>').join('');
+  const firstImage = imageDataUrl(first.screenshot) || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+  return '<style>.uwe-engine-workspace{border:1px solid #111827;background:#fff;margin:12px 0 18px}.uwe-engine-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #111827;background:#f3f4f6;padding:10px 12px}.uwe-engine-head h4{margin:0;font-size:15px;line-height:1.2}.uwe-engine-toolbar,.uwe-node-map{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 12px;border-bottom:1px solid #d8dee8}.uwe-node-map{background:#fbfdff}.uwe-engine-toolbar button,.uwe-node-map button{cursor:pointer;border:1px solid #111827;background:#fff;color:#111827;padding:5px 9px;font-size:12px;font-weight:700}.uwe-engine-toolbar button:hover,.uwe-node-map button:hover{background:#111827;color:#fff}.uwe-runtime-badge{margin-left:auto;color:#374151;font-size:12px;font-weight:800}.uwe-engine-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;min-height:620px}.uwe-cy-graph{min-height:620px;background:linear-gradient(#f8fafc,#fff);position:relative}.uwe-cy-placeholder{position:absolute;inset:0;display:grid;place-items:center;color:#64748b;font-weight:800}.uwe-engine-inspector{border-left:1px solid #111827;background:#fbfdff;padding:12px}.uwe-engine-inspector img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border:1px solid #111827;background:#fff;margin:8px 0}.uwe-inspector-kicker{display:block;color:#0f766e;font-size:12px;font-weight:900;text-transform:uppercase}.uwe-inspector-title{margin:2px 0 0;font-size:18px}.uwe-inspector-block{border-top:1px solid #d8dee8;padding:8px 0}.uwe-inspector-block strong{display:block;font-size:11px;text-transform:uppercase;color:#5b6472}.uwe-engine-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:9px 12px;border-top:1px solid #d8dee8}.uwe-engine-stats div{border:1px solid #d8dee8;background:#f8fafc;padding:8px}.uwe-engine-stats strong{display:block;font-size:20px}@media(max-width:920px){.uwe-engine-grid{grid-template-columns:1fr}.uwe-engine-inspector{border-left:0;border-top:1px solid #111827}.uwe-runtime-badge{margin-left:0}}</style>' +
+    '<div id="' + workspaceId + '" class="uwe-engine-workspace" role="group" aria-label="Engine-backed UWE navigation workspace">' +
+    '<div class="uwe-engine-head"><div><h4>Engine-Backed UWE Navigation Workspace</h4><p class="muted">Primary view rendered from structured source data with Cytoscape.js and dagre. Screenshots are node backgrounds; click nodes to inspect actions and effects.</p></div><span class="tool-badge">Cytoscape + dagre</span></div>' +
+    '<div class="uwe-engine-toolbar"><button type="button" data-uwe-action="fit">Fit graph</button><button type="button" data-uwe-action="layout">Re-run layout</button>' + packageButtons + '<span class="uwe-runtime-badge" data-uwe-runtime-badge>Workspace runtime pending</span></div><div class="uwe-node-map" aria-label="UWE node focus map">' + nodeButtons + '</div>' +
+    '<div class="uwe-engine-grid"><div class="uwe-cy-graph" data-uwe-cy><div class="uwe-cy-placeholder">Rendering UWE graph workspace...</div></div>' +
+    '<aside class="uwe-engine-inspector" aria-label="Selected UWE node inspector"><span class="uwe-inspector-kicker" data-uwe-inspector-stereo>' + escapeHtml(uweStereotype(first)) + '</span><h4 class="uwe-inspector-title" data-uwe-inspector-title>' + escapeHtml(first.label || first.id || 'UWE node') + '</h4><img data-uwe-inspector-image src="' + escapeAttribute(firstImage) + '" alt="Selected UWE node screenshot"><div class="uwe-inspector-block"><strong>Package</strong><span data-uwe-inspector-package>' + escapeHtml(first.navigationClass || 'Navigation') + '</span></div><div class="uwe-inspector-block"><strong>Route or state</strong><span data-uwe-inspector-route>' + escapeHtml(first.route || 'state') + '</span></div><div class="uwe-inspector-block"><strong>Role</strong><span data-uwe-inspector-role>' + escapeHtml(first.role || 'all roles') + '</span></div><div class="uwe-inspector-block"><strong>Available user action</strong><span data-uwe-inspector-actions>' + escapeHtml(first.actions || 'Inspect this node and outgoing UWE links.') + '</span></div><div class="uwe-inspector-block"><strong>System effect</strong><span data-uwe-inspector-effect>' + escapeHtml(first.effect || 'Effect not recorded.') + '</span></div></aside></div>' +
+    '<div class="uwe-engine-stats"><div><strong data-uwe-stat="nodes">' + graph.nodes.length + '</strong>UWE nodes</div><div><strong data-uwe-stat="edges">' + graph.edges.length + '</strong>typed links</div><div><strong data-uwe-stat="packages">' + packages.length + '</strong>packages</div></div>' +
+    '<div hidden>' + nodeData + edgeData + '</div></div>';
+}
+
 function renderUweNavigationSvg(spec, graph) {
   const cardWidth = 210;
   const cardHeight = 168;
@@ -5003,19 +5084,23 @@ async function renderInfographicSpec(spec, index) {
   const tool = normalizeToolId(spec.tool ?? spec.renderer ?? 'source-spec');
   const allowed = infographicToolIds.has(tool) || tool === 'source-spec';
   const kind = String(spec.kind ?? spec.mark ?? spec.type ?? '').toLowerCase();
+  const isUwe = kind === 'uwe-navigation' || kind === 'uwe';
   let visual = '';
-  if (['graphviz', 'mermaid'].includes(tool) || ['graph', 'network', 'lineage', 'relationship'].includes(kind)) {
+  if (isUwe) {
+    const graph = graphData(spec);
+    const graphvizVisual = await renderUweNavigationGraphvizSvg(spec, graph);
+    visual = renderUweWorkspace(spec, graph, index) +
+      '<details class="uml-render-fallback"><summary>Graphviz UML fallback and source-rendered SVG</summary>' + renderZoomableUmlSvg(graphvizVisual, index) + '</details>';
+  } else if (['graphviz', 'mermaid'].includes(tool) || ['graph', 'network', 'lineage', 'relationship'].includes(kind)) {
     visual = await renderGraphSvg(spec);
   } else if (kind === 'line' || kind === 'trend') {
     visual = renderLineSvg(spec);
   } else {
     visual = renderBarSvg(spec);
   }
-  const isUwe = kind === 'uwe-navigation' || kind === 'uwe';
-  if (isUwe) visual = renderZoomableUmlSvg(visual, index);
   const articleClass = isUwe ? 'chart-panel uml-model-panel' : 'chart-panel';
-  const badge = isUwe ? 'UWE / UML profile - Graphviz backend' : (tool || 'source-spec');
-  const rendererNote = isUwe ? '<p class="muted">Generated from source JSON into DOT, rendered with the open-source @viz-js/viz Graphviz engine, viewed with svg-pan-zoom when the reviewed JS lane is enabled, and extended only by injecting screenshots into UML node compartments after render.</p>' : '';
+  const badge = isUwe ? 'UWE workspace - Cytoscape + Graphviz' : (tool || 'source-spec');
+  const rendererNote = isUwe ? '<p class="muted">Generated from source JSON into an engine-backed Cytoscape/Dagre workspace, with Graphviz kept as the UML renderer fallback. Screenshots remain evidence extensions inside UWE nodes, not replacements for UWE notation.</p>' : '';
   return '<article class="' + articleClass + '"><div class="chart-head"><h3>' + escapeHtml(spec.title ?? 'Infographic ' + (index + 1)) + '</h3><span class="tool-badge">' + escapeHtml(badge) + '</span></div><p>' + escapeHtml(spec.summary ?? spec.description ?? (allowed ? 'Rendered as static review markup from a source-declared infographic spec.' : 'Unknown tool requested; rendered with the static fallback.')) + '</p>' + rendererNote + visual + '</article>';
 }
 
@@ -5073,10 +5158,13 @@ function gallerySection(artifact) {
 }
 
 function htmlPage(title, body, options = {}) {
-  const scripts = options.enableSvgPanZoom && svgPanZoomRuntime
-    ? '<script>' + svgPanZoomRuntime + '</script>\n<script>document.querySelectorAll("[data-svg-pan-zoom=true] svg").forEach(function(svg){svgPanZoom(svg,{controlIconsEnabled:true,fit:true,center:true,minZoom:.1,maxZoom:20,zoomScaleSensitivity:.25});});document.querySelectorAll(".viewer-badge").forEach(function(el){el.textContent="svg-pan-zoom active: drag, wheel, +/- controls";});document.documentElement.classList.add("svg-pan-zoom-active");</script>\n'
+  const svgPanZoomInitializer = 'document.querySelectorAll("[data-svg-pan-zoom=true] svg").forEach(function(svg){svgPanZoom(svg,{controlIconsEnabled:true,fit:true,center:true,minZoom:.1,maxZoom:20,zoomScaleSensitivity:.25});});document.querySelectorAll(".viewer-badge").forEach(function(el){el.textContent="svg-pan-zoom active: drag, wheel, +/- controls";});document.documentElement.classList.add("svg-pan-zoom-active");';
+  const scripts = options.enableUweWorkspace && svgPanZoomRuntime && cytoscapeRuntime && dagreRuntime && cytoscapeDagreRuntime && uweWorkspaceRuntime
+    ? '<script>' + svgPanZoomRuntime + '</script>\n<script>' + cytoscapeRuntime + '</script>\n<script>' + dagreRuntime + '</script>\n<script>' + cytoscapeDagreRuntime + '</script>\n<script>' + uweWorkspaceRuntime + '</script>\n'
+    : options.enableSvgPanZoom && svgPanZoomRuntime
+    ? '<script>' + svgPanZoomRuntime + '</script>\n<script>' + svgPanZoomInitializer + '</script>\n'
     : '';
-  const csp = options.enableSvgPanZoom ? "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" : requiredCsp;
+  const csp = options.enableSvgPanZoom || options.enableUweWorkspace ? "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" : requiredCsp;
   return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="' + escapeAttribute(csp) + '">\n<title>' + escapeHtml(title) + '</title>\n<style>\n:root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;--bg:#eef2f6;--panel:#fff;--text:#1f2937;--muted:#5b6472;--line:#d8dee8;--navy:#172033;--teal:#0f766e;--blue:#2457c5;--amber:#a15c07;--green:#16794b;--red:#b42318;--violet:#6546a3}*{box-sizing:border-box}body{margin:0;color:var(--text);background:var(--bg)}a{color:#174ea6}header{background:var(--navy);color:#fff;padding:28px;border-bottom:6px solid var(--teal)}header h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:0}header p{max-width:1040px;margin:0;color:#dce6f1}main{max-width:1240px;margin:0 auto;padding:18px}h2,h3{margin:0 0 10px;line-height:1.2;letter-spacing:0}p{margin:0 0 12px}.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{border:1px solid var(--line);border-top:5px solid var(--teal);border-radius:8px;padding:12px;background:#fff;min-height:104px}.metric strong{display:block;font-size:28px;line-height:1;margin-bottom:6px}.metric span{color:var(--muted);font-size:13px}.blue{border-top-color:var(--blue)}.amber{border-top-color:var(--amber)}.green{border-top-color:var(--green)}.violet{border-top-color:var(--violet)}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:650}.tab-panel{display:none;margin-top:14px}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4){display:block}.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.step{border:1px solid var(--line);border-radius:8px;background:#f9fbfd;padding:12px;min-height:96px}.step strong{display:block;margin-bottom:5px}.step span,.muted{color:var(--muted)}.bar-row{display:grid;grid-template-columns:172px minmax(0,1fr) 52px;gap:10px;align-items:center;margin:10px 0}.bar-track{height:18px;background:#e8edf4;border-radius:999px;overflow:hidden}.bar{display:block;height:100%;border-radius:999px;background:var(--teal)}.w100{width:100%}.w80{width:80%}.w60{width:60%}.w40{width:40%}.w20{width:20%}.toolkit-grid,.chart-grid,.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.uml-review-section{background:#fdfdfb;border-color:#111827}.uml-review-section>h2{font-size:18px;text-transform:uppercase;letter-spacing:.04em;color:#111827}.uml-model-panel{grid-column:1/-1;border:1px solid #111827;border-radius:0;background:#fff;padding:14px}.uml-model-panel .chart-head{border-bottom:1px solid #111827;margin:-14px -14px 12px;padding:10px 12px;background:#f3f4f6}.uml-model-panel .tool-badge{border-color:#111827;border-radius:0;background:#fff;color:#111827}.uml-model-panel p{max-width:980px;color:#374151}.uml-model-panel .graphviz-render{border:0;border-radius:0;background:#fff;padding:0;margin:0}.uml-zoom{border:1px solid #111827;background:#fff;margin-top:10px}.uml-zoom>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.uml-zoom-controls{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-bottom:1px solid #111827;background:#f3f4f6;padding:8px 10px}.uml-zoom-controls span{font-size:12px;font-weight:800;text-transform:uppercase;color:#111827}.uml-zoom-controls label{cursor:pointer;border:1px solid #111827;background:#fff;color:#111827;padding:4px 8px;font-size:12px;font-weight:700}.viewer-badge{text-transform:none!important;font-weight:700!important;color:#374151!important;margin-left:auto}.uml-zoom-frame{height:min(72vh,760px);overflow:auto;background:#fff}.uml-zoom-canvas{transform-origin:0 0;transition:transform .12s ease;width:max-content;min-width:100%}.uml-zoom input:nth-of-type(1):checked~.uml-zoom-controls label:nth-of-type(1),.uml-zoom input:nth-of-type(2):checked~.uml-zoom-controls label:nth-of-type(2),.uml-zoom input:nth-of-type(3):checked~.uml-zoom-controls label:nth-of-type(3),.uml-zoom input:nth-of-type(4):checked~.uml-zoom-controls label:nth-of-type(4){background:#111827;color:#fff}.uml-zoom input:nth-of-type(2):checked~.uml-zoom-frame .uml-zoom-canvas{transform:scale(1)}.uml-zoom input:nth-of-type(3):checked~.uml-zoom-frame .uml-zoom-canvas{transform:scale(1.5);padding-right:50%;padding-bottom:28%}.uml-zoom input:nth-of-type(4):checked~.uml-zoom-frame .uml-zoom-canvas{transform:scale(2);padding-right:100%;padding-bottom:55%}.tool-card,.chart-panel{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px}.chart-panel.uml-model-panel{border:1px solid #111827;border-radius:0;background:#fff;padding:14px}.tool-card strong,.tool-card span,.tool-card em{display:block}.tool-card span{color:var(--muted);font-size:13px}.tool-card em{margin-top:6px;color:#334155;font-size:12px;font-style:normal}.chart-head{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}.tool-badge{display:inline-flex;border:1px solid #b9c7dc;background:#f4f7fb;border-radius:999px;padding:2px 8px;color:#334155;font-size:12px;font-weight:700;white-space:nowrap}.infographic-chart{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff;margin-top:8px}.graphviz-render .edge polygon{fill:#fff;stroke:#111827}.graphviz-render text{font-family:"Segoe UI",Arial,sans-serif}.graphviz-render .cluster text{font-weight:600}.graphviz-render .node>polygon:last-child{stroke:#111827}figure{margin:0;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}figure img{display:block;width:100%;height:auto}figcaption{padding:9px 10px;color:var(--muted);font-size:13px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid var(--line);text-align:left;vertical-align:top;padding:9px}th{background:#f7f9fc}pre{white-space:pre-wrap;overflow:auto;background:#101828;color:#e5edf7;padding:14px;border-radius:8px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#eef2f6;border:1px solid #dae2ec;border-radius:4px;padding:1px 4px}ul,ol{margin:8px 0 0 20px;padding:0}li{margin:4px 0}.callout{border-left:5px solid var(--teal);background:#effaf8;padding:12px 14px;border-radius:7px;margin:12px 0}@media(max-width:920px){.grid,.metrics{grid-template-columns:1fr}main{padding:12px}.bar-row{grid-template-columns:1fr}.chart-head{display:block}.tool-badge{margin-bottom:8px}.viewer-badge{margin-left:0}}\\n</style>\\n</head>\\n<body>\\n' + body + '\\n' + scripts + '</body>\\n</html>\\n';
 }
 
@@ -5103,7 +5191,10 @@ async function renderArtifact(artifact, outPath) {
     '<div class="tab-panel"><h2>Canonical Source</h2><p>' + linkFor(outPath, artifact.source, artifact.source || 'source') + '</p><pre>' + escapeHtml(source || 'Source not found or not readable.') + '</pre></div>' +
     '<div class="tab-panel"><h2>Metadata</h2><table><tbody><tr><th>ID</th><td>' + escapeHtml(artifact.id) + '</td></tr><tr><th>Type</th><td>' + escapeHtml(artifact.type) + '</td></tr><tr><th>Owner</th><td>' + escapeHtml(artifact.owner) + '</td></tr><tr><th>Renderer</th><td>' + escapeHtml(artifact.renderer || rendererName) + '</td></tr><tr><th>Source hash</th><td>' + escapeHtml(artifact.sourceHash || '') + '</td></tr></tbody></table></div>' +
     '</div></section></main>';
-  return htmlPage(String(title || 'Artifact Review'), body, { enableSvgPanZoom: artifact.htmlInteractionLane === 'reviewed-svg-pan-zoom' });
+  return htmlPage(String(title || 'Artifact Review'), body, {
+    enableSvgPanZoom: artifact.htmlInteractionLane === 'reviewed-svg-pan-zoom',
+    enableUweWorkspace: artifact.htmlInteractionLane === 'reviewed-uwe-workspace'
+  });
 }
 
 function renderIndex(artifacts, outPath, hasModelArtifacts) {
@@ -5846,6 +5937,203 @@ console.log('Model inventory check passed');
 `
 }
 
+func developerArtifactUweWorkspaceRuntimeScript() string {
+	return `(function () {
+  function text(value, fallback) {
+    return value || fallback || "";
+  }
+
+  function nodeDataFrom(element) {
+    return {
+      id: element.dataset.uweId,
+      name: text(element.dataset.uweLabel, element.dataset.uweId),
+      stereo: text(element.dataset.uweStereo, "«navigationClass»"),
+      type: text(element.dataset.uweType, "navigation"),
+      packageName: text(element.dataset.uwePackage, "Navigation"),
+      route: text(element.dataset.uweRoute, ""),
+      role: text(element.dataset.uweRole, ""),
+      actions: text(element.dataset.uweActions, "Inspect available actions in the source matrix."),
+      effect: text(element.dataset.uweEffect, "Effect not recorded."),
+      screenshot: text(element.dataset.uweScreenshot, "")
+    };
+  }
+
+  function edgeDataFrom(element) {
+    return {
+      id: element.dataset.uweFrom + "__" + element.dataset.uweTo + "__" + text(element.dataset.uweLabel, "link"),
+      source: element.dataset.uweFrom,
+      target: element.dataset.uweTo,
+      label: text(element.dataset.uweLabel, "«navigationLink»")
+    };
+  }
+
+  function classFor(node) {
+    var raw = String(node.type || node.stereo || "navigation").toLowerCase();
+    if (raw.indexOf("process") >= 0) return "uwe-process";
+    if (raw.indexOf("access") >= 0) return "uwe-access";
+    if (raw.indexOf("adaptation") >= 0 || raw.indexOf("denied") >= 0) return "uwe-adaptation";
+    return "uwe-navigation";
+  }
+
+  function setInspector(workspace, data) {
+    workspace.querySelector("[data-uwe-inspector-stereo]").textContent = data.stereo || "UWE node";
+    workspace.querySelector("[data-uwe-inspector-title]").textContent = data.name || data.id;
+    workspace.querySelector("[data-uwe-inspector-package]").textContent = data.packageName || "Navigation";
+    workspace.querySelector("[data-uwe-inspector-route]").textContent = data.route || "state";
+    workspace.querySelector("[data-uwe-inspector-role]").textContent = data.role || "all roles";
+    workspace.querySelector("[data-uwe-inspector-actions]").textContent = data.actions || "No action inventory recorded.";
+    workspace.querySelector("[data-uwe-inspector-effect]").textContent = data.effect || "No side effect recorded.";
+    var img = workspace.querySelector("[data-uwe-inspector-image]");
+    if (img && data.screenshot) {
+      img.src = data.screenshot;
+      img.alt = (data.name || data.id) + " screenshot";
+    }
+  }
+
+  function initPanZoom() {
+    if (!window.svgPanZoom) return;
+    document.querySelectorAll("[data-svg-pan-zoom=true] svg").forEach(function (svg) {
+      window.svgPanZoom(svg, {
+        controlIconsEnabled: true,
+        fit: true,
+        center: true,
+        minZoom: 0.1,
+        maxZoom: 20,
+        zoomScaleSensitivity: 0.25
+      });
+    });
+    document.querySelectorAll(".viewer-badge").forEach(function (el) {
+      el.textContent = "svg-pan-zoom active: drag, wheel, +/- controls";
+    });
+  }
+
+  function initWorkspace(workspace) {
+    var graphHost = workspace.querySelector("[data-uwe-cy]");
+    var badge = workspace.querySelector("[data-uwe-runtime-badge]");
+    var nodeElements = Array.prototype.slice.call(workspace.querySelectorAll("[data-uwe-node]"));
+    var edgeElements = Array.prototype.slice.call(workspace.querySelectorAll("[data-uwe-edge]"));
+    var nodes = nodeElements.map(nodeDataFrom);
+    var edges = edgeElements.map(edgeDataFrom).filter(function (edge) {
+      return nodes.some(function (node) { return node.id === edge.source; }) && nodes.some(function (node) { return node.id === edge.target; });
+    });
+    if (!graphHost || !window.cytoscape) {
+      if (badge) badge.textContent = "Graph workspace fallback: Cytoscape runtime unavailable";
+      return;
+    }
+    if (window.cytoscapeDagre) window.cytoscape.use(window.cytoscapeDagre);
+    graphHost.innerHTML = "";
+    var cy = window.cytoscape({
+      container: graphHost,
+      elements: nodes.map(function (node) {
+        return { group: "nodes", data: node, classes: classFor(node) };
+      }).concat(edges.map(function (edge) {
+        return { group: "edges", data: edge };
+      })),
+      minZoom: 0.12,
+      maxZoom: 2.8,
+      wheelSensitivity: 0.18,
+      style: [
+        {
+          selector: "node",
+          style: {
+            shape: "round-rectangle",
+            width: 232,
+            height: 168,
+            "background-color": "#ffffff",
+            "background-image": "data(screenshot)",
+            "background-fit": "cover",
+            "background-opacity": 0.86,
+            "border-color": "#111827",
+            "border-width": 1.5,
+            label: "data(name)",
+            "font-family": "Segoe UI, Arial, sans-serif",
+            "font-weight": 800,
+            "font-size": 12,
+            color: "#111827",
+            "text-background-color": "#ffffff",
+            "text-background-opacity": 0.92,
+            "text-background-padding": 5,
+            "text-valign": "bottom",
+            "text-halign": "center",
+            "overlay-opacity": 0
+          }
+        },
+        { selector: ".uwe-process", style: { "border-color": "#a15c07", "border-style": "dashed" } },
+        { selector: ".uwe-access", style: { "border-color": "#2457c5" } },
+        { selector: ".uwe-adaptation", style: { "border-color": "#b42318", "border-style": "dashed" } },
+        {
+          selector: "edge",
+          style: {
+            width: 2,
+            "line-color": "#64748b",
+            "target-arrow-color": "#64748b",
+            "target-arrow-shape": "triangle",
+            "curve-style": "bezier",
+            label: "data(label)",
+            "font-size": 10,
+            "font-family": "Segoe UI, Arial, sans-serif",
+            color: "#334155",
+            "text-background-color": "#ffffff",
+            "text-background-opacity": 0.85,
+            "text-background-padding": 2
+          }
+        },
+        { selector: ":selected", style: { "border-width": 4, "border-color": "#0f766e", "line-color": "#0f766e", "target-arrow-color": "#0f766e" } }
+      ],
+      layout: {
+        name: window.cytoscapeDagre ? "dagre" : "grid",
+        rankDir: "LR",
+        nodeSep: 70,
+        edgeSep: 24,
+        rankSep: 132,
+        fit: true,
+        padding: 36
+      }
+    });
+    workspace.uweCy = cy;
+    workspace.querySelector("[data-uwe-stat=nodes]").textContent = String(nodes.length);
+    workspace.querySelector("[data-uwe-stat=edges]").textContent = String(edges.length);
+    workspace.querySelector("[data-uwe-stat=packages]").textContent = String(new Set(nodes.map(function (node) { return node.packageName; })).size);
+    if (badge) badge.textContent = "Cytoscape + dagre active: wheel zoom, drag pan, click inspect";
+    if (nodes[0]) setInspector(workspace, nodes[0]);
+    cy.on("tap", "node", function (event) {
+      setInspector(workspace, event.target.data());
+    });
+    workspace.querySelectorAll("[data-uwe-action]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var action = button.dataset.uweAction;
+        if (action === "fit") cy.fit(undefined, 36);
+        if (action === "layout") cy.layout({ name: window.cytoscapeDagre ? "dagre" : "grid", rankDir: "LR", nodeSep: 70, edgeSep: 24, rankSep: 132, fit: true, padding: 36 }).run();
+        if (action && action.indexOf("package:") === 0) {
+          var packageName = action.slice("package:".length);
+          var collection = cy.nodes().filter(function (node) { return node.data("packageName") === packageName; });
+          if (collection.length > 0) cy.fit(collection.union(collection.connectedEdges()), 56);
+        }
+      });
+    });
+    workspace.querySelectorAll("[data-uwe-focus-node]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var id = button.dataset.uweFocusNode;
+        var node = nodes.find(function (candidate) { return candidate.id === id; });
+        if (!node) return;
+        setInspector(workspace, node);
+        var cyNode = cy.getElementById(id);
+        if (cyNode && cyNode.length > 0) {
+          cy.nodes().unselect();
+          cyNode.select();
+          cy.fit(cyNode.union(cyNode.connectedEdges()), 72);
+        }
+      });
+    });
+  }
+
+  initPanZoom();
+  document.querySelectorAll(".uwe-engine-workspace").forEach(initWorkspace);
+  document.documentElement.classList.add("uwe-workspace-active");
+})();
+`
+}
+
 func developerArtifactPolicyScript() string {
 	return `import fs from 'node:fs';
 import path from 'node:path';
@@ -5860,6 +6148,9 @@ const manifestPath = path.join(root, developerArtifacts.manifest?.path ?? 'docs/
 const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) : {};
 const reviewedSvgPanZoomSurfaces = new Set((manifest.artifacts ?? [])
   .filter((artifact) => artifact.htmlInteractionLane === 'reviewed-svg-pan-zoom' && typeof artifact.reviewSurface === 'string')
+  .map((artifact) => path.normalize(path.resolve(root, artifact.reviewSurface))));
+const reviewedUweWorkspaceSurfaces = new Set((manifest.artifacts ?? [])
+  .filter((artifact) => artifact.htmlInteractionLane === 'reviewed-uwe-workspace' && typeof artifact.reviewSurface === 'string')
   .map((artifact) => path.normalize(path.resolve(root, artifact.reviewSurface))));
 
 const blockedTagPatterns = [
@@ -5890,6 +6181,18 @@ const allowedSvgPanZoomRuntime = fs.existsSync(path.join(root, 'node_modules', '
   ? fs.readFileSync(path.join(root, 'node_modules', 'svg-pan-zoom', 'dist', 'svg-pan-zoom.min.js'), 'utf8')
   : '';
 const allowedSvgPanZoomInitializer = 'document.querySelectorAll("[data-svg-pan-zoom=true] svg").forEach(function(svg){svgPanZoom(svg,{controlIconsEnabled:true,fit:true,center:true,minZoom:.1,maxZoom:20,zoomScaleSensitivity:.25});});document.querySelectorAll(".viewer-badge").forEach(function(el){el.textContent="svg-pan-zoom active: drag, wheel, +/- controls";});document.documentElement.classList.add("svg-pan-zoom-active");';
+const allowedCytoscapeRuntime = fs.existsSync(path.join(root, 'node_modules', 'cytoscape', 'dist', 'cytoscape.min.js'))
+  ? fs.readFileSync(path.join(root, 'node_modules', 'cytoscape', 'dist', 'cytoscape.min.js'), 'utf8')
+  : '';
+const allowedDagreRuntime = fs.existsSync(path.join(root, 'node_modules', 'dagre', 'dist', 'dagre.min.js'))
+  ? fs.readFileSync(path.join(root, 'node_modules', 'dagre', 'dist', 'dagre.min.js'), 'utf8')
+  : '';
+const allowedCytoscapeDagreRuntime = fs.existsSync(path.join(root, 'node_modules', 'cytoscape-dagre', 'cytoscape-dagre.js'))
+  ? fs.readFileSync(path.join(root, 'node_modules', 'cytoscape-dagre', 'cytoscape-dagre.js'), 'utf8')
+  : '';
+const allowedUweWorkspaceRuntime = fs.existsSync(path.join(root, 'scripts', 'uwe-workspace-runtime.js'))
+  ? fs.readFileSync(path.join(root, 'scripts', 'uwe-workspace-runtime.js'), 'utf8')
+  : '';
 
 function walk(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -5906,14 +6209,23 @@ function checkFile(filePath) {
   const html = fs.readFileSync(filePath, 'utf8');
   const failures = [];
   const reviewedSvgPanZoom = reviewedSvgPanZoomSurfaces.has(path.normalize(path.resolve(filePath)));
-  const expectedCsp = reviewedSvgPanZoom ? reviewedSvgPanZoomCsp : requiredCsp;
+  const reviewedUweWorkspace = reviewedUweWorkspaceSurfaces.has(path.normalize(path.resolve(filePath)));
+  const expectedCsp = reviewedSvgPanZoom || reviewedUweWorkspace ? reviewedSvgPanZoomCsp : requiredCsp;
   if (!html.includes('Content-Security-Policy') || !html.includes(expectedCsp)) failures.push('missing required CSP meta tag');
   const scriptMatches = [...html.matchAll(/<script>([\s\S]*?)<\/script>/gi)].map((match) => match[1]);
-  if (!reviewedSvgPanZoom && scriptMatches.length > 0) failures.push('blocked script tag');
+  if (!reviewedSvgPanZoom && !reviewedUweWorkspace && scriptMatches.length > 0) failures.push('blocked script tag');
   if (reviewedSvgPanZoom) {
     if (scriptMatches.length !== 2) failures.push('reviewed-svg-pan-zoom requires exactly two inline scripts');
     if (scriptMatches[0] !== allowedSvgPanZoomRuntime) failures.push('reviewed-svg-pan-zoom runtime does not match bundled svg-pan-zoom');
     if (scriptMatches[1] !== allowedSvgPanZoomInitializer) failures.push('reviewed-svg-pan-zoom initializer is not the approved static initializer');
+  }
+  if (reviewedUweWorkspace) {
+    if (scriptMatches.length !== 5) failures.push('reviewed-uwe-workspace requires exactly five inline scripts');
+    if (scriptMatches[0] !== allowedSvgPanZoomRuntime) failures.push('reviewed-uwe-workspace svg-pan-zoom runtime does not match bundled dependency');
+    if (scriptMatches[1] !== allowedCytoscapeRuntime) failures.push('reviewed-uwe-workspace Cytoscape runtime does not match bundled dependency');
+    if (scriptMatches[2] !== allowedDagreRuntime) failures.push('reviewed-uwe-workspace dagre runtime does not match bundled dependency');
+    if (scriptMatches[3] !== allowedCytoscapeDagreRuntime) failures.push('reviewed-uwe-workspace cytoscape-dagre runtime does not match bundled dependency');
+    if (scriptMatches[4] !== allowedUweWorkspaceRuntime) failures.push('reviewed-uwe-workspace initializer does not match scripts/uwe-workspace-runtime.js');
   }
   for (const pattern of blockedTagPatterns) if (pattern.test(html)) failures.push('blocked tag or preload pattern: ' + pattern);
   for (const pattern of blockedApiPatterns) if (pattern.test(html)) failures.push('blocked browser API: ' + pattern);
