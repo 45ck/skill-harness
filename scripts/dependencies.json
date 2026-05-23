@@ -102,6 +102,12 @@
     "integration-tooling-skills": {
       "path": "packs/integration-tooling-skills"
     },
+    "specgraph-skills": {
+      "path": "packs/specgraph-skills"
+    },
+    "noslop-skills": {
+      "path": "packs/noslop-skills"
+    },
     "developer-artifact-skills": {
       "path": "packs/developer-artifact-skills"
     },
@@ -118,6 +124,7 @@
         "business-analysis-skills",
         "documentation-evidence-skills",
         "frontier-agent-playbook",
+        "specgraph-skills",
         "developer-artifact-skills",
         "agent-operating-skills"
       ]
@@ -127,6 +134,7 @@
         "business-analysis-skills",
         "documentation-evidence-skills",
         "frontier-agent-playbook",
+        "specgraph-skills",
         "developer-artifact-skills",
         "agent-operating-skills"
       ]

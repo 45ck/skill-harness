@@ -27,6 +27,20 @@ The root [package.json](package.json) is marked `private` because npm is used he
 
 `skill-harness` can write into user-level agent directories, clone or copy skill packs, install project tooling, run setup commands, and create generated review surfaces in target repos. Review scripts and dependency changes as supply-chain-sensitive.
 
+The `setup-project` command runs inside the resolved setup directory. In `--scope auto`, that may be a detected monorepo root rather than the exact directory passed with `--dir`. It can:
+
+- create or update `package.json`
+- install `@45ck/noslop` and `github:45ck/agent-docs` as development dependencies
+- run `agent-docs init`, `noslop init`, `bd init`, and `agent-docs install-gates --quality`
+- install Beads if `bd` is not already available
+- write `.claude/settings.json` to allow Claude agent-team use
+- install the repo-local Beads worktree wrapper by default
+- create `.skill-harness/`, `docs/artifacts/`, `generated/review/`, helper scripts, and package scripts
+
+Beads installation first uses an existing `bd`, then tries `go install github.com/steveyegge/beads/cmd/bd@latest`, then falls back to the upstream Beads install script (`irm ... | iex` on Windows or `curl ... | bash` on Unix). Use `--skip-beads` when you want to install or review Beads manually.
+
+Use `--install-only` to install packages without running initialization commands, `--scope workspace` to avoid monorepo-root lifting, `--skip-claude-settings` to avoid changing Claude tool permissions, `--beads-worktrees=false` to skip the Beads worktree wrapper, and the other `--skip-*` flags to reduce setup side effects.
+
 Generated HTML under `generated/review/` is a human review surface only. Canonical decisions, specs, models, and evidence stay in source files under `docs/`, `packs/`, scripts, or target repo scaffolds.
 
 ## What it can set up
@@ -57,12 +71,14 @@ That command:
 - auto-detects `npm`, `pnpm`, `yarn`, or `bun` from lockfiles or `packageManager`
 - defaults to monorepo-root setup when the target directory is inside a detected monorepo
 - creates a `package.json` in the resolved setup directory if one does not exist yet
-- installs `@45ck/noslop` and `45ck/agent-docs`
+- installs `@45ck/noslop` and `github:45ck/agent-docs`
 - installs the Beads CLI if it is not already present
 - runs `agent-docs init`
 - runs `noslop init`
 - runs `bd init`
 - runs `agent-docs install-gates --quality`
+- writes `.claude/settings.json` to allow Claude agent-team use unless `--skip-claude-settings` is passed
+- installs the repo-local Beads worktree wrapper unless `--beads-worktrees=false` is passed
 - scaffolds developer artifact guidance by default, with Markdown/TOON/JSON/YAML/specgraph sources, visual-source-first product/business/data/research/UX/mockup artifacts, UML/UWE/C4/evidence model sources as canonical source, generated HTML as a human review surface, and a manifest for provenance/freshness, including optional governed agent-loop scaffolding
 - writes `.skill-harness/setup-proof.json` with setup scope, package manager, selected profiles, tool statuses, check commands, generated paths, skipped capabilities, and Beads mode
 
@@ -80,6 +96,8 @@ Controlled experiments measured the toolkit (specgraph + noslop + skills) agains
 The gap is driven by scope enforcement and traceability — not code quality (functional output was equal in every experiment). The largest signal came from the ambiguous brief: the toolkit forced scope decisions before code was written; the baseline built a 4-class framework for a task that needed a 3-function library. Treat these as controlled workflow results; downstream repos still need active hook, CI, and agent wiring before those practices are enforced.
 
 ## Install the CLI
+
+Prerequisites for local builds and wrapper scripts: Go, Git, and the target shell (`bash` or PowerShell). Node.js and Python are only needed for development and artifact checks.
 
 ### Build locally
 
@@ -107,7 +125,9 @@ bash install.sh
 .\install.ps1
 ```
 
-### Download a release bundle
+The wrapper scripts are `go run` shortcuts. They still require Go and run the checked-out source tree.
+
+### Build a release bundle
 
 Release bundles can ship the binary plus the repo files together so Go is not required.
 
@@ -185,6 +205,8 @@ Skip one tool:
 ./skill-harness setup-project --dir ../my-project --skip-agent-docs
 ./skill-harness setup-project --dir ../my-project --skip-noslop
 ./skill-harness setup-project --dir ../my-project --skip-beads
+./skill-harness setup-project --dir ../my-project --skip-claude-settings
+./skill-harness setup-project --dir ../my-project --beads-worktrees=false
 ./skill-harness setup-project --dir ../my-project --skip-artifacts
 ./skill-harness setup-project --dir ../my-project --skip-developer-artifacts
 ```
