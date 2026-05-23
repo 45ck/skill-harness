@@ -6,6 +6,9 @@
 
 `skill-harness` is the setup repo for the 45ck agent workflow stack. It is primarily an installer and generator: most downstream repos receive copied Claude/Codex agent definitions or project setup changes rather than importing `skill-harness` as an application runtime.
 
+[![quality](https://github.com/45ck/skill-harness/actions/workflows/quality.yml/badge.svg)](https://github.com/45ck/skill-harness/actions/workflows/quality.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 It does five jobs:
 
 - installs the shared dependency-repo suite across pack repos, doctrine repos, and single-skill repos
@@ -13,6 +16,18 @@ It does five jobs:
 - bootstraps project-level tooling with `@45ck/noslop` and `45ck/agent-docs`
 - optionally bootstraps Beads, enabled by default in project setup
 - hosts embedded packs for suite-local or incubating capabilities
+
+## Project status
+
+This repo is open source under the [MIT License](LICENSE). It is actively evolving, and the default branch is the source of truth until formal release channels are established.
+
+The root [package.json](package.json) is marked `private` because npm is used here for local policy and artifact scripts, not for publishing the CLI as an npm package. Build the Go CLI locally or from a release bundle.
+
+## Trust boundaries
+
+`skill-harness` can write into user-level agent directories, clone or copy skill packs, install project tooling, run setup commands, and create generated review surfaces in target repos. Review scripts and dependency changes as supply-chain-sensitive.
+
+Generated HTML under `generated/review/` is a human review surface only. Canonical decisions, specs, models, and evidence stay in source files under `docs/`, `packs/`, scripts, or target repo scaffolds.
 
 ## What it can set up
 
@@ -226,6 +241,24 @@ Every `setup-project` run writes `.skill-harness/setup-proof.json`. Treat it as 
 ./skill-harness check --all
 ```
 
+## Development
+
+Required local tools:
+
+- Go, using the version in [go.mod](go.mod)
+- Node.js 22 or newer for generated artifact checks
+- Python 3.12 or newer for suite maintenance scripts
+
+Core checks:
+
+```bash
+go test ./...
+npm run artifacts:check
+python scripts/check_suite_drift.py --check
+```
+
+The GitHub Actions workflow in [.github/workflows/quality.yml](.github/workflows/quality.yml) also builds the CLI, validates JSON inputs, compiles Python scripts, checks suite drift, verifies generated model review HTML, and runs a hermetic `setup-project` smoke test.
+
 ## Included agents
 
 - `requirements-analyst`
@@ -307,6 +340,13 @@ Use it in two ways:
 - [`45ck/agent-docs`](https://github.com/45ck/agent-docs)
 - [`steveyegge/beads`](https://github.com/steveyegge/beads)
 
+## Contributing and support
+
+- Start with [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, validation, scope, and pull request expectations.
+- Use [SUPPORT.md](SUPPORT.md) for public support requests.
+- Follow [SECURITY.md](SECURITY.md) for vulnerability reports and generated artifact safety expectations.
+- Follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for collaboration standards.
+
 ## Full toolkit
 
 The standard full toolkit for a new project is **specgraph + noslop**. The `setup-project` command installs both automatically. For manual installation steps or to install the matching skill packs (`specgraph-skills`, `noslop-skills`), see [AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md).
@@ -319,6 +359,9 @@ If another agent needs to install this repo or use it as the setup entrypoint, p
 
 - [cmd/skill-harness/main.go](cmd/skill-harness/main.go)
 - [AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md)
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [SECURITY.md](SECURITY.md)
+- [SUPPORT.md](SUPPORT.md)
 - [docs/developer-artifacts.md](docs/developer-artifacts.md)
 - [docs/agent-operating-skills.md](docs/agent-operating-skills.md)
 - [docs/demo-production-media.md](docs/demo-production-media.md)

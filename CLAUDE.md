@@ -25,4 +25,5 @@ Use the narrowest specialist agent that can own the work end to end. Treat this 
 
 - Use Beads for task tracking in this repo.
 - Run the relevant Go tests and generated artifact checks after code changes.
+- Keep public contribution, support, security, and conduct docs aligned when changing OSS-facing workflows.
 - Push completed work to the remote before ending the session.

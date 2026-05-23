@@ -10,3 +10,4 @@
 - Keep synthetic user or agent-simulation evidence distinct from real user/customer evidence.
 - Open generated HTML with the best available human surface: Codex Browser plugin in Codex app, Claude desktop preview/browser in Claude desktop, or `node scripts/open-artifact-review.mjs` for CLI/system-browser fallback.
 - Validate with `node scripts/check-model-artifact-policy.mjs` and `node scripts/check-artifact-html-policy.mjs`.
+- Public contribution and security guidance lives in `CONTRIBUTING.md`, `SUPPORT.md`, `SECURITY.md`, and `CODE_OF_CONDUCT.md`.

@@ -11,6 +11,8 @@ Use this file when another agent needs to install or use `skill-harness` correct
 - the home for embedded suite-local packs under `packs/`
 - the dependency entrypoint for pack repos, doctrine repos, and single-skill repos such as `repo-branding-skill`
 
+For public contribution, support, and security expectations, use [CONTRIBUTING.md](CONTRIBUTING.md), [SUPPORT.md](SUPPORT.md), and [SECURITY.md](SECURITY.md). This file is the operational guide for agents and maintainers.
+
 ## Shared suite install
 
 Run this from the repo root when the goal is to install the shared packs and agents:
@@ -186,6 +188,9 @@ After project setup:
 ## Reference files
 
 - [README.md](README.md)
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [SECURITY.md](SECURITY.md)
+- [SUPPORT.md](SUPPORT.md)
 - [cmd/skill-harness/main.go](cmd/skill-harness/main.go)
 - [docs/developer-artifacts.md](docs/developer-artifacts.md)
 - [docs/agent-operating-skills.md](docs/agent-operating-skills.md)
