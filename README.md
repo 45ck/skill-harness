@@ -342,6 +342,8 @@ Agent-to-skill mapping lives in [docs/agent-loadouts.md](docs/agent-loadouts.md)
 - `coding-workflow-skills` (embedded)
 - `design-tooling-skills` (embedded)
 - `integration-tooling-skills` (embedded)
+- `specgraph-skills` (embedded)
+- `noslop-skills` (embedded)
 - `developer-artifact-skills` (embedded)
 - `demo-production-skills` (embedded)
 - `agent-operating-skills` (embedded)
@@ -354,6 +356,10 @@ Use it in two ways:
 
 - install the doctrine skills globally with `./skill-harness install --packs=frontier-agent-playbook --packs-only`
 - copy `AGENTS.md`, `CLAUDE.md`, `AGENT_INSTRUCTIONS.md`, and `llms.txt` into a target project when you want repo-local doctrine surfaces
+
+## Codex helper plugin
+
+The optional [skill-harness helpers plugin](plugins/skill-harness-helpers/README.md) packages Codex-oriented helper skills for agent selection, handoff planning, Beads task shaping, and third-party skill intake. It is a local helper bundle, not a replacement for the main `.codex/agents/` loadouts installed by the CLI.
 
 ## Tooling repos used here
 
