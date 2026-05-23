@@ -74,6 +74,15 @@ const (
 	artifactProfileNone          artifactProfile = "none"
 )
 
+type modelingMode string
+
+const (
+	modelingModeAuto     modelingMode = "auto"
+	modelingModeOff      modelingMode = "off"
+	modelingModeBaseline modelingMode = "baseline"
+	modelingModeUMLFirst modelingMode = "uml-first"
+)
+
 type projectSetupContext struct {
 	TargetDir      string
 	OperationDir   string
@@ -105,6 +114,8 @@ type projectSetupProofProject struct {
 type projectSetupProofProfiles struct {
 	RequestedDeveloperArtifacts artifactProfile `json:"requestedDeveloperArtifacts"`
 	EffectiveDeveloperArtifacts artifactProfile `json:"effectiveDeveloperArtifacts"`
+	RequestedModeling           modelingMode    `json:"requestedModeling"`
+	EffectiveModeling           modelingMode    `json:"effectiveModeling"`
 }
 
 type toolProof struct {
@@ -124,7 +135,8 @@ type checkProof struct {
 type projectSetupProofOptions struct {
 	RequestedArtifactProfile artifactProfile
 	EffectiveArtifactProfile artifactProfile
-	EnableModeling           bool
+	RequestedModelingMode    modelingMode
+	EffectiveModelingMode    modelingMode
 	InstallOnly              bool
 	SkipNoslop               bool
 	SkipAgentDocs            bool
@@ -261,6 +273,8 @@ func runSetupProject(root string, args []string) {
 	skipArtifacts := fs.Bool("skip-artifacts", false, "Do not scaffold developer artifact guidance.")
 	skipDeveloperArtifacts := fs.Bool("skip-developer-artifacts", false, "Do not scaffold developer artifact guidance.")
 	enableModeling := fs.Bool("enable-modeling", false, "Scaffold source-first UML/UWE/C4 model artifacts and model review checks.")
+	skipModeling := fs.Bool("skip-modeling", false, "Keep developer artifacts but skip UML-first model scaffolding.")
+	modelingModeValue := fs.String("modeling-mode", string(modelingModeAuto), "Developer artifact modeling mode: auto, off, baseline, or uml-first.")
 	artifactProfileValue := fs.String("artifact-profile", string(artifactProfileAuto), "Developer artifact profile: auto, media, agent-loop, markdown, html, dual, or none.")
 	developerArtifactsProfileValue := fs.String("developer-artifacts-profile", string(artifactProfileAuto), "Developer artifact profile: auto, codex-app, claude-desktop, cli, tui, media, agent-loop, markdown, html, dual, or none.")
 	installOnly := fs.Bool("install-only", false, "Install packages only; skip initialization commands.")
@@ -280,9 +294,24 @@ func runSetupProject(root string, args []string) {
 	}
 	artifactProfile, err := parseArtifactProfile(profileValue)
 	exitOnErr(err)
-	if *enableModeling && (*skipArtifacts || *skipDeveloperArtifacts || artifactProfile == artifactProfileNone) {
-		exitOnErr(errors.New("--enable-modeling requires developer artifacts; remove --skip-developer-artifacts/--skip-artifacts and do not use profile none"))
+	requestedModelingMode, err := parseModelingMode(*modelingModeValue)
+	exitOnErr(err)
+	if *enableModeling && *skipModeling {
+		exitOnErr(errors.New("cannot combine --enable-modeling and --skip-modeling"))
 	}
+	if *enableModeling && flagWasSet(fs, "modeling-mode") && requestedModelingMode != modelingModeAuto && requestedModelingMode != modelingModeUMLFirst {
+		exitOnErr(errors.New("--enable-modeling cannot be combined with --modeling-mode off or baseline"))
+	}
+	if *skipModeling && flagWasSet(fs, "modeling-mode") && requestedModelingMode != modelingModeAuto && requestedModelingMode != modelingModeOff {
+		exitOnErr(errors.New("--skip-modeling cannot be combined with --modeling-mode baseline or uml-first"))
+	}
+	if *enableModeling {
+		requestedModelingMode = modelingModeUMLFirst
+	}
+	if *skipModeling {
+		requestedModelingMode = modelingModeOff
+	}
+	effectiveModelingMode := resolveEffectiveModelingMode(ctx.OperationDir, requestedModelingMode, artifactProfile, *skipArtifacts || *skipDeveloperArtifacts)
 
 	if _, err := os.Stat(filepath.Join(ctx.OperationDir, "package.json")); errors.Is(err, os.ErrNotExist) {
 		exitOnErr(writeMinimalPackageJSON(ctx.OperationDir))
@@ -313,7 +342,8 @@ func runSetupProject(root string, args []string) {
 	proofOptions := projectSetupProofOptions{
 		RequestedArtifactProfile: artifactProfile,
 		EffectiveArtifactProfile: effectiveArtifactProfile(artifactProfile),
-		EnableModeling:           *enableModeling,
+		RequestedModelingMode:    requestedModelingMode,
+		EffectiveModelingMode:    effectiveModelingMode,
 		InstallOnly:              *installOnly,
 		SkipNoslop:               *skipNoslop,
 		SkipAgentDocs:            *skipAgentDocs,
@@ -335,7 +365,7 @@ func runSetupProject(root string, args []string) {
 		exitOnErr(runLocalTool(ctx.OperationDir, ctx.PackageManager, "agent-docs", "init"))
 	}
 	if !*skipArtifacts && !*skipDeveloperArtifacts && artifactProfile != artifactProfileNone {
-		exitOnErr(writeDeveloperArtifactScaffold(ctx.OperationDir, artifactProfile, !*skipAgentDocs, !*skipBeads, *enableModeling))
+		exitOnErr(writeDeveloperArtifactScaffold(ctx.OperationDir, artifactProfile, !*skipAgentDocs, !*skipBeads, effectiveModelingMode))
 	}
 	if !*skipNoslop {
 		exitOnErr(runLocalTool(ctx.OperationDir, ctx.PackageManager, "noslop", "init"))
@@ -866,6 +896,63 @@ func parseArtifactProfile(value string) (artifactProfile, error) {
 	}
 }
 
+func parseModelingMode(value string) (modelingMode, error) {
+	switch modelingMode(strings.ToLower(strings.TrimSpace(value))) {
+	case "", modelingModeAuto:
+		return modelingModeAuto, nil
+	case modelingModeOff, "none", "skip", "disabled":
+		return modelingModeOff, nil
+	case modelingModeBaseline, "source", "source-first":
+		return modelingModeBaseline, nil
+	case modelingModeUMLFirst, "uml", "umlfirst", "review":
+		return modelingModeUMLFirst, nil
+	default:
+		return "", fmt.Errorf("unsupported modeling mode %q: expected auto, off, baseline, or uml-first", value)
+	}
+}
+
+func resolveEffectiveModelingMode(projectDir string, requested modelingMode, profile artifactProfile, artifactsDisabled bool) modelingMode {
+	if artifactsDisabled || profile == artifactProfileNone {
+		return modelingModeOff
+	}
+	if requested != modelingModeAuto {
+		return requested
+	}
+	if existing := existingModelingMode(projectDir); existing != modelingModeAuto {
+		return existing
+	}
+	if fileExists(filepath.Join(projectDir, ".skill-harness", "project.json")) {
+		return modelingModeOff
+	}
+	return modelingModeUMLFirst
+}
+
+func existingModelingMode(projectDir string) modelingMode {
+	configPath := filepath.Join(projectDir, ".skill-harness", "project.json")
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return modelingModeAuto
+	}
+	var config map[string]any
+	if err := json.Unmarshal(data, &config); err != nil {
+		return modelingModeAuto
+	}
+	capabilities, _ := config["capabilities"].(map[string]any)
+	developerArtifacts, _ := capabilities["developerArtifacts"].(map[string]any)
+	modeling, _ := developerArtifacts["modeling"].(map[string]any)
+	if value, ok := modeling["mode"].(string); ok {
+		if mode, err := parseModelingMode(value); err == nil && mode != modelingModeAuto {
+			return mode
+		}
+	}
+	modelPolicy, _ := developerArtifacts["modelPolicy"].(map[string]any)
+	uml, _ := modelPolicy["uml"].(map[string]any)
+	if enabled, ok := uml["enabled"].(bool); ok && enabled {
+		return modelingModeUMLFirst
+	}
+	return modelingModeAuto
+}
+
 func flagWasSet(fs *flag.FlagSet, name string) bool {
 	found := false
 	fs.Visit(func(f *flag.Flag) {
@@ -1010,6 +1097,8 @@ func buildProjectSetupProof(ctx projectSetupContext, options projectSetupProofOp
 		Profiles: projectSetupProofProfiles{
 			RequestedDeveloperArtifacts: options.RequestedArtifactProfile,
 			EffectiveDeveloperArtifacts: options.EffectiveArtifactProfile,
+			RequestedModeling:           options.RequestedModelingMode,
+			EffectiveModeling:           options.EffectiveModelingMode,
 		},
 		Tools: map[string]toolProof{
 			"packageManager": {
@@ -1094,14 +1183,17 @@ func buildProjectSetupProof(ctx projectSetupContext, options projectSetupProofOp
 		)
 		proof.Checks["artifactManifest"] = checkProof{Status: "available", Command: "node scripts/check-artifact-manifest.mjs", Path: "scripts/check-artifact-manifest.mjs"}
 		proof.Checks["artifactHtmlPolicy"] = checkProof{Status: "available", Command: "node scripts/check-artifact-html-policy.mjs", Path: "scripts/check-artifact-html-policy.mjs"}
-		if options.EnableModeling {
+		if options.EffectiveModelingMode != modelingModeOff {
 			proof.GeneratedPaths = append(proof.GeneratedPaths,
 				"docs/artifacts/source/models/",
+				"docs/artifacts/source/models/model-inventory.md",
 				"docs/artifacts/templates/model-diff-artifact.md",
 				"generated/review/models/",
 				"scripts/check-model-artifact-policy.mjs",
+				"scripts/generate-model-review.mjs",
 			)
 			proof.Checks["modelArtifactPolicy"] = checkProof{Status: "available", Command: "node scripts/check-model-artifact-policy.mjs", Path: "scripts/check-model-artifact-policy.mjs"}
+			proof.Checks["modelReviewGenerate"] = checkProof{Status: "available", Command: "node scripts/generate-model-review.mjs", Path: "scripts/generate-model-review.mjs"}
 		}
 		if options.RequestedArtifactProfile == artifactProfileMedia {
 			proof.GeneratedPaths = append(proof.GeneratedPaths, "generated/media/", "docs/artifacts/templates/demo-artifact.md")
@@ -1200,7 +1292,10 @@ func writeMinimalPackageJSON(projectDir string) error {
 	return os.WriteFile(filepath.Join(projectDir, "package.json"), content, 0o644)
 }
 
-func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile artifactProfile, enableModeling bool) error {
+func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile artifactProfile, mode modelingMode) error {
+	if mode == modelingModeAuto {
+		mode = modelingModeUMLFirst
+	}
 	packagePath := filepath.Join(projectDir, "package.json")
 	data, err := os.ReadFile(packagePath)
 	if err != nil {
@@ -1228,13 +1323,15 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile arti
 		defaultScripts["agent-loop:check"] = "node scripts/check-agent-loop-policy.mjs"
 		defaultScripts["agent-loop:review"] = "node scripts/check-agent-loop-policy.mjs && node scripts/check-artifact-manifest.mjs"
 	}
-	if enableModeling {
+	if mode != modelingModeOff {
 		defaultScripts["artifacts:check"] = "node scripts/check-artifact-manifest.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-html-policy.mjs"
+		defaultScripts["artifacts:model:generate"] = "node scripts/generate-model-review.mjs"
 		defaultScripts["artifacts:model:check"] = "node scripts/check-model-artifact-policy.mjs"
-		defaultScripts["artifacts:model:review"] = "node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-html-policy.mjs"
+		defaultScripts["artifacts:model:review"] = "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-html-policy.mjs"
+		defaultScripts["models:generate"] = "node scripts/generate-model-review.mjs"
 		defaultScripts["models:check"] = "node scripts/check-model-artifact-policy.mjs"
 		defaultScripts["models:diff:check"] = "node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-html-policy.mjs"
-		defaultScripts["models:review"] = "node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs"
+		defaultScripts["models:review"] = "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs"
 	}
 	for name, command := range defaultScripts {
 		if _, exists := scripts[name]; !exists {
@@ -1283,8 +1380,12 @@ func gitignoreHasLine(text, expected string) bool {
 	return false
 }
 
-func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, agentDocsEnabled bool, beadsEnabled bool, enableModeling bool) error {
+func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, agentDocsEnabled bool, beadsEnabled bool, mode modelingMode) error {
+	if mode == modelingModeAuto {
+		mode = modelingModeUMLFirst
+	}
 	effectiveProfile := effectiveArtifactProfile(profile)
+	modelingEnabled := mode != modelingModeOff
 	dirs := []string{
 		filepath.Join(projectDir, "docs", "artifacts", "source"),
 		filepath.Join(projectDir, "docs", "artifacts", "templates"),
@@ -1298,7 +1399,7 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	if profile == artifactProfileAgentLoop {
 		dirs = append(dirs, filepath.Join(projectDir, "generated", "agent-runs"))
 	}
-	if enableModeling {
+	if modelingEnabled {
 		dirs = append(dirs,
 			filepath.Join(projectDir, "docs", "artifacts", "source", "models"),
 			filepath.Join(projectDir, "generated", "review", "models"),
@@ -1327,7 +1428,7 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 					"tooling": canonicalTooling,
 					"paths":   []string{"docs", "docs/artifacts/source"},
 				},
-				"artifactTypes": artifactTypes(enableModeling),
+				"artifactTypes": artifactTypes(modelingEnabled),
 				"manifest": map[string]any{
 					"path":            "docs/artifacts/artifacts.manifest.json",
 					"schemaVersion":   1,
@@ -1338,7 +1439,8 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 						"hashAlgorithm":   "sha256",
 					},
 				},
-				"modelPolicy": artifactModelPolicy(enableModeling),
+				"modeling":    artifactModelingConfig(mode),
+				"modelPolicy": artifactModelPolicy(mode),
 				"reviewSurface": map[string]any{
 					"format":          "html",
 					"outDir":          "generated/review",
@@ -1368,7 +1470,7 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	if err := os.WriteFile(filepath.Join(projectDir, ".skill-harness", "project.json"), data, 0o644); err != nil {
 		return err
 	}
-	if err := updatePackageScripts(projectDir, agentDocsEnabled, profile, enableModeling); err != nil {
+	if err := updatePackageScripts(projectDir, agentDocsEnabled, profile, mode); err != nil {
 		return err
 	}
 	gitignoreLines := []string{"generated/review/"}
@@ -1384,7 +1486,7 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 
 	readmePath := filepath.Join(projectDir, "docs", "artifacts", "README.md")
 	if !fileExists(readmePath) {
-		if err := os.WriteFile(readmePath, []byte(developerArtifactReadme(profile, enableModeling)), 0o644); err != nil {
+		if err := os.WriteFile(readmePath, []byte(developerArtifactReadme(profile, mode)), 0o644); err != nil {
 			return err
 		}
 	}
@@ -1402,7 +1504,13 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 			return err
 		}
 	}
-	if enableModeling {
+	if modelingEnabled {
+		modelInventoryPath := filepath.Join(projectDir, "docs", "artifacts", "source", "models", "model-inventory.md")
+		if !fileExists(modelInventoryPath) {
+			if err := os.WriteFile(modelInventoryPath, []byte(developerModelInventoryTemplate()), 0o644); err != nil {
+				return err
+			}
+		}
 		modelDiffTemplatePath := filepath.Join(projectDir, "docs", "artifacts", "templates", "model-diff-artifact.md")
 		if !fileExists(modelDiffTemplatePath) {
 			if err := os.WriteFile(modelDiffTemplatePath, []byte(developerModelDiffArtifactTemplate()), 0o644); err != nil {
@@ -1455,10 +1563,16 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 			return err
 		}
 	}
-	if enableModeling {
+	if modelingEnabled {
 		modelCheckerPath := filepath.Join(projectDir, "scripts", "check-model-artifact-policy.mjs")
 		if !fileExists(modelCheckerPath) {
 			if err := os.WriteFile(modelCheckerPath, []byte(developerModelArtifactPolicyScript()), 0o644); err != nil {
+				return err
+			}
+		}
+		modelReviewGeneratorPath := filepath.Join(projectDir, "scripts", "generate-model-review.mjs")
+		if !fileExists(modelReviewGeneratorPath) {
+			if err := os.WriteFile(modelReviewGeneratorPath, []byte(developerModelReviewGeneratorScript()), 0o644); err != nil {
 				return err
 			}
 		}
@@ -1552,13 +1666,32 @@ func artifactTypes(enableModeling bool) []string {
 	return types
 }
 
-func artifactModelPolicy(enableModeling bool) map[string]any {
+func artifactModelingConfig(mode modelingMode) map[string]any {
+	if mode == modelingModeOff {
+		return map[string]any{
+			"mode":    string(modelingModeOff),
+			"enabled": false,
+		}
+	}
+	return map[string]any{
+		"mode":                  string(mode),
+		"enabled":               true,
+		"defaultForFreshSetup":  mode == modelingModeUMLFirst,
+		"autoDetectModelImpact": true,
+		"canonicalInventory":    "docs/artifacts/source/models/model-inventory.md",
+		"sourceDir":             "docs/artifacts/source/models",
+		"reviewDir":             "generated/review/models",
+		"humanReviewFormat":     "html",
+	}
+}
+
+func artifactModelPolicy(mode modelingMode) map[string]any {
 	policy := map[string]any{
 		"canonicalSource":        true,
 		"generatedReviewOnly":    true,
 		"renderDiagramsOffline":  true,
 		"defaultReviewEmbedding": "inline-svg",
-		"allowedNotations":       []string{"mermaid", "markdown", "toon", "plantuml"},
+		"allowedNotations":       []string{"mermaid", "markdown", "toon", "plantuml", "structurizr"},
 		"allowedModelKinds": []string{
 			"sequence",
 			"state",
@@ -1580,23 +1713,27 @@ func artifactModelPolicy(enableModeling bool) map[string]any {
 			"levels":       []string{"context", "container", "component", "dynamic", "deployment"},
 		},
 	}
-	if enableModeling {
+	if mode != modelingModeOff {
 		policy["uml"] = map[string]any{
 			"enabled":                 true,
-			"methods":                 []string{"uml", "uwe", "c4"},
-			"allowedSourceExtensions": []string{".md", ".toon", ".mmd", ".puml", ".dsl"},
+			"mode":                    string(mode),
+			"methods":                 []string{"uml", "uwe", "c4", "evidence"},
+			"allowedSourceExtensions": []string{".md", ".toon", ".mmd", ".puml", ".plantuml", ".dsl", ".json", ".yaml", ".yml"},
 			"defaultDiffMethod":       "source",
 			"semanticDiff":            false,
 			"sourceDir":               "docs/artifacts/source/models",
 			"reviewDir":               "generated/review/models",
-			"generatedReviewRequired": true,
+			"inventory":               "docs/artifacts/source/models/model-inventory.md",
+			"generatedReviewRequired": mode == modelingModeUMLFirst,
+			"reviewRequirement":       map[string]any{"baseline": "optional", "uml-first": "required-for-ready-model-artifacts"},
 			"allowedFacets": map[string]any{
 				"uwe": []string{"content", "navigation", "presentation", "process", "access", "adaptation"},
 			},
 			"methodModelKinds": map[string]any{
-				"uml": []string{"use-case", "activity", "sequence", "state", "class", "domain"},
-				"uwe": []string{"use-case", "activity", "sequence", "state", "domain", "component"},
-				"c4":  []string{"context", "container", "component", "dynamic", "deployment"},
+				"uml":      []string{"use-case", "activity", "sequence", "state", "class", "domain"},
+				"uwe":      []string{"use-case", "activity", "sequence", "state", "domain", "component"},
+				"c4":       []string{"context", "container", "component", "dynamic", "deployment", "architecture-space"},
+				"evidence": []string{"dependency", "architecture-space", "class", "dynamic", "deployment"},
 			},
 			"evidenceDefaultKinds":    []string{"dependency"},
 			"authoredOrEvidenceKinds": []string{"class", "dynamic"},
@@ -1693,20 +1830,24 @@ func artifactRequiredCSP() string {
 	return "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 }
 
-func developerArtifactReadme(profile artifactProfile, enableModeling bool) string {
+func developerArtifactReadme(profile artifactProfile, mode modelingMode) string {
 	effectiveProfile := effectiveArtifactProfile(profile)
 	modelingSection := ""
-	if enableModeling {
-		modelingSection = `
+	if mode != modelingModeOff {
+		modelingSection = fmt.Sprintf(`
 ## Source-First Modeling
 
-- Use source/models/ as the default home for canonical UML/UWE/C4 model sources when no domain-specific docs folder is better.
-- Use generated/review/models/ for generated before/after HTML review surfaces.
+- Modeling mode: %s.
+- Auto-detect model impact for engineering changes. If code, API, workflow, dependency, deployment, or UX structure changes, update the relevant model source or record why no model change is needed.
+- Use source/models/ as the default home for canonical UML/UWE/C4/evidence model sources when no domain-specific docs folder is better.
+- Use generated/review/models/ for generated human HTML before/after review surfaces.
 - Keep model-view and model-diff entries in artifacts.manifest.json; the manifest carries modelId, method, facets, lineage, diff metadata, evidence links, renderer data, and source hashes.
 - Treat source diffs as canonical. HTML, SVG, PNG, and screenshots are review surfaces only.
 - UWE facets are content, navigation, presentation, process, access, and adaptation. Access is the local security/access-control facet; adaptation covers personalization/context variation.
+- Keep model-inventory.md current as the canonical index of model ids, owners, sources, generated reviews, and implementation touchpoints.
+- Run node scripts/generate-model-review.mjs to refresh static HTML review pages for humans.
 - Run node scripts/check-model-artifact-policy.mjs before handing off model-backed engineering artifacts.
-`
+`, mode)
 	}
 	return fmt.Sprintf(`# Developer Artifacts
 
@@ -1809,8 +1950,8 @@ func developerModelArtifactTemplate() string {
 **Artifact type:** model-view
 **Model ID:** [stable-model-id]
 **Model kind:** sequence | state | class | domain | context | container | component | dynamic | deployment | dependency | use-case | activity | architecture-space
-**Notation:** mermaid | markdown | toon | plantuml
-**Method:** uml | uwe | c4 | none
+**Notation:** mermaid | markdown | toon | plantuml | structurizr
+**Method:** uml | uwe | c4 | evidence
 **Facets:** [uwe: content, navigation, presentation, process, access, adaptation]
 **Canonical source:** [path or issue]
 **Generated review:** [generated/review/path.html]
@@ -1841,6 +1982,31 @@ Keep diagram source here or link to the canonical source artifact. Generated HTM
 - Source hash:
 - Renderer and version:
 - Last generated:
+`
+}
+
+func developerModelInventoryTemplate() string {
+	return `# Model Inventory
+
+This is the canonical index for source-backed system models and human HTML review surfaces.
+
+## Rules
+
+- Auto-detect model impact for each engineering change.
+- Update the relevant canonical model source when code, API, workflow, dependency, deployment, or UX structure changes.
+- Keep generated HTML under ` + "`generated/review/models/`" + ` and treat it as a review surface, not source of truth.
+- Record every durable model in ` + "`docs/artifacts/artifacts.manifest.json`" + ` with source, modelId, method, modelKind, owner, and reviewSurface.
+
+## Inventory
+
+| Model ID | Kind | Method | Canonical Source | Human HTML Review | Owner | Implementation Touchpoints |
+| --- | --- | --- | --- | --- | --- | --- |
+| example-system-context | context | c4 | docs/artifacts/source/models/example-system-context.md | generated/review/models/example-system-context.html | system-modeler | apps, packages, deployment |
+
+## Change Log
+
+| Date | Model ID | Change | Source/Evidence |
+| --- | --- | --- | --- |
 `
 }
 
@@ -2146,6 +2312,124 @@ console.log('Artifact manifest policy passed');
 `
 }
 
+func developerModelReviewGeneratorScript() string {
+	return `import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const configPath = path.join(root, '.skill-harness', 'project.json');
+const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
+const modelPolicy = developerArtifacts.modelPolicy ?? {};
+const modeling = developerArtifacts.modeling ?? modelPolicy.uml ?? {};
+const manifestPath = path.join(root, developerArtifacts.manifest?.path ?? 'docs/artifacts/artifacts.manifest.json');
+const modelReviewDir = path.join(root, modeling.reviewDir ?? modelPolicy.uml?.reviewDir ?? 'generated/review/models');
+const requiredCsp = developerArtifacts.htmlPolicy?.requiredCSP ?? "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+
+function repoPath(filePath) {
+  return path.relative(root, filePath).replaceAll(path.sep, '/');
+}
+
+function safeFileName(value) {
+  return String(value || 'model').toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'model';
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function escapeAttribute(value) {
+  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;');
+}
+
+function htmlPage(title, body) {
+  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="' + escapeAttribute(requiredCsp) + '">\n<title>' + escapeHtml(title) + '</title>\n<style>\n:root{color-scheme:light dark;font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.5}body{margin:0;color:#1f2933;background:#f6f8fb}main{max-width:1100px;margin:0 auto;padding:32px 20px}section{margin:20px 0;padding:18px;background:#fff;border:1px solid #d9e2ec;border-radius:8px}h1,h2{line-height:1.2}table{width:100%;border-collapse:collapse;background:#fff}th,td{text-align:left;vertical-align:top;border-bottom:1px solid #d9e2ec;padding:10px}code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow:auto;background:#102a43;color:#f0f4f8;padding:16px;border-radius:6px}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.meta div{padding:10px;background:#f0f4f8;border-radius:6px}@media (prefers-color-scheme:dark){body{color:#d9e2ec;background:#102a43}section,table{background:#1f2933;border-color:#334e68}.meta div{background:#243b53}}\n</style>\n</head>\n<body>\n<main>\n' + body + '\n</main>\n</body>\n</html>\n';
+}
+
+function readSource(artifact) {
+  if (typeof artifact.source !== 'string') return '';
+  const sourcePath = path.resolve(root, artifact.source);
+  if (!sourcePath.startsWith(root + path.sep) && sourcePath !== root) return '';
+  if (!fs.existsSync(sourcePath) || !fs.statSync(sourcePath).isFile()) return '';
+  return fs.readFileSync(sourcePath, 'utf8');
+}
+
+function artifactPath(artifact) {
+  const fileName = safeFileName(artifact.reviewSurface ? path.basename(artifact.reviewSurface, '.html') : artifact.id || artifact.modelId) + '.html';
+  return path.join(modelReviewDir, fileName);
+}
+
+function renderArtifact(artifact, byId) {
+  const source = readSource(artifact);
+  const rows = [
+    ['ID', artifact.id],
+    ['Type', artifact.type],
+    ['Status', artifact.status],
+    ['Model ID', artifact.modelId],
+    ['Model Kind', artifact.modelKind],
+    ['Method', artifact.method],
+    ['Notation', artifact.notation],
+    ['Source', artifact.source],
+    ['Owner', artifact.owner],
+  ];
+  let body = '<h1>' + escapeHtml(artifact.modelId || artifact.id || 'Model Review') + '</h1>\n<section class="meta">';
+  for (const [label, value] of rows) body += '<div><strong>' + escapeHtml(label) + '</strong><br>' + escapeHtml(value) + '</div>';
+  body += '</section>\n<section><h2>Canonical Source</h2><pre>' + escapeHtml(source || 'Source not found or not readable.') + '</pre></section>';
+  if (artifact.type === 'model-diff') {
+    const diff = artifact.diff ?? {};
+    const before = byId.get(diff.beforeArtifactId);
+    const after = byId.get(diff.afterArtifactId);
+    body += '<section><h2>Before And After</h2><table><thead><tr><th>Side</th><th>Artifact</th><th>Source</th></tr></thead><tbody>';
+    body += '<tr><td>Before</td><td>' + escapeHtml(diff.beforeArtifactId) + '</td><td>' + escapeHtml(before?.source ?? '') + '</td></tr>';
+    body += '<tr><td>After</td><td>' + escapeHtml(diff.afterArtifactId) + '</td><td>' + escapeHtml(after?.source ?? '') + '</td></tr>';
+    body += '</tbody></table></section>';
+  }
+  body += '<section><h2>Evidence</h2><ul>';
+  for (const link of Array.isArray(artifact.evidenceLinks) ? artifact.evidenceLinks : []) body += '<li>' + escapeHtml(link) + '</li>';
+  body += '</ul></section>';
+  return htmlPage('Model Review: ' + (artifact.modelId || artifact.id || 'model'), body);
+}
+
+function isModelArtifact(artifact) {
+  return artifact?.type === 'model-view' || artifact?.type === 'model-diff' || typeof artifact?.modelKind === 'string';
+}
+
+if (!fs.existsSync(manifestPath)) {
+  console.error('Missing artifact manifest: ' + repoPath(manifestPath));
+  process.exit(1);
+}
+
+fs.mkdirSync(modelReviewDir, { recursive: true });
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+const artifacts = Array.isArray(manifest.artifacts) ? manifest.artifacts.filter(isModelArtifact) : [];
+const byId = new Map();
+for (const artifact of artifacts) if (artifact?.id) byId.set(artifact.id, artifact);
+
+const indexRows = [];
+for (const artifact of artifacts) {
+  const outPath = artifactPath(artifact);
+  fs.writeFileSync(outPath, renderArtifact(artifact, byId));
+  const reviewSurface = repoPath(outPath);
+  artifact.reviewSurface = reviewSurface;
+  if (artifact.type === 'model-diff') {
+    artifact.diff = artifact.diff ?? {};
+    artifact.diff.reviewSurface = reviewSurface;
+  }
+  indexRows.push('<tr><td>' + escapeHtml(artifact.id) + '</td><td>' + escapeHtml(artifact.modelKind) + '</td><td>' + escapeHtml(artifact.method) + '</td><td>' + escapeHtml(artifact.source) + '</td><td>' + escapeHtml(reviewSurface) + '</td></tr>');
+}
+
+const indexBody = '<h1>Model Review Index</h1><section><table><thead><tr><th>ID</th><th>Kind</th><th>Method</th><th>Source</th><th>HTML Review</th></tr></thead><tbody>' + indexRows.join('\n') + '</tbody></table></section>';
+fs.writeFileSync(path.join(modelReviewDir, 'index.html'), htmlPage('Model Review Index', indexBody));
+fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+console.log('Generated ' + artifacts.length + ' model review artifact(s) in ' + repoPath(modelReviewDir));
+`
+}
+
 func developerModelArtifactPolicyScript() string {
 	return `import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -2156,12 +2440,14 @@ const configPath = path.join(root, '.skill-harness', 'project.json');
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
 const modelPolicy = developerArtifacts.modelPolicy ?? {};
-const modeling = modelPolicy.uml ?? {};
+const modeling = modelPolicy.uml ?? developerArtifacts.modeling ?? {};
+const modelingMode = developerArtifacts.modeling?.mode ?? modeling.mode ?? 'baseline';
+const generatedReviewRequired = modeling.generatedReviewRequired === true || modelingMode === 'uml-first';
 const manifestPath = path.join(root, developerArtifacts.manifest?.path ?? 'docs/artifacts/artifacts.manifest.json');
 const reviewRoot = path.resolve(root, developerArtifacts.reviewSurface?.outDir ?? 'generated/review');
 const modelReviewRoot = path.resolve(root, modeling.reviewDir ?? path.join(developerArtifacts.reviewSurface?.outDir ?? 'generated/review', 'models'));
 const allowedMethods = new Set(modeling.methods ?? []);
-const allowedSourceExtensions = new Set(modeling.allowedSourceExtensions ?? ['.md', '.toon', '.mmd', '.puml']);
+const allowedSourceExtensions = new Set(modeling.allowedSourceExtensions ?? ['.md', '.toon', '.mmd', '.puml', '.plantuml', '.dsl', '.json', '.yaml', '.yml']);
 const allowedModelKinds = new Set(modelPolicy.allowedModelKinds ?? []);
 const allowedNotations = new Set(modelPolicy.allowedNotations ?? []);
 const evidenceDefaultKinds = new Set(modeling.evidenceDefaultKinds ?? []);
@@ -2282,7 +2568,7 @@ if (fs.existsSync(manifestPath)) {
           failures.push(label + ' ready model review surface does not exist: ' + artifact.reviewSurface);
         }
       }
-    } else if (artifact.status === 'ready' || artifact.type === 'model-diff') {
+    } else if (artifact.status === 'ready' && (generatedReviewRequired || artifact.type === 'model-diff' || artifact.reviewRequired === true)) {
       failures.push(label + ' needs a generated HTML reviewSurface');
     }
 
@@ -2703,7 +2989,7 @@ func printUsage(loadouts loadoutConfig, deps dependencyConfig) {
 	fmt.Println("Commands:")
 	fmt.Println("  list [--agents] [--packs]")
 	fmt.Println("  install [--all] [--interactive] [--packs-only] [--agents-only] [--agents=a,b] [--packs=x,y]")
-	fmt.Println("  setup-project [--dir path] [--scope auto|root|workspace] [--package-manager auto|npm|pnpm|yarn|bun] [--developer-artifacts-profile auto|codex-app|claude-desktop|cli|tui|media|agent-loop|none] [--enable-modeling] [--install-only] [--skip-noslop] [--skip-agent-docs] [--skip-beads] [--beads-worktrees] [--skip-developer-artifacts] [--skip-claude-settings]")
+	fmt.Println("  setup-project [--dir path] [--scope auto|root|workspace] [--package-manager auto|npm|pnpm|yarn|bun] [--developer-artifacts-profile auto|codex-app|claude-desktop|cli|tui|media|agent-loop|none] [--modeling-mode auto|off|baseline|uml-first] [--enable-modeling] [--skip-modeling] [--install-only] [--skip-noslop] [--skip-agent-docs] [--skip-beads] [--beads-worktrees] [--skip-developer-artifacts] [--skip-claude-settings]")
 	fmt.Println("  beads-worktrees [--dir path] [--force]")
 	fmt.Println("  update")
 	fmt.Println("  check [--all] [--interactive] [--agents=a,b]")

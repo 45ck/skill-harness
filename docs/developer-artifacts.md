@@ -43,13 +43,16 @@ It also adds `generated/review/` to `.gitignore` and adds package scripts when a
 
 If `--skip-agent-docs` is used, the artifact scaffold still works, but it does not add scripts that call `agent-docs`.
 
-For stricter model-driven engineering, add:
+Modeling mode defaults to `auto`. Fresh developer-artifact setups resolve `auto` to UML-first modeling; existing harnessed repos preserve their current behavior unless explicitly migrated. Use explicit modes when needed:
 
 ```bash
-./skill-harness setup-project --dir ../my-project --enable-modeling
+./skill-harness setup-project --dir ../my-project --modeling-mode auto
+./skill-harness setup-project --dir ../my-project --modeling-mode uml-first
+./skill-harness setup-project --dir ../my-project --modeling-mode baseline
+./skill-harness setup-project --dir ../my-project --skip-modeling
 ```
 
-This is not a separate profile. It keeps the existing developer artifact profile and adds source-first modeling conveniences: `docs/artifacts/source/models/`, `generated/review/models/`, `docs/artifacts/templates/model-diff-artifact.md`, `scripts/check-model-artifact-policy.mjs`, model-aware package scripts, and setup-proof check entries. The base scaffold already supports `model-view`; `--enable-modeling` adds stricter UML/UWE/C4 metadata, `model-diff` lineage checks, and paired human HTML review expectations.
+This is not a separate profile. It keeps the existing developer artifact profile and adds source-first modeling conveniences: `docs/artifacts/source/models/`, `docs/artifacts/source/models/model-inventory.md`, `generated/review/models/`, `docs/artifacts/templates/model-diff-artifact.md`, `scripts/generate-model-review.mjs`, `scripts/check-model-artifact-policy.mjs`, model-aware package scripts, and setup-proof check entries. The base scaffold already supports `model-view`; UML-first adds stricter UML/UWE/C4/evidence metadata, `model-diff` lineage checks, and paired human HTML review expectations. `--enable-modeling` remains as a legacy alias for `--modeling-mode uml-first`.
 
 `.skill-harness/setup-proof.json` is the install evidence record for the setup run. It records the resolved target and operation directories, package manager, requested and effective artifact profile, tool initialization statuses, skipped capabilities, generated paths, Beads mode, and available check commands. Use it to distinguish a repo that merely has copied files from one where the harness recorded what it set up.
 
@@ -103,10 +106,12 @@ The checker rejects common unsafe constructs including `<script>`, iframes, obje
 
 Mermaid, C4, UML-style, UWE-inspired, dependency, and architecture-space views fit the developer artifact model when they stay source-backed:
 
+- auto-detect model impact for every engineering change; if code, API, workflow, dependency, deployment, UI structure, or agent behavior changes, update the relevant model source or record why no model change is needed
 - keep canonical model source in Markdown, TOON, specgraph, Mermaid text, PlantUML text, or existing project docs
-- generate static HTML review surfaces from that source
+- generate static human HTML review surfaces from that source under `generated/review/models/`
 - pre-render diagrams as inline SVG or static markup; do not load a browser Mermaid runtime by default
 - record model kind, notation, abstraction level, source path, generated review path, owner, evidence links, renderer, and source hash in the manifest
+- keep `docs/artifacts/source/models/model-inventory.md` current as the canonical index of model ids, owners, sources, review paths, and implementation touchpoints
 - treat Mermaid C4 as a useful review notation, but mark the C4 level explicitly: context, container, component, dynamic, or deployment
 - treat dependency graphs as generated evidence unless the project has a separate model source of truth
 - keep UWE UML semantics in structured source; generate simplified review diagrams only when they help humans inspect the workflow
@@ -117,10 +122,10 @@ Run the manifest check before handing off model-backed artifacts:
 node scripts/check-artifact-manifest.mjs
 ```
 
-When `--enable-modeling` is used, model-backed artifacts get an additional policy layer:
+When modeling mode is `baseline` or `uml-first`, model-backed artifacts get an additional policy layer:
 
 - `model-view` and `model-diff` entries require `modelId`, `modelKind`, `notation`, `method`, `abstractionLevel`, `owner`, source path, review path, and freshness metadata when present
-- valid methods are `uml`, `uwe`, and `c4`; each method has allowed model kinds
+- valid methods are `uml`, `uwe`, `c4`, and `evidence`; each method has allowed model kinds
 - UWE facets are `content`, `navigation`, `presentation`, `process`, `access`, and `adaptation`; `access` is the local access-control facet and `adaptation` covers personalization/context variation
 - `model-diff` entries must reference valid before/after artifact ids and declare `diff.method`
 - HTML, SVG, PNG, screenshots, and generated comparison pages are review surfaces only; the source diff remains canonical
@@ -130,6 +135,8 @@ Run:
 
 ```bash
 node scripts/check-model-artifact-policy.mjs
+node scripts/generate-model-review.mjs
+node scripts/check-artifact-html-policy.mjs
 ```
 
 ## Media And Demo Artifacts

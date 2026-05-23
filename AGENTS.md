@@ -10,6 +10,14 @@ Guidelines:
 - Treat this repo as the suite entrypoint and project setup repo, including embedded packs under `packs/`.
 - Treat `frontier-agent-playbook` as the shared doctrine companion when a task needs frontier-capability priors, agentic thinking, or anti-fallback framing.
 
+UML-first artifacts:
+- Auto-detect model impact for every engineering change. If code, API, workflow, dependency, deployment, UI structure, or agent behavior changes, update the relevant canonical model source or record why no model change is required.
+- Use the modeling system by default for fresh developer-artifact setups. `--modeling-mode auto` preserves legacy repos, defaults fresh repos to `uml-first`, and can be overridden with `--modeling-mode off|baseline|uml-first` or `--skip-modeling`.
+- Keep canonical UML/UWE/C4/evidence model sources in repo-relative text files, preferring `docs/artifacts/source/models/` when no domain-specific docs path is better.
+- Keep `docs/artifacts/source/models/model-inventory.md` and `docs/artifacts/artifacts.manifest.json` aligned with model ids, owners, methods, source paths, evidence, and generated review surfaces.
+- Human review artifacts for models must be static HTML under `generated/review/models/`, generated from source with `node scripts/generate-model-review.mjs`, and validated with the model and HTML policy checks.
+- Treat HTML, SVG, PNG, screenshots, and generated comparison pages as review surfaces only. Source files and model diffs remain canonical.
+
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
 ## Beads Issue Tracker
 

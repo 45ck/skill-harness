@@ -48,7 +48,7 @@ That command:
 - runs `noslop init`
 - runs `bd init`
 - runs `agent-docs install-gates --quality`
-- scaffolds developer artifact guidance by default, with Markdown/TOON/specgraph as canonical source, generated HTML as an optional review surface, and a manifest for provenance/freshness, including optional governed agent-loop scaffolding
+- scaffolds developer artifact guidance by default, with Markdown/TOON/specgraph and UML/UWE/C4/evidence model sources as canonical source, generated HTML as a human review surface, and a manifest for provenance/freshness, including optional governed agent-loop scaffolding
 - writes `.skill-harness/setup-proof.json` with setup scope, package manager, selected profiles, tool statuses, check commands, generated paths, skipped capabilities, and Beads mode
 
 ## Benchmark results
@@ -195,15 +195,18 @@ Choose a developer artifact profile:
 
 Artifact profiles are guidance and scaffold settings, not a separate runtime. `auto` is the default and resolves to `dual`: canonical Markdown/TOON/specgraph sources plus optional generated review surfaces. Use `codex-app` or `claude-desktop` for desktop workflows with file-backed previews, `cli` or `tui` for terminal-heavy projects, `media` for source-backed demo and generated media review workflows, `agent-loop` for governed self-improving agent workflows with trace/eval receipts, and `none`, `--skip-artifacts`, or `--skip-developer-artifacts` for minimal projects. The shorter `--artifact-profile media|agent-loop|markdown|html|dual|none` form remains supported as an alias.
 
-Developer artifact scaffolding also creates `docs/artifacts/artifacts.manifest.json` and `scripts/check-artifact-manifest.mjs`. Use the manifest to record source-backed generated views, including Mermaid, C4, UML-style, dependency, architecture-space, demo media, and agent-loop artifacts. Generated HTML should embed pre-rendered diagrams, such as inline SVG, instead of loading browser diagram runtimes by default. The `media` profile also creates `generated/media/` and `docs/artifacts/templates/demo-artifact.md`; generated media stays out of git by default. The `agent-loop` profile creates `generated/agent-runs/`, `docs/artifacts/source/agent-loop-playbook.md`, `docs/artifacts/templates/agent-loop-artifact.md`, and `scripts/check-agent-loop-policy.mjs`.
+Developer artifact scaffolding also creates `docs/artifacts/artifacts.manifest.json` and `scripts/check-artifact-manifest.mjs`. Use the manifest to record source-backed generated views, including Mermaid, C4, UML-style, dependency, architecture-space, demo media, and agent-loop artifacts. Generated HTML should embed pre-rendered diagrams, such as inline SVG, instead of loading browser diagram runtimes by default. Agents should auto-detect model impact for engineering changes and update the relevant model source, manifest, and human HTML review artifact when code, API, workflow, dependency, deployment, UI structure, or agent behavior changes. The `media` profile also creates `generated/media/` and `docs/artifacts/templates/demo-artifact.md`; generated media stays out of git by default. The `agent-loop` profile creates `generated/agent-runs/`, `docs/artifacts/source/agent-loop-playbook.md`, `docs/artifacts/templates/agent-loop-artifact.md`, and `scripts/check-agent-loop-policy.mjs`.
 
-For stricter model-driven engineering, add `--enable-modeling` to any developer artifact profile:
+Modeling mode defaults to `auto`. Fresh developer-artifact setups resolve `auto` to UML-first modeling; existing harnessed repos keep their current behavior unless migrated. Use explicit modes when needed:
 
 ```bash
-./skill-harness setup-project --dir ../my-project --enable-modeling
+./skill-harness setup-project --dir ../my-project --modeling-mode auto
+./skill-harness setup-project --dir ../my-project --modeling-mode uml-first
+./skill-harness setup-project --dir ../my-project --modeling-mode baseline
+./skill-harness setup-project --dir ../my-project --skip-modeling
 ```
 
-This keeps modeling inside the normal artifact system and adds `docs/artifacts/source/models/`, `generated/review/models/`, `docs/artifacts/templates/model-diff-artifact.md`, `scripts/check-model-artifact-policy.mjs`, model-aware package scripts, and setup-proof check entries. `model-view` still exists in the base scaffold; `--enable-modeling` adds stricter UML/UWE/C4 policy, `model-diff` support, and human HTML review expectations.
+UML-first mode keeps modeling inside the normal artifact system and adds `docs/artifacts/source/models/`, `docs/artifacts/source/models/model-inventory.md`, `generated/review/models/`, `docs/artifacts/templates/model-diff-artifact.md`, `scripts/generate-model-review.mjs`, `scripts/check-model-artifact-policy.mjs`, model-aware package scripts, and setup-proof check entries. `model-view` still exists in the base scaffold; UML-first adds stricter UML/UWE/C4/evidence policy, `model-diff` support, and generated human HTML review expectations. `--enable-modeling` remains as a legacy alias for `--modeling-mode uml-first`.
 
 Every `setup-project` run writes `.skill-harness/setup-proof.json`. Treat it as machine-readable install evidence: it records the resolved setup directory, monorepo lift, package manager, requested/effective artifact profile, initialized tools, available check commands, generated paths, and skipped capabilities. It is intentionally descriptive; run the recorded check commands for live conformance.
 

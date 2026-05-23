@@ -108,11 +108,47 @@ func TestParseArtifactProfileAcceptsAgentLoopAliases(t *testing.T) {
 	}
 }
 
+func TestParseAndResolveModelingModes(t *testing.T) {
+	for value, want := range map[string]modelingMode{
+		"":             modelingModeAuto,
+		"auto":         modelingModeAuto,
+		"off":          modelingModeOff,
+		"none":         modelingModeOff,
+		"baseline":     modelingModeBaseline,
+		"source-first": modelingModeBaseline,
+		"uml":          modelingModeUMLFirst,
+		"uml-first":    modelingModeUMLFirst,
+	} {
+		got, err := parseModelingMode(value)
+		if err != nil {
+			t.Fatalf("parseModelingMode(%q) returned error: %v", value, err)
+		}
+		if got != want {
+			t.Fatalf("parseModelingMode(%q) = %q, want %q", value, got, want)
+		}
+	}
+
+	fresh := t.TempDir()
+	if got := resolveEffectiveModelingMode(fresh, modelingModeAuto, artifactProfileDual, false); got != modelingModeUMLFirst {
+		t.Fatalf("fresh auto should resolve to uml-first, got %q", got)
+	}
+
+	legacy := t.TempDir()
+	mustWriteFile(t, filepath.Join(legacy, ".skill-harness", "project.json"), "{\n  \"version\": 1,\n  \"capabilities\": {\"developerArtifacts\": {\"enabled\": true}}\n}\n")
+	if got := resolveEffectiveModelingMode(legacy, modelingModeAuto, artifactProfileDual, false); got != modelingModeOff {
+		t.Fatalf("legacy project without modeling mode should preserve off, got %q", got)
+	}
+
+	if got := resolveEffectiveModelingMode(fresh, modelingModeAuto, artifactProfileNone, false); got != modelingModeOff {
+		t.Fatalf("profile none should resolve to off, got %q", got)
+	}
+}
+
 func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
 
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, false); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, modelingModeOff); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -187,7 +223,7 @@ func TestWriteDeveloperArtifactScaffoldMediaProfile(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
 
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileMedia, true, true, false); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileMedia, true, true, modelingModeOff); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -243,7 +279,7 @@ func TestWriteDeveloperArtifactScaffoldAgentLoopProfile(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
 
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileAgentLoop, true, true, false); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileAgentLoop, true, true, modelingModeOff); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -313,7 +349,7 @@ func TestWriteDeveloperArtifactScaffoldAgentLoopProfileWithoutBeads(t *testing.T
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
 
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileAgentLoop, true, false, false); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileAgentLoop, true, false, modelingModeOff); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -345,7 +381,7 @@ func TestWriteDeveloperArtifactScaffoldModeling(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
 
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, true); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, modelingModeUMLFirst); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -391,7 +427,7 @@ func TestWriteDeveloperArtifactScaffoldModeling(t *testing.T) {
 	if scripts["artifacts:model:check"] != "node scripts/check-model-artifact-policy.mjs" {
 		t.Fatalf("expected model check script, got %#v", scripts["artifacts:model:check"])
 	}
-	if scripts["models:review"] != "node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs" {
+	if scripts["models:review"] != "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs" {
 		t.Fatalf("expected model review script, got %#v", scripts["models:review"])
 	}
 }
@@ -399,7 +435,7 @@ func TestWriteDeveloperArtifactScaffoldModeling(t *testing.T) {
 func TestModelArtifactPolicyScriptAcceptsValidModelView(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, true); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, modelingModeUMLFirst); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -428,10 +464,74 @@ func TestModelArtifactPolicyScriptAcceptsValidModelView(t *testing.T) {
 	runNodeScript(t, root, "scripts/check-model-artifact-policy.mjs", true)
 }
 
+func TestModelReviewGeneratorCreatesHumanHTML(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, modelingModeUMLFirst); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	sourcePath := filepath.Join(root, "docs", "artifacts", "source", "models", "architecture.md")
+	source := "# Architecture\n\n```mermaid\nflowchart LR\n  Web --> API\n```\n"
+	mustWriteFile(t, sourcePath, source)
+	writeManifest(t, root, []map[string]any{
+		{
+			"id":               "model-architecture",
+			"type":             "model-view",
+			"source":           "docs/artifacts/source/models/architecture.md",
+			"status":           "ready",
+			"modelId":          "architecture",
+			"modelKind":        "context",
+			"notation":         "mermaid",
+			"method":           "c4",
+			"abstractionLevel": "runtime",
+			"owner":            "system-modeler",
+			"sourceHash":       sha256Hex(source),
+			"evidenceLinks":    []string{"docs/architecture.md"},
+		},
+	})
+
+	runNodeScript(t, root, "scripts/generate-model-review.mjs", true)
+	if !fileExists(filepath.Join(root, "generated", "review", "models", "model-architecture.html")) {
+		t.Fatal("expected generated model review HTML")
+	}
+	runNodeScript(t, root, "scripts/check-model-artifact-policy.mjs", true)
+	runNodeScript(t, root, "scripts/check-artifact-html-policy.mjs", true)
+}
+
+func TestModelArtifactPolicyBaselineAcceptsEvidenceModelsWithoutHTML(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileCLI, true, true, modelingModeBaseline); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	source := "{\"dependencies\":[]}\n"
+	mustWriteFile(t, filepath.Join(root, "docs", "artifacts", "source", "models", "dependencies.json"), source)
+	writeManifest(t, root, []map[string]any{
+		{
+			"id":               "model-dependencies",
+			"type":             "model-view",
+			"source":           "docs/artifacts/source/models/dependencies.json",
+			"status":           "ready",
+			"modelId":          "dependencies",
+			"modelKind":        "dependency",
+			"notation":         "markdown",
+			"method":           "evidence",
+			"abstractionLevel": "runtime",
+			"owner":            "system-modeler",
+			"sourceHash":       sha256Hex(source),
+			"evidenceLinks":    []string{"package.json"},
+		},
+	})
+
+	runNodeScript(t, root, "scripts/check-model-artifact-policy.mjs", true)
+}
+
 func TestModelArtifactPolicyScriptRejectsInvalidFacetAndBrokenDiff(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, true); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, modelingModeUMLFirst); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -485,7 +585,7 @@ func TestWriteDeveloperArtifactScaffoldResolvesAutoProfile(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
 
-	if err := writeDeveloperArtifactScaffold(root, artifactProfileAuto, true, true, false); err != nil {
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileAuto, true, true, modelingModeOff); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
@@ -521,7 +621,8 @@ func TestWriteProjectSetupProof(t *testing.T) {
 	proof := buildProjectSetupProof(ctx, projectSetupProofOptions{
 		RequestedArtifactProfile: artifactProfileAgentLoop,
 		EffectiveArtifactProfile: artifactProfileDual,
-		EnableModeling:           true,
+		RequestedModelingMode:    modelingModeUMLFirst,
+		EffectiveModelingMode:    modelingModeUMLFirst,
 		BeadsMode:                beadsSystem,
 		BeadsWorktrees:           true,
 	})
