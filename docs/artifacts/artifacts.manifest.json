@@ -13,7 +13,7 @@
       "status": "ready",
       "owner": "codex",
       "reviewSurface": "generated/review/model-to-code-human-artifacts-plan-2026-05-23.html",
-      "sourceHash": "98edbdc5d89ceb08c835b666bb463ff2c2ed222937d0736917febc3da56746d3",
+      "sourceHash": "0afeeeb8a1b9117187337d18adb418525b599e131ec3e0f55e4ac0c39f04f737",
       "evidenceLinks": [
         "docs/developer-artifacts.md",
         "docs/artifacts/source/uml-model-driven-artifacts-research-2026-05-23.md",
@@ -40,7 +40,7 @@
       "abstractionLevel": "runtime",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-system-context.html",
-      "sourceHash": "6432603165c08e4024162168571b696f5e5edc6caa5aa1f7ecbdc652a7a89595",
+      "sourceHash": "55db3ccf5fb0108a0a91f90fd02a3dce34610386c453d9e84d35fc3bbe3b0c5f",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -79,7 +79,7 @@
       "abstractionLevel": "domain",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-domain-artifact-governance.html",
-      "sourceHash": "2a8fe81a0dd5d0ce71ac846c2f3bcb788d45ac71ebf5d32db91b49ef58306fdf",
+      "sourceHash": "416f8fdc43dbb51cb8f7729a335ad2fc8d11afbaa0f3d98893c2617f83df07c0",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -118,7 +118,7 @@
       "abstractionLevel": "domain",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-usecase-cli-workflows.html",
-      "sourceHash": "ff8fddbad2b5468b87fdf6f8a1397a63f79c7bf25158da8451ba9eca22630512",
+      "sourceHash": "34a813e8cd83ebccf3c6ed92bef9ef98a26c56919eade0a4f291095480cf7a7d",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -154,7 +154,7 @@
       "abstractionLevel": "runtime",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-activity-setup-project.html",
-      "sourceHash": "57391b23ccf9fefc1bb829025a8edd885df0ed7aac8fb09f7e761e8538e4c1f0",
+      "sourceHash": "7875a72c74c8f8beb954d619e8df72f6782e9c6ad431c8764305793cec783d16",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -189,7 +189,7 @@
       "abstractionLevel": "design",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-component-scaffold-engine.html",
-      "sourceHash": "40298667adcac8fba1f48954c1b410a20d01e9b6aab31e19ab51e258aeef915c",
+      "sourceHash": "b4dbee181093800776df2c9e233b211de57f5c8a97a2f280f918af4c4d617125",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -231,7 +231,7 @@
       "abstractionLevel": "decision",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-state-artifact-freshness.html",
-      "sourceHash": "776b1c88f9b270b43ee3240d743b251be344056053422e051496075acce4fb44",
+      "sourceHash": "89be9817de5bc8e563835b5457624c422f17440a0fba9dd8e8e56c7c37d0884e",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
