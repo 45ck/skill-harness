@@ -22,24 +22,32 @@ Generated agent files and installed skills are derived from those sources. If a 
 
 Paste this into Codex or Claude Code from the target repo:
 
-```md
-Bootstrap this repository with the 45ck skill-harness baseline.
+````md
+Use the 45ck skill-harness baseline in this repository.
 
-Inspect the repo first. Choose the smallest useful profile. Prefer repo-local overlays over editing generated agent or skill files directly. Preserve the ability to receive upstream skill-harness updates.
+Inspect the repo first. Choose the smallest useful setup. For repo governance use `minimal`, `team`, or `agent-native`; for agent-stack overlays use `minimal`, `default`, or `security`; only add artifact, media, security, or agent-loop capabilities when the repo clearly needs them. Prefer repo-local overlays over editing generated agent or skill files directly. Preserve the ability to receive upstream skill-harness updates.
 
 Before making changes, report:
 - detected language, package manager, monorepo layout, CI, tests, docs, and existing agent/tooling files
 - proposed profile and skipped capabilities
 - local files you expect to write
-- package installs, global writes, hooks, CI changes, network operations, or destructive actions that need approval
+- package installs, monorepo-root setup, global/home-directory writes, Claude settings or permission changes, Beads install/init, Git hook changes, CI changes, network operations, or destructive actions that need approval
+
+If skill-harness is not already available, fetch or use a local checkout from https://github.com/45ck/skill-harness and build the CLI. Run the safe repo-local bootstrap flow before `setup-project` or other side-effecting setup:
+
+```sh
+skill-harness audit-project --dir .
+skill-harness bootstrap --dir . --agent-native
+skill-harness resolve --dir .
+```
 
 After approval, configure the repo, run available checks, and leave setup evidence in `.skill-harness/`.
-```
+````
 
 For a lean setup, add:
 
 ```md
-Keep the setup minimal. Do not install media, demo, pentest, generated HTML review, or agent-loop capabilities unless this repo clearly needs them.
+Keep the setup minimal. Do not enable media, demo, pentest, or agent-loop capabilities unless this repo clearly needs them. Use generated HTML review surfaces only when the active workflow benefits from desktop/browser review.
 ```
 
 For a governed agent-loop repo, add:
@@ -54,7 +62,7 @@ The agent should follow this sequence:
 
 1. Inspect repo shape and existing tooling.
 2. Decide whether the repo is unmanaged, generated-only, already harnessed, or agent-native.
-3. Propose the smallest useful profile and opt-outs.
+3. Propose the smallest useful setup choices and opt-outs.
 4. Locate or fetch `skill-harness`.
 5. Create or update `.skill-harness/agent-stack.json`.
 6. Run a read-only resolution before mutating setup.
@@ -68,10 +76,10 @@ The agent should follow this sequence:
 The prompt-first flow is backed by deterministic commands:
 
 ```sh
-skill-harness resolve --dir .
-skill-harness bootstrap --dir . --agent-native
-skill-harness update-project --dir .
 skill-harness audit-project --dir .
+skill-harness bootstrap --dir . --agent-native
+skill-harness resolve --dir .
+skill-harness update-project --dir . --write-lock
 skill-harness install --dir .
 skill-harness render --dir .
 skill-harness check --dir .
@@ -85,7 +93,7 @@ skill-harness check --dir .
 
 `update-project` reads the overlay, reports resolved agent-stack state, and can write `.skill-harness/agent-stack.lock.json` with `--write-lock`. It is intentionally dry-run unless asked to write the lockfile.
 
-`audit-project` tells an agent whether a repo is unmanaged, generated-only, agent-native, or conflicted. `repo audit`, `repo sync`, and `repo lock` expose the lower-level legacy baseline-manifest governance surface and write `.skill-harness/baseline.lock.json`, not the agent-stack lock.
+`audit-project` tells an agent whether a repo is unmanaged, generated-only, agent-native, or conflicted. `repo audit`, `repo drift`, `repo sync`, `repo update --check`, and `repo trim --dry-run` expose the lower-level baseline-manifest governance surface. `repo sync` writes `.skill-harness/baseline.lock.json`, not the agent-stack lock.
 
 ## Overlay Rules
 
@@ -162,18 +170,14 @@ Agents need explicit approval for:
 
 ## Profile Direction
 
-Initial profiles should be conservative:
+Initial setup choices should be conservative and use current CLI vocabulary:
 
-| Profile | Intent |
+| Surface | Values | Intent |
 | --- | --- |
-| `minimal` | Small agent stack, core workflow only, low setup cost |
-| `default` | Current practical setup-project behavior |
-| `cli` | Source-first docs and checks, no generated HTML by default |
-| `desktop-review` | Source-first artifacts plus generated HTML review surfaces |
-| `modeling` | UML-first model sources and generated model review |
-| `agent-loop` | Governed self-improving agent workflows |
-| `media` | Demo, QA, and media handoff workflows |
-| `security` | Security and pentest-oriented agents and skills |
+| Agent-stack profile | `minimal`, `default`, `security` | Controls effective agents and packs in `.skill-harness/agent-stack.json`. |
+| Repo governance profile | `minimal`, `team`, `agent-native` | Controls baseline manifest defaults for managed downstream repos. |
+| Developer artifact profile | `auto`, `codex-app`, `claude-desktop`, `cli`, `tui`, `media`, `agent-loop`, `none` | Controls source-first docs, generated review surfaces, media/demo scaffolds, or governed agent-loop scaffolds. |
+| Modeling mode | `auto`, `off`, `baseline`, `uml-first` | Controls model source and generated model review policy. |
 
 Profiles describe defaults. Repos can still opt out of specific packs or agents through the overlay.
 
@@ -196,7 +200,7 @@ Current implementation status:
 - `setup-project` writes `.skill-harness/agent-stack.json` without overwriting an existing stack.
 - `bootstrap --agent-native` writes the overlay, resolved agent-stack lock, and setup proof without installing packages or writing global agent files.
 - `install --dir`, `render --dir`, and `check --dir` consume resolved state and fail fast when a target repo has not been bootstrapped with `agent-stack.json`.
-- `audit-project`, `repo audit`, `repo lock`, `bootstrap --agent-native`, and `update-project --write-lock` provide the first audit/update surfaces.
+- `audit-project`, `repo audit`, `repo drift`, `repo sync`, `bootstrap --agent-native`, and `update-project --write-lock` provide the first audit/update surfaces.
 
 ## Done Criteria
 

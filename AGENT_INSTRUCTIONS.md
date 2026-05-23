@@ -15,20 +15,25 @@ For public contribution, support, and security expectations, use [CONTRIBUTING.m
 
 ## Agent-native bootstrap
 
-The preferred downstream setup path is prompt-first. A human should be able to open a target repo in Codex, Claude Code, or another coding agent and ask the agent to bootstrap the repo from the `skill-harness` baseline. The agent should inspect the repo, choose the smallest useful profile, use repo-local overlay config for customizations, ask before approval-sensitive side effects, and leave setup/update evidence in `.skill-harness/`.
+The preferred downstream setup path is prompt-first. A human should be able to open a target repo in Codex, Claude Code, or another coding agent and ask the agent to bootstrap the repo from the `skill-harness` baseline. The agent should inspect the repo, choose the smallest useful setup, use repo-local overlay config for customizations, ask before approval-sensitive side effects, and leave setup/update evidence in `.skill-harness/`.
 
 Use [docs/agent-native-bootstrap.md](docs/agent-native-bootstrap.md) for the copyable bootstrap prompt and operational rules. The planning source is [docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md](docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md).
 
 Useful commands:
 
 ```bash
+./skill-harness audit-project --dir path/to/project
 ./skill-harness resolve --dir path/to/project
 ./skill-harness bootstrap --dir path/to/project --agent-native
 ./skill-harness install --dir path/to/project
+./skill-harness render --dir path/to/project
+./skill-harness check --dir path/to/project
 ./skill-harness update-project --dir path/to/project --write-lock
 ```
 
 `bootstrap --agent-native` creates the repo-local overlay, resolved lock, and setup proof without package installs or global writes. After that, `install --dir`, `render --dir`, and `check --dir` use only the resolved effective stack unless explicit agents or packs are supplied.
+
+Ask before running `setup-project`, package installs, monorepo-root setup, global or home-directory writes, `.claude/settings.json` permission changes, Beads install/init, Git hook changes, CI changes, publishing, deployment, or destructive actions.
 
 ## Shared suite install
 

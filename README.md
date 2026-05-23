@@ -17,6 +17,47 @@ It does five jobs:
 - optionally bootstraps Beads, enabled by default in project setup
 - hosts embedded packs for suite-local or incubating capabilities
 
+## Copy this into your agent to use it
+
+Open the target repo in Codex, Claude Code, or another coding agent, then paste this:
+
+````md
+Use the 45ck skill-harness baseline in this repository.
+
+First inspect the repo and report:
+- language, package manager, monorepo layout, CI, tests, docs, and existing agent/tooling files
+- the smallest useful skill-harness setup: usually repo profile `minimal`, `team`, or `agent-native`; only add artifact, media, security, or agent-loop capabilities when the repo clearly needs them
+- files you expect to write
+- package installs, monorepo-root setup, global/home-directory writes, Claude settings or permission changes, Beads install/init, Git hook changes, CI changes, network operations, or destructive actions that need approval
+
+If skill-harness is not already available, fetch or use a local checkout from https://github.com/45ck/skill-harness and build the CLI:
+
+```sh
+git clone https://github.com/45ck/skill-harness.git .skill-harness-upstream
+cd .skill-harness-upstream
+go build -o skill-harness ./cmd/skill-harness
+```
+
+Then return to this target repo and run the safe, repo-local bootstrap flow first:
+
+```sh
+../.skill-harness-upstream/skill-harness audit-project --dir .
+../.skill-harness-upstream/skill-harness bootstrap --dir . --agent-native
+../.skill-harness-upstream/skill-harness resolve --dir .
+```
+
+Do not run `setup-project`, install packages, write global agent files, change hooks, change Claude permissions, initialize Beads, or change CI until approval is given. After approval, apply the selected setup, run available checks, and leave `.skill-harness/agent-stack.json`, `.skill-harness/agent-stack.lock.json`, and `.skill-harness/setup-proof.json` as evidence for future agents.
+````
+
+PowerShell agents should build `skill-harness.exe` and use `..\.skill-harness-upstream\skill-harness.exe` for the same commands.
+
+This prompt is the preferred installer surface for downstream repos: the agent chooses a lean profile, the CLI gives deterministic resolution, and repo-local overlays preserve future updates.
+
+## Two ways to use skill-harness
+
+- **Agent-native bootstrap, recommended for downstream repos:** paste the prompt above into an agent running inside the target repo. The agent inspects first, proposes a minimal profile, asks before side effects, runs the deterministic bootstrap commands, and leaves `.skill-harness/` evidence.
+- **Direct CLI/manual setup:** build or obtain the CLI yourself, then run `install`, `setup-project`, `render`, `check`, or repo governance commands directly. This is still useful for maintainers, release bundles, and controlled local installs.
+
 ## Project status
 
 This repo is open source under the [MIT License](LICENSE). It is actively evolving, and the default branch is the source of truth until formal release channels are established.
@@ -59,17 +100,20 @@ Generated HTML under `generated/review/` is a human review surface only. Canonic
 
 Humans do not need to learn the full install flow before using the stack. The intended modern path is prompt-first: open a target repo in Codex, Claude Code, or a similar coding agent and ask it to bootstrap the repo from the `skill-harness` baseline.
 
-See [docs/agent-native-bootstrap.md](docs/agent-native-bootstrap.md) for the copyable bootstrap prompt, repo-local overlay model, update flow, and approval boundaries. The durable planning source is [docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md](docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md).
+Use the copy-paste agent prompt near the top of this README for first contact. See [docs/agent-native-bootstrap.md](docs/agent-native-bootstrap.md) for the longer bootstrap prompt, repo-local overlay model, update flow, and approval boundaries. The durable planning source is [docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md](docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md).
 
 Agent-native repos use `.skill-harness/agent-stack.json` as desired state and can be inspected or updated with:
 
 ```bash
+./skill-harness audit-project --dir ../my-project
 ./skill-harness resolve --dir ../my-project
 ./skill-harness bootstrap --dir ../my-project --agent-native
 ./skill-harness update-project --dir ../my-project --write-lock
+./skill-harness render --dir ../my-project
+./skill-harness check --dir ../my-project
 ```
 
-`bootstrap --agent-native` writes the desired-state overlay, `.skill-harness/agent-stack.lock.json`, and `.skill-harness/setup-proof.json` without installing packages or writing global agent files. `install --dir`, `render --dir`, and `check --dir` use the resolved stack and require that overlay to exist.
+`bootstrap --agent-native` writes the desired-state overlay, `.skill-harness/agent-stack.lock.json`, and `.skill-harness/setup-proof.json` without installing packages or writing global agent files. `install --dir`, `render --dir`, and `check --dir` use the resolved stack and require that overlay to exist. Full three-way reconciliation across an old lockfile, a new upstream baseline, and local overlays remains follow-up work; current update commands provide resolution, lock refresh, and conservative reports.
 
 For ongoing distribution across active projects, use the repo governance commands. They add a repo-local baseline manifest and report how the shared harness should interact with project-owned files, overlays, and generated outputs:
 
