@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Synthetic settings screenshot">
+  <rect width="960" height="540" fill="#eef2f6"/>
+  <rect x="0" y="0" width="220" height="540" fill="#172033"/>
+  <text x="28" y="48" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff">Vibecord</text>
+  <text x="44" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#dce6f1">Dashboard</text>
+  <rect x="24" y="194" width="172" height="36" rx="6" fill="#2457c5"/>
+  <text x="44" y="218" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#ffffff">Settings</text>
+  <text x="260" y="72" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700" fill="#172033">Workspace settings</text>
+  <rect x="260" y="112" width="600" height="328" rx="8" fill="#ffffff" stroke="#d8dee8"/>
+  <text x="292" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#172033">Admin-only controls</text>
+  <text x="292" y="194" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#5b6472">Authorization check passed for admin role.</text>
+  <rect x="292" y="236" width="520" height="44" rx="6" fill="#f7f9fc" stroke="#d8dee8"/>
+  <text x="314" y="264" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#334155">Community visibility</text>
+  <rect x="292" y="304" width="520" height="44" rx="6" fill="#f7f9fc" stroke="#d8dee8"/>
+  <text x="314" y="332" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#334155">Member permissions</text>
+  <rect x="292" y="372" width="124" height="42" rx="6" fill="#2457c5"/>
+  <text x="332" y="398" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#ffffff">Save</text>
+  <text x="260" y="492" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#5b6472">Screenshot evidence: settings branch and authorization effect</text>
+</svg>

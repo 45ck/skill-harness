@@ -481,7 +481,10 @@
         "docs/artifacts/source/models/sample-uwe-navigation.md",
         "generated/review/evidence/sample-uwe-atlas/landing.svg",
         "generated/review/evidence/sample-uwe-atlas/auth.svg",
-        "generated/review/evidence/sample-uwe-atlas/dashboard.svg"
+        "generated/review/evidence/sample-uwe-atlas/dashboard.svg",
+        "generated/review/evidence/sample-uwe-atlas/channels.svg",
+        "generated/review/evidence/sample-uwe-atlas/settings.svg",
+        "generated/review/evidence/sample-uwe-atlas/denied.svg"
       ],
       "screenshots": [
         {
@@ -498,6 +501,21 @@
           "path": "generated/review/evidence/sample-uwe-atlas/dashboard.svg",
           "caption": "Synthetic authenticated dashboard node",
           "alt": "Synthetic dashboard screenshot"
+        },
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/channels.svg",
+          "caption": "Synthetic channel navigation node",
+          "alt": "Synthetic channels screenshot"
+        },
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/settings.svg",
+          "caption": "Synthetic admin settings node",
+          "alt": "Synthetic settings screenshot"
+        },
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/denied.svg",
+          "caption": "Synthetic access denied node",
+          "alt": "Synthetic access denied screenshot"
         }
       ],
       "updateTriggers": [
@@ -509,7 +527,7 @@
         "generatedAt": "2026-05-23",
         "sourceFirst": true
       },
-      "sourceHash": "cfdc8dc1fcd94e061ab5368c406b52b16e33673fdc82ad9a07201c7c4486b757",
+      "sourceHash": "b26036246fefe67a4426955cfbd36c4bc8acf71f5d21252aa6522cc2c2c911ae",
       "generatedAt": "2026-05-23"
     },
     {
@@ -539,7 +557,10 @@
         "docs/artifacts/source/product/sample-uwe-screenshot-atlas.md",
         "generated/review/evidence/sample-uwe-atlas/landing.svg",
         "generated/review/evidence/sample-uwe-atlas/auth.svg",
-        "generated/review/evidence/sample-uwe-atlas/dashboard.svg"
+        "generated/review/evidence/sample-uwe-atlas/dashboard.svg",
+        "generated/review/evidence/sample-uwe-atlas/channels.svg",
+        "generated/review/evidence/sample-uwe-atlas/settings.svg",
+        "generated/review/evidence/sample-uwe-atlas/denied.svg"
       ],
       "docTouchpoints": [
         "docs/artifacts/templates/e2e-product-system-atlas.md",
@@ -549,7 +570,10 @@
         "docs/artifacts/source/product/sample-uwe-screenshot-atlas.md",
         "generated/review/evidence/sample-uwe-atlas/landing.svg",
         "generated/review/evidence/sample-uwe-atlas/auth.svg",
-        "generated/review/evidence/sample-uwe-atlas/dashboard.svg"
+        "generated/review/evidence/sample-uwe-atlas/dashboard.svg",
+        "generated/review/evidence/sample-uwe-atlas/channels.svg",
+        "generated/review/evidence/sample-uwe-atlas/settings.svg",
+        "generated/review/evidence/sample-uwe-atlas/denied.svg"
       ],
       "visualEvidence": [
         {
@@ -563,6 +587,18 @@
         {
           "path": "generated/review/evidence/sample-uwe-atlas/dashboard.svg",
           "caption": "Dashboard node"
+        },
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/channels.svg",
+          "caption": "Channels node"
+        },
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/settings.svg",
+          "caption": "Settings node"
+        },
+        {
+          "path": "generated/review/evidence/sample-uwe-atlas/denied.svg",
+          "caption": "Access denied node"
         }
       ],
       "reviewRequired": true,

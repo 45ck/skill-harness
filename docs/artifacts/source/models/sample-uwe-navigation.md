@@ -18,6 +18,9 @@ implementationTouchpoints:
   - generated/review/evidence/sample-uwe-atlas/landing.svg
   - generated/review/evidence/sample-uwe-atlas/auth.svg
   - generated/review/evidence/sample-uwe-atlas/dashboard.svg
+  - generated/review/evidence/sample-uwe-atlas/channels.svg
+  - generated/review/evidence/sample-uwe-atlas/settings.svg
+  - generated/review/evidence/sample-uwe-atlas/denied.svg
 docTouchpoints:
   - docs/artifacts/templates/e2e-product-system-atlas.md
   - docs/artifacts/source/models/model-inventory.md
@@ -26,6 +29,9 @@ evidenceLinks:
   - generated/review/evidence/sample-uwe-atlas/landing.svg
   - generated/review/evidence/sample-uwe-atlas/auth.svg
   - generated/review/evidence/sample-uwe-atlas/dashboard.svg
+  - generated/review/evidence/sample-uwe-atlas/channels.svg
+  - generated/review/evidence/sample-uwe-atlas/settings.svg
+  - generated/review/evidence/sample-uwe-atlas/denied.svg
 reviewRequired: true
 updateTriggers:
   - sample atlas source changes
@@ -69,7 +75,9 @@ flowchart LR
 | landing | marketing copy | public entry | landing screenshot | get started | anonymous | desktop/mobile variants |
 | auth | credential fields | login route | auth screenshot | authenticate | anonymous to member | password recovery branch |
 | dashboard | community/channel data | authenticated hub | dashboard screenshot | open channels/settings | member/admin | role-specific nav |
-| settings | settings data | admin branch | not captured | update settings | admin only | feature flags |
+| channels | channel list and room data | member branch | channels screenshot | select channel | member | responsive channel list |
+| settings | settings data | admin branch | settings screenshot | update settings | admin only | feature flags |
+| denied | denial message | restricted branch | denied screenshot | return to app | member denied | role-specific fallback |
 
 ## Screenshot Evidence
 
@@ -78,7 +86,9 @@ flowchart LR
 | landing | `generated/review/evidence/sample-uwe-atlas/landing.svg` |
 | auth | `generated/review/evidence/sample-uwe-atlas/auth.svg` |
 | dashboard | `generated/review/evidence/sample-uwe-atlas/dashboard.svg` |
-| settings | evidence gap |
+| channels | `generated/review/evidence/sample-uwe-atlas/channels.svg` |
+| settings | `generated/review/evidence/sample-uwe-atlas/settings.svg` |
+| denied | `generated/review/evidence/sample-uwe-atlas/denied.svg` |
 
 ## Invariants
 

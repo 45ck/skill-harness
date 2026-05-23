@@ -9,6 +9,9 @@ evidenceLinks:
   - generated/review/evidence/sample-uwe-atlas/landing.svg
   - generated/review/evidence/sample-uwe-atlas/auth.svg
   - generated/review/evidence/sample-uwe-atlas/dashboard.svg
+  - generated/review/evidence/sample-uwe-atlas/channels.svg
+  - generated/review/evidence/sample-uwe-atlas/settings.svg
+  - generated/review/evidence/sample-uwe-atlas/denied.svg
 ---
 
 # Sample UWE Screenshot Atlas
@@ -37,6 +40,9 @@ Demonstrate the reusable shape: navigation nodes are the spine, screenshots make
 | landing | `/` | navigation + presentation | anonymous | `generated/review/evidence/sample-uwe-atlas/landing.svg` | sign in, get started | route transition, no session mutation |
 | auth | `/login` | access + process | anonymous | `generated/review/evidence/sample-uwe-atlas/auth.svg` | submit credentials, recover password | session token on success, validation errors on failure |
 | dashboard | `/app` | content + navigation + presentation | member, admin | `generated/review/evidence/sample-uwe-atlas/dashboard.svg` | open channels, view activity, open settings | API fetch, membership read, activity query |
+| channels | `/app/channels` | navigation + content | member | `generated/review/evidence/sample-uwe-atlas/channels.svg` | inspect rooms, select channel | channel list query, selected-room read |
+| settings | `/app/settings` | access + presentation | admin | `generated/review/evidence/sample-uwe-atlas/settings.svg` | change settings, save | authorization check, settings update |
+| denied | access-denied state | access + adaptation | member | `generated/review/evidence/sample-uwe-atlas/denied.svg` | back to app | authorization denial, no settings mutation |
 
 ## Navigation Links
 
@@ -89,7 +95,8 @@ Demonstrate the reusable shape: navigation nodes are the spine, screenshots make
       "navigationClass": "Authenticated workspace flow",
       "facet": "navigation",
       "role": "member",
-      "effect": "channel list query"
+      "effect": "channel list query",
+      "screenshot": "generated/review/evidence/sample-uwe-atlas/channels.svg"
     },
     {
       "id": "Settings",
@@ -98,7 +105,18 @@ Demonstrate the reusable shape: navigation nodes are the spine, screenshots make
       "navigationClass": "Workspace utilities and admin",
       "facet": "access",
       "role": "admin",
-      "effect": "authorization check"
+      "effect": "authorization check",
+      "screenshot": "generated/review/evidence/sample-uwe-atlas/settings.svg"
+    },
+    {
+      "id": "Denied",
+      "label": "Access denied",
+      "route": "access-denied",
+      "navigationClass": "Workspace utilities and admin",
+      "facet": "adaptation",
+      "role": "member",
+      "effect": "blocked settings mutation",
+      "screenshot": "generated/review/evidence/sample-uwe-atlas/denied.svg"
     }
   ],
   "edges": [
@@ -106,6 +124,8 @@ Demonstrate the reusable shape: navigation nodes are the spine, screenshots make
     ["Auth", "Dashboard", "valid session"],
     ["Dashboard", "Channels", "open channels"],
     ["Dashboard", "Settings", "admin only"],
+    ["Dashboard", "Denied", "member denied"],
+    ["Denied", "Dashboard", "back"],
     ["Settings", "Dashboard", "back"]
   ]
 }
@@ -120,6 +140,9 @@ The manifest lists three synthetic screenshots. A real repo should replace these
 | `landing.svg` | landing | anonymous entry state |
 | `auth.svg` | auth | access/process state |
 | `dashboard.svg` | dashboard | authenticated navigation state |
+| `channels.svg` | channels | channel list and selected-room state |
+| `settings.svg` | settings | admin settings branch |
+| `denied.svg` | denied | role-sensitive denied branch |
 
 ## Action And Side-Effect Matrix
 
@@ -127,16 +150,17 @@ The manifest lists three synthetic screenshots. A real repo should replace these
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ACT-001 | landing | click sign in | auth node visible | none | route transition | landing + auth screenshots | pass |
 | ACT-002 | auth | submit valid credentials | dashboard visible | session created | auth API call, session cookie/token | auth + dashboard screenshots | synthetic |
-| ACT-003 | dashboard | open channels | channel list visible | membership/channel read | API fetch and cache update | dashboard screenshot | untested |
-| ACT-004 | dashboard | open settings as member | access denied or member settings visible | settings read only | authorization check | not captured | inconclusive |
+| ACT-003 | dashboard | open channels | channel list visible | membership/channel read | API fetch and cache update | dashboard + channels screenshots | synthetic |
+| ACT-004 | dashboard | open settings as member | access denied visible | no settings mutation | authorization check | dashboard + denied screenshots | synthetic |
+| ACT-005 | dashboard | open settings as admin | settings visible | settings read/update available | authorization check | dashboard + settings screenshots | synthetic |
 
 ## Access And Adaptation
 
 | Branch | Expected behavior | Evidence state |
 | --- | --- | --- |
 | anonymous | can reach landing and auth only | captured |
-| member | can reach dashboard and member channels | dashboard captured |
-| admin | can reach dashboard, members, moderation, settings | not captured |
+| member | can reach dashboard and member channels; denied from admin settings | dashboard, channels, denied captured |
+| admin | can reach dashboard, members, moderation, settings | settings branch captured |
 | mobile viewport | navigation should collapse without hiding primary actions | not captured |
 | feature flag disabled | flagged routes should be absent or disabled | not captured |
 

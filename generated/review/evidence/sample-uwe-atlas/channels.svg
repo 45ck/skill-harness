@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Synthetic channels screenshot">
+  <rect width="960" height="540" fill="#f4f7fb"/>
+  <rect x="0" y="0" width="220" height="540" fill="#172033"/>
+  <text x="28" y="48" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff">Vibecord</text>
+  <rect x="24" y="96" width="172" height="36" rx="6" fill="#0f766e"/>
+  <text x="44" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#ffffff">Dashboard</text>
+  <rect x="24" y="150" width="172" height="36" rx="6" fill="#ffffff" opacity=".14"/>
+  <text x="44" y="174" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#dce6f1">Channels</text>
+  <text x="260" y="72" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700" fill="#172033">Channels</text>
+  <rect x="260" y="112" width="280" height="340" rx="8" fill="#ffffff" stroke="#d8dee8"/>
+  <text x="286" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#172033">Community rooms</text>
+  <rect x="286" y="188" width="220" height="38" rx="6" fill="#effaf8"/>
+  <text x="306" y="213" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#0f766e"># general</text>
+  <rect x="286" y="244" width="220" height="38" rx="6" fill="#f7f9fc" stroke="#d8dee8"/>
+  <text x="306" y="269" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#334155"># launches</text>
+  <rect x="286" y="300" width="220" height="38" rx="6" fill="#f7f9fc" stroke="#d8dee8"/>
+  <text x="306" y="325" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#334155"># support</text>
+  <rect x="578" y="112" width="282" height="248" rx="8" fill="#ffffff" stroke="#d8dee8"/>
+  <text x="604" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#172033">Selected room</text>
+  <rect x="604" y="192" width="210" height="30" rx="5" fill="#e8edf4"/>
+  <rect x="604" y="242" width="180" height="30" rx="5" fill="#e8edf4"/>
+  <rect x="604" y="292" width="230" height="30" rx="5" fill="#e8edf4"/>
+  <text x="260" y="492" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#5b6472">Screenshot evidence: channel navigation and room read</text>
+</svg>
