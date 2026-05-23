@@ -13,6 +13,7 @@ implementationTouchpoints:
   - scripts/check-model-artifact-policy.mjs
   - scripts/check-artifact-html-policy.mjs
   - scripts/open-artifact-review.mjs
+  - scripts/generate-artifact-review.mjs
   - scripts/generate-model-review.mjs
 docTouchpoints:
   - docs/developer-artifacts.md
@@ -23,7 +24,10 @@ evidenceLinks:
 reviewRequired: true
 updateTriggers:
   - artifact manifest schema changes
+  - visual-source-first policy changes
   - HTML policy changes
+  - interaction lane policy changes
+  - generated review semantics changes
   - model metadata contract changes
 driftVerdict: aligned
 ---
@@ -80,8 +84,14 @@ classDiagram
   class ReviewSurface {
     path
     surfaceKind
+    interactionLane
     generated
     canonical
+  }
+  class ArtifactReviewGenerator {
+    renderer
+    cssOnlyDefault
+    managedByReviewRequired
   }
   Artifact <|-- VisualArtifact
   Artifact <|-- ModelView
@@ -89,16 +99,19 @@ classDiagram
   Artifact --> EvidenceLink
   Artifact --> ReviewSurface
   ReviewSurface --> VisualDerivative
+  ArtifactReviewGenerator --> ReviewSurface
 ```
 
 ## Invariants
 
 - Every ready artifact names a canonical source.
 - Every ready artifact has concrete evidence.
-- Product, business, data, research, UX, and mockup review artifacts keep agent-readable source separate from generated visual derivatives.
+- Product, business, data, research, UX, planning, discovery, and mockup review artifacts keep agent-readable source separate from generated visual derivatives.
 - High-fidelity review is required for UI and customer-facing workflow approval surfaces; low-fidelity sketches are scratch unless recorded as evidence.
 - Every model view records method, notation, owner, touchpoints, and freshness.
 - HTML review files are generated from source and checked for drift.
+- Non-model artifacts that set `reviewRequired: true` are generated through the generic artifact review generator.
+- Default HTML interaction is CSS-only. Inline JavaScript requires an explicit reviewed lane, manifest metadata, and policy/checker support before use.
 - Synthetic user or agent-simulation evidence is labelled separately from real user/customer evidence.
 - Host-specific opening is transport only: `open-artifact-review.mjs` resolves the review target, while Codex Browser, Claude preview, system browser, or a local HTTP server provides the human viewing surface.
 
@@ -108,4 +121,4 @@ Evidence comes from `docs/developer-artifacts.md`, `.skill-harness/project.json`
 
 ## Freshness
 
-Update this model when artifact manifest schema, visual-source-first policy, model metadata requirements, HTML safety policy, or generated review semantics change.
+Update this model when artifact manifest schema, visual-source-first policy, model metadata requirements, HTML safety policy, interaction lane policy, or generated review semantics change.

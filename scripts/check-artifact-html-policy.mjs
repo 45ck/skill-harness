@@ -27,6 +27,10 @@ const blockedApiPatterns = [
   /\blocalStorage\b/,
   /\bsessionStorage\b/
 ];
+const blockedAttributePatterns = [
+  /\son[a-z]+\s*=/i,
+  /\b(?:href|src|action)\s*=\s*["']\s*javascript:/i
+];
 const externalReferencePattern = /\b(?:src|href|action)=["'](?:https?:|\/\/)/i;
 
 function walk(dir) {
@@ -46,6 +50,7 @@ function checkFile(filePath) {
   if (!html.includes('Content-Security-Policy') || !html.includes(requiredCsp)) failures.push('missing required CSP meta tag');
   for (const pattern of blockedTagPatterns) if (pattern.test(html)) failures.push('blocked tag or preload pattern: ' + pattern);
   for (const pattern of blockedApiPatterns) if (pattern.test(html)) failures.push('blocked browser API: ' + pattern);
+  for (const pattern of blockedAttributePatterns) if (pattern.test(html)) failures.push('blocked inline event or javascript URL pattern: ' + pattern);
   if (externalReferencePattern.test(html)) failures.push('external src/href/action reference');
   return failures;
 }

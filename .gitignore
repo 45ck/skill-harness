@@ -11,6 +11,8 @@ generated/review/*
 !generated/review/models/
 !generated/review/models/*.html
 generated/review/models/*.png
+!generated/review/product/
+!generated/review/product/*.html
 !generated/review/research/
 !generated/review/research/*.html
 generated/media/

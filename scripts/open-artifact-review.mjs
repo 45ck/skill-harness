@@ -34,16 +34,23 @@ function firstExisting(paths) {
 }
 
 function discoverTarget() {
-  if (explicitTarget) {
-    const resolved = resolveReviewPath(explicitTarget);
-    if (resolved && fs.existsSync(resolved)) return resolved;
-    throw new Error('review artifact not found or outside repo: ' + explicitTarget);
-  }
   const config = readJSON(path.join(root, '.skill-harness', 'project.json')) ?? {};
   const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
   const reviewDir = developerArtifacts.reviewSurface?.outDir ?? 'generated/review';
   const modelReviewDir = developerArtifacts.modeling?.reviewDir ?? developerArtifacts.modelPolicy?.uml?.reviewDir ?? path.join(reviewDir, 'models');
   const manifest = readJSON(path.join(root, developerArtifacts.manifest?.path ?? 'docs/artifacts/artifacts.manifest.json'));
+
+  if (explicitTarget) {
+    const resolved = resolveReviewPath(explicitTarget);
+    if (resolved && fs.existsSync(resolved)) return resolved;
+    const artifact = (manifest?.artifacts ?? []).find((item) => item?.id === explicitTarget || item?.modelId === explicitTarget);
+    if (artifact?.reviewSurface) {
+      const reviewPath = resolveReviewPath(artifact.reviewSurface);
+      if (reviewPath && fs.existsSync(reviewPath)) return reviewPath;
+    }
+    throw new Error('review artifact not found by path or artifact id: ' + explicitTarget);
+  }
+
   const manifestTargets = [];
   for (const artifact of Array.isArray(manifest?.artifacts) ? manifest.artifacts : []) {
     if (typeof artifact?.reviewSurface === 'string' && artifact.reviewSurface.endsWith('.html')) {
@@ -51,7 +58,7 @@ function discoverTarget() {
       if (resolved) manifestTargets.push(resolved);
     }
   }
-  const discovered = firstExisting([path.join(root, modelReviewDir, 'index.html'), path.join(root, reviewDir, 'index.html'), ...manifestTargets]);
+  const discovered = firstExisting([path.join(root, reviewDir, 'index.html'), path.join(root, modelReviewDir, 'index.html'), ...manifestTargets]);
   if (discovered) return discovered;
   throw new Error('no generated HTML review artifact found; generate one first');
 }

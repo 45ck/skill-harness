@@ -43,7 +43,7 @@ Use `--install-only` to install packages without running initialization commands
 
 Dependency source and pinning details are documented in [docs/dependency-provenance.md](docs/dependency-provenance.md).
 
-Generated HTML under `generated/review/` is a human review surface only. Canonical decisions, specs, models, and evidence stay in source files under `docs/`, `packs/`, scripts, or target repo scaffolds.
+Generated HTML under `generated/review/` is a human review surface only. Canonical decisions, specs, models, and evidence stay in source files under `docs/`, `packs/`, scripts, or target repo scaffolds. Human-facing discovery and planning artifacts should use source plus generated infographic HTML, not Markdown-only handoff, when the active workflow is a desktop or browser review surface.
 
 ## What it can set up
 
@@ -54,6 +54,32 @@ Generated HTML under `generated/review/` is a human review surface only. Canonic
 - supports repos exposed as `skills/`, packaged `.claude/.agents` mirrors, or a single root `SKILL.md`
 - shared Claude agents
 - shared Codex agents
+
+### Agent-native bootstrap
+
+Humans do not need to learn the full install flow before using the stack. The intended modern path is prompt-first: open a target repo in Codex, Claude Code, or a similar coding agent and ask it to bootstrap the repo from the `skill-harness` baseline.
+
+See [docs/agent-native-bootstrap.md](docs/agent-native-bootstrap.md) for the copyable bootstrap prompt, repo-local overlay model, update flow, and approval boundaries. The durable planning source is [docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md](docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md).
+
+Agent-native repos use `.skill-harness/agent-stack.json` as desired state and can be inspected or updated with:
+
+```bash
+./skill-harness resolve --dir ../my-project
+./skill-harness bootstrap --dir ../my-project --agent-native
+./skill-harness update-project --dir ../my-project --write-lock
+```
+
+For ongoing distribution across active projects, use the repo governance commands. They add a repo-local baseline manifest and report how the shared harness should interact with project-owned files, overlays, and generated outputs:
+
+```bash
+./skill-harness repo init --dir ../my-project --profile team
+./skill-harness repo audit --dir ../my-project
+./skill-harness repo sync --dir ../my-project
+./skill-harness repo update --dir ../my-project --check
+./skill-harness repo trim --dir ../my-project --dry-run
+```
+
+`repo init` writes `.skill-harness/baseline.manifest.json`. `repo sync` writes `.skill-harness/baseline.lock.json` and `.skill-harness/update-report.json`. Existing repo-local skills, agents, Beads state, and project instructions are classified as `overlay` or `owned` surfaces so baseline updates can be received without deleting project-specific customization. Update and trim are intentionally observe-only until a repo chooses which surfaces and capabilities to accept, ignore, or opt out of.
 
 ### Project tooling
 
@@ -219,6 +245,19 @@ Install the repo-local Beads worktree wrapper (copies `scripts/beads/bd.mjs` + a
 ./skill-harness beads-worktrees --dir ../my-project
 ```
 
+Audit and pin baseline governance for an existing repo:
+
+```bash
+./skill-harness repo audit --dir ../my-project
+./skill-harness repo init --dir ../my-project --profile minimal
+./skill-harness repo sync --dir ../my-project
+./skill-harness repo drift --dir ../my-project
+./skill-harness repo update --dir ../my-project --check
+./skill-harness repo trim --dir ../my-project --dry-run
+```
+
+Profiles choose the default effective agent set: `minimal` keeps the lowest-cost delivery and quality loadout, `team` adds requirements and architecture, and `agent-native` adds workflow orchestration. The manifest can opt agents and packs in or out per repo, while surface modes describe ownership: `generated`, `managed-section`, `overlay`, `owned`, or `ignored`.
+
 Choose a developer artifact profile:
 
 ```bash
@@ -234,7 +273,7 @@ Choose a developer artifact profile:
 
 Artifact profiles are guidance and scaffold settings, not a separate runtime. `auto` is the default and resolves to `dual`: canonical Markdown/TOON/specgraph sources plus optional generated review surfaces. Use `codex-app` or `claude-desktop` for desktop workflows with file-backed previews, `cli` or `tui` for terminal-heavy projects, `media` for source-backed demo and generated media review workflows, `agent-loop` for governed self-improving agent workflows with trace/eval receipts, and `none`, `--skip-artifacts`, or `--skip-developer-artifacts` for minimal projects. The shorter `--artifact-profile media|agent-loop|markdown|html|dual|none` form remains supported as an alias.
 
-Developer artifact scaffolding also creates `docs/artifacts/artifacts.manifest.json` and `scripts/check-artifact-manifest.mjs`. Use the manifest to record source-backed generated views, including product briefs, business dashboards, data dictionaries, metric definitions, research evidence boards, high-fidelity UX prototypes, Mermaid, C4, UML-style, dependency, architecture-space, demo media, and agent-loop artifacts. Generated HTML should be the human artifact: a self-contained review page with clear sections, tabs, diagrams or static previews, screenshots or evidence images, text summaries, source links, and freshness metadata. It should embed pre-rendered diagrams, such as inline SVG, instead of loading browser diagram runtimes by default. Visual-source-first artifact families use canonical sources under `docs/artifacts/source/product/`, `business/`, `data/`, `research/`, and `ux/`, with generated reviews under matching `generated/review/` subfolders. High-fidelity review is the default for UI, product, customer-facing workflow, and mockup artifacts; low-fidelity sketches are scratch unless captured as evidence. Agents should auto-detect model impact for engineering changes and update the relevant model source, manifest, and human HTML review artifact when code, API, workflow, dependency, deployment, UI structure, or agent behavior changes. The `media` profile also creates `generated/media/` and `docs/artifacts/templates/demo-artifact.md`; generated media stays out of git by default. The `agent-loop` profile creates `generated/agent-runs/`, `docs/artifacts/source/agent-loop-playbook.md`, `docs/artifacts/templates/agent-loop-artifact.md`, and `scripts/check-agent-loop-policy.mjs`.
+Developer artifact scaffolding also creates `docs/artifacts/artifacts.manifest.json`, `scripts/check-artifact-manifest.mjs`, and `scripts/generate-artifact-review.mjs`. Use the manifest to record source-backed generated views, including product briefs, business dashboards, data dictionaries, metric definitions, research evidence boards, high-fidelity UX prototypes, Mermaid, C4, UML-style, dependency, architecture-space, demo media, and agent-loop artifacts. Generated HTML should be the human artifact: a self-contained review page with clear sections, tabs, diagrams or static previews, screenshots or evidence images, text summaries, source links, and freshness metadata. For non-model human artifacts, set `reviewRequired: true` and run `npm run artifacts:generate` or `node scripts/generate-artifact-review.mjs` to produce infographic-style HTML with metrics, charts, evidence/freshness panels, and source links. It should embed pre-rendered diagrams, such as inline SVG, instead of loading browser diagram runtimes by default. Visual-source-first artifact families use canonical sources under `docs/artifacts/source/product/`, `business/`, `data/`, `research/`, and `ux/`, with generated reviews under matching `generated/review/` subfolders. High-fidelity review is the default for UI, product, customer-facing workflow, and mockup artifacts; low-fidelity sketches are scratch unless captured as evidence. Agents should auto-detect model impact for engineering changes and update the relevant model source, manifest, and human HTML review artifact when code, API, workflow, dependency, deployment, UI structure, or agent behavior changes. The `media` profile also creates `generated/media/` and `docs/artifacts/templates/demo-artifact.md`; generated media stays out of git by default. The `agent-loop` profile creates `generated/agent-runs/`, `docs/artifacts/source/agent-loop-playbook.md`, `docs/artifacts/templates/agent-loop-artifact.md`, and `scripts/check-agent-loop-policy.mjs`.
 
 Modeling mode defaults to `auto`. Fresh developer-artifact setups resolve `auto` to UML-first modeling; existing harnessed repos keep their current behavior unless migrated. Use explicit modes when needed:
 
@@ -247,7 +286,7 @@ Modeling mode defaults to `auto`. Fresh developer-artifact setups resolve `auto`
 
 UML-first mode keeps modeling inside the normal artifact system and adds `docs/artifacts/source/models/`, `docs/artifacts/source/models/model-inventory.md`, `generated/review/models/`, `docs/artifacts/templates/model-diff-artifact.md`, `scripts/generate-model-review.mjs`, `scripts/open-artifact-review.mjs`, `scripts/check-model-artifact-policy.mjs`, model-aware package scripts, and setup-proof check entries. `model-view` still exists in the base scaffold; UML-first adds stricter UML/UWE/C4/evidence policy, `model-diff` support, and generated human HTML review expectations. `--enable-modeling` remains as a legacy alias for `--modeling-mode uml-first`.
 
-Use `npm run models:review` to regenerate model review HTML and `npm run models:drift` to fail on stale generated review files. CI should use the drift check after generation has been committed or uploaded as an artifact.
+Use `npm run artifacts:review` to regenerate non-model infographic HTML plus model review HTML and run policy checks. Use `npm run artifacts:generate` when you only need to refresh generated review files. Use `npm run models:review` to regenerate model review HTML and `npm run models:drift` to fail on stale generated model review files. CI should use the drift checks after generation has been committed or uploaded as an artifact.
 
 Use `npm run models:open` to open the generated model index through the default local surface. Agents and host apps can resolve the same target without launching a browser by running:
 
@@ -255,7 +294,7 @@ Use `npm run models:open` to open the generated model index through the default 
 node scripts/open-artifact-review.mjs --json --print
 ```
 
-In Codex app or Claude desktop, open the resolved artifact with the built-in browser/preview surface when available. If that surface blocks `file://` URLs, serve `generated/review/` through a local static server and open `/models/index.html` from `http://127.0.0.1:<port>/`.
+In Codex app or Claude desktop, open the resolved artifact with the built-in browser/preview surface when available. If that surface blocks `file://` URLs, serve `generated/review/` through a local static server and open `/index.html` or the target artifact path from `http://127.0.0.1:<port>/`.
 
 Every `setup-project` run writes `.skill-harness/setup-proof.json`. Treat it as machine-readable install evidence: it records the resolved setup directory, monorepo lift, package manager, requested/effective artifact profile, initialized tools, available check commands, generated paths, and skipped capabilities. It is intentionally descriptive; run the recorded check commands for live conformance.
 
@@ -393,6 +432,7 @@ If another agent needs to install this repo or use it as the setup entrypoint, p
 - [SECURITY.md](SECURITY.md)
 - [SUPPORT.md](SUPPORT.md)
 - [docs/developer-artifacts.md](docs/developer-artifacts.md)
+- [docs/agent-native-bootstrap.md](docs/agent-native-bootstrap.md)
 - [docs/dependency-provenance.md](docs/dependency-provenance.md)
 - [docs/agent-operating-skills.md](docs/agent-operating-skills.md)
 - [docs/demo-production-media.md](docs/demo-production-media.md)

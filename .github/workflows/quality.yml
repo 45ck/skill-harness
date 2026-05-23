@@ -59,7 +59,10 @@ jobs:
               --modeling-mode uml-first
 
           test -f "$tmp_repo/.skill-harness/setup-proof.json"
+          test -f "$tmp_repo/scripts/generate-artifact-review.mjs"
           test -f "$tmp_repo/scripts/generate-model-review.mjs"
+          (cd "$tmp_repo" && node scripts/generate-artifact-review.mjs)
+          (cd "$tmp_repo" && node scripts/generate-artifact-review.mjs --check)
           (cd "$tmp_repo" && node scripts/generate-model-review.mjs)
           (cd "$tmp_repo" && node scripts/generate-model-review.mjs --check)
           (cd "$tmp_repo" && node scripts/check-artifact-manifest.mjs)

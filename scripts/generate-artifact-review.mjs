@@ -1,0 +1,232 @@
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const checkOnly = process.argv.slice(2).includes('--check');
+const rendererName = 'skill-harness artifact review generator';
+const config = JSON.parse(fs.readFileSync(path.join(root, '.skill-harness', 'project.json'), 'utf8'));
+const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
+const manifestPath = path.join(root, developerArtifacts.manifest?.path ?? 'docs/artifacts/artifacts.manifest.json');
+const reviewRoot = path.resolve(root, developerArtifacts.reviewSurface?.outDir ?? 'generated/review');
+const requiredCsp = developerArtifacts.htmlPolicy?.requiredCSP ?? "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+const families = new Set(['product', 'business', 'data', 'research', 'ux']);
+
+function repoPath(filePath) {
+  return path.relative(root, filePath).replaceAll(path.sep, '/');
+}
+
+function isInside(parent, child) {
+  const relative = path.relative(parent, child);
+  return relative === '' || (!!relative && !relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+function safeName(value) {
+  return String(value || 'artifact').toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'artifact';
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function escapeAttribute(value) {
+  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;');
+}
+
+function hrefBetween(fromFile, targetPath) {
+  if (typeof targetPath !== 'string' || targetPath.trim() === '') return '';
+  const resolved = path.resolve(root, targetPath);
+  if (!resolved.startsWith(root + path.sep) && resolved !== root) return '';
+  return encodeURI(path.relative(path.dirname(fromFile), resolved).replaceAll(path.sep, '/'));
+}
+
+function linkFor(fromFile, targetPath, label) {
+  const href = hrefBetween(fromFile, targetPath);
+  if (!href) return escapeHtml(label ?? targetPath ?? '');
+  return '<a href="' + escapeAttribute(href) + '">' + escapeHtml(label ?? targetPath) + '</a>';
+}
+
+function readSource(artifact) {
+  const fullPath = path.resolve(root, artifact.source ?? '');
+  if ((!fullPath.startsWith(root + path.sep) && fullPath !== root) || !fs.existsSync(fullPath) || !fs.statSync(fullPath).isFile()) return '';
+  return fs.readFileSync(fullPath, 'utf8');
+}
+
+function hashSource(artifact) {
+  const fullPath = path.resolve(root, artifact.source ?? '');
+  if ((!fullPath.startsWith(root + path.sep) && fullPath !== root) || !fs.existsSync(fullPath) || !fs.statSync(fullPath).isFile()) return '';
+  return crypto.createHash('sha256').update(fs.readFileSync(fullPath)).digest('hex');
+}
+
+function sourceGeneratedAt(artifact) {
+  const match = readSource(artifact).match(/^freshness:\s*\r?\n(?:\s+.+\r?\n)*?\s+generatedAt:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/m);
+  return match ? match[1] : '';
+}
+
+function firstParagraph(markdown) {
+  const withoutFrontmatter = String(markdown || '').replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
+  const withoutFences = withoutFrontmatter.replace(/```[\s\S]*?```/g, '');
+  for (const line of withoutFences.split(/\r?\n/).map((item) => item.trim())) {
+    if (line && !line.startsWith('#') && !line.startsWith('|') && !line.startsWith('- ') && !line.match(/^\d+\./)) return line;
+  }
+  return '';
+}
+
+function sourceTitle(markdown) {
+  const withoutFrontmatter = String(markdown || '').replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
+  const match = withoutFrontmatter.match(/^#\s+(.+)$/m);
+  return match ? match[1].trim() : '';
+}
+
+function headings(markdown) {
+  return String(markdown || '')
+    .split(/\r?\n/)
+    .map((line) => line.match(/^(#{2,3})\s+(.+)$/))
+    .filter(Boolean)
+    .map((match) => ({ level: match[1].length, text: match[2].trim() }))
+    .slice(0, 8);
+}
+
+function familyFor(artifact) {
+  if (families.has(artifact.family)) return artifact.family;
+  const source = String(artifact.source ?? '').replaceAll('\\', '/');
+  const match = source.match(/docs\/artifacts\/source\/([^/]+)\//);
+  if (match && families.has(match[1])) return match[1];
+  if (['research-synthesis', 'claim-evidence-matrix'].includes(artifact.type)) return 'research';
+  if (['product-brief', 'opportunity-brief', 'planning-artifact'].includes(artifact.type)) return 'product';
+  if (['business-case', 'stakeholder-map'].includes(artifact.type)) return 'business';
+  if (['data-dictionary', 'metric-definition', 'lineage-map'].includes(artifact.type)) return 'data';
+  if (['high-fidelity-prototype', 'interaction-state-board', 'journey-map', 'visual-review'].includes(artifact.type)) return 'ux';
+  return 'review';
+}
+
+function defaultReviewSurface(artifact) {
+  const family = familyFor(artifact);
+  if (families.has(family)) return 'generated/review/' + family + '/' + safeName(artifact.id) + '.html';
+  return 'generated/review/' + safeName(artifact.id) + '.html';
+}
+
+function isModelArtifact(artifact) {
+  return artifact?.type === 'model-view' || artifact?.type === 'model-diff' || typeof artifact?.modelKind === 'string';
+}
+
+function isManagedArtifact(artifact) {
+  if (!artifact || isModelArtifact(artifact)) return false;
+  if (artifact.renderer === rendererName) return true;
+  return artifact.reviewRequired === true && !artifact.reviewSurface;
+}
+
+function resolveReviewSurface(artifact) {
+  const outPath = path.resolve(root, artifact.reviewSurface ?? '');
+  if (!isInside(reviewRoot, outPath) || path.extname(outPath).toLowerCase() !== '.html') {
+    throw new Error('artifact ' + (artifact.id ?? '<unknown>') + ' reviewSurface must be an HTML file under ' + repoPath(reviewRoot));
+  }
+  return outPath;
+}
+
+function listItems(values, emptyText, currentFile) {
+  if (!Array.isArray(values) || values.length === 0) return '<p class="muted">' + escapeHtml(emptyText) + '</p>';
+  return '<ul>' + values.map((value) => {
+    const text = typeof value === 'string' ? value : JSON.stringify(value);
+    if (currentFile && typeof value === 'string') return '<li>' + linkFor(currentFile, value, value) + '</li>';
+    return '<li>' + escapeHtml(text) + '</li>';
+  }).join('') + '</ul>';
+}
+
+function sourceStats(source) {
+  const lines = String(source || '').split(/\r?\n/).filter((line) => line.trim() !== '').length;
+  const sectionCount = headings(source).filter((heading) => heading.level === 2).length;
+  const tableCount = (String(source || '').match(/\n\|.+\|\r?\n/g) ?? []).length;
+  return { lines, sectionCount, tableCount };
+}
+
+function htmlPage(title, body) {
+  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="' + escapeAttribute(requiredCsp) + '">\n<title>' + escapeHtml(title) + '</title>\n<style>\n:root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;--bg:#eef2f6;--panel:#fff;--text:#1f2937;--muted:#5b6472;--line:#d8dee8;--navy:#172033;--teal:#0f766e;--blue:#2457c5;--amber:#a15c07;--green:#16794b;--red:#b42318;--violet:#6546a3}*{box-sizing:border-box}body{margin:0;color:var(--text);background:var(--bg)}a{color:#174ea6}header{background:var(--navy);color:#fff;padding:28px;border-bottom:6px solid var(--teal)}header h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:0}header p{max-width:1040px;margin:0;color:#dce6f1}main{max-width:1240px;margin:0 auto;padding:18px}h2,h3{margin:0 0 10px;line-height:1.2;letter-spacing:0}p{margin:0 0 12px}.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{border:1px solid var(--line);border-top:5px solid var(--teal);border-radius:8px;padding:12px;background:#fff;min-height:104px}.metric strong{display:block;font-size:28px;line-height:1;margin-bottom:6px}.metric span{color:var(--muted);font-size:13px}.blue{border-top-color:var(--blue)}.amber{border-top-color:var(--amber)}.green{border-top-color:var(--green)}.violet{border-top-color:var(--violet)}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:650}.tab-panel{display:none;margin-top:14px}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4){display:block}.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.step{border:1px solid var(--line);border-radius:8px;background:#f9fbfd;padding:12px;min-height:96px}.step strong{display:block;margin-bottom:5px}.step span,.muted{color:var(--muted)}.bar-row{display:grid;grid-template-columns:172px minmax(0,1fr) 52px;gap:10px;align-items:center;margin:10px 0}.bar-track{height:18px;background:#e8edf4;border-radius:999px;overflow:hidden}.bar{display:block;height:100%;border-radius:999px;background:var(--teal)}.w100{width:100%}.w80{width:80%}.w60{width:60%}.w40{width:40%}.w20{width:20%}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid var(--line);text-align:left;vertical-align:top;padding:9px}th{background:#f7f9fc}pre{white-space:pre-wrap;overflow:auto;background:#101828;color:#e5edf7;padding:14px;border-radius:8px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#eef2f6;border:1px solid #dae2ec;border-radius:4px;padding:1px 4px}ul,ol{margin:8px 0 0 20px;padding:0}li{margin:4px 0}.callout{border-left:5px solid var(--teal);background:#effaf8;padding:12px 14px;border-radius:7px;margin:12px 0}svg.chart{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff}@media(max-width:920px){.grid,.metrics{grid-template-columns:1fr}main{padding:12px}.bar-row{grid-template-columns:1fr}}\n</style>\n</head>\n<body>\n' + body + '\n</body>\n</html>\n';
+}
+
+function renderArtifact(artifact, outPath) {
+  const source = readSource(artifact);
+  const summary = artifact.summary || artifact.purpose || firstParagraph(source) || 'Source-backed human review artifact.';
+  const family = familyFor(artifact);
+  const stats = sourceStats(source);
+  const title = artifact.title || sourceTitle(source) || artifact.id;
+  const sectionHeads = headings(source);
+  const evidenceCount = Array.isArray(artifact.evidenceLinks) ? artifact.evidenceLinks.length : 0;
+  const updateCount = Array.isArray(artifact.updateTriggers) ? artifact.updateTriggers.length : 0;
+  const body = '<header><h1>' + escapeHtml(title) + '</h1><p>' + escapeHtml(summary) + '</p></header><main>' +
+    '<section class="grid"><div class="panel"><h2>Review Verdict</h2><p>' + escapeHtml(summary) + '</p><div class="callout"><strong>Source first:</strong> edit ' + linkFor(outPath, artifact.source, artifact.source) + ' before regenerating this review surface.</div></div>' +
+    '<div class="metrics"><div class="metric green"><strong>' + escapeHtml(artifact.status || 'draft') + '</strong><span>Status</span></div><div class="metric blue"><strong>' + evidenceCount + '</strong><span>Evidence links</span></div><div class="metric amber"><strong>' + stats.sectionCount + '</strong><span>Major sections</span></div><div class="metric violet"><strong>' + escapeHtml(family) + '</strong><span>Artifact family</span></div></div></section>' +
+    '<section class="panel"><h2>Infographic Snapshot</h2><div class="bar-row"><span>Evidence coverage</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, evidenceCount * 20)) + '"></span></span><strong>' + evidenceCount + '</strong></div><div class="bar-row"><span>Source depth</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, stats.sectionCount * 20)) + '"></span></span><strong>' + stats.sectionCount + '</strong></div><div class="bar-row"><span>Update triggers</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, updateCount * 20)) + '"></span></span><strong>' + updateCount + '</strong></div></section>' +
+    '<section class="panel"><h2>Source-To-Review Flow</h2><div class="flow"><div class="step"><strong>Canonical Source</strong><span>' + escapeHtml(artifact.source || '') + '</span></div><div class="step"><strong>Generated HTML</strong><span>' + escapeHtml(artifact.reviewSurface || '') + '</span></div><div class="step"><strong>Evidence</strong><span>' + evidenceCount + ' linked item(s)</span></div><div class="step"><strong>Freshness</strong><span>' + escapeHtml(artifact.generatedAt || artifact.freshness?.generatedAt || 'not-recorded') + '</span></div></div></section>' +
+    '<section class="panel tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-evidence" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-metadata" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-evidence">Evidence</label><label for="tab-source">Source</label><label for="tab-metadata">Metadata</label></div><div class="tab-panels">' +
+    '<div class="tab-panel"><h2>Review Sections</h2>' + (sectionHeads.length === 0 ? '<p class="muted">No headings found in source.</p>' : '<ol>' + sectionHeads.map((heading) => '<li>' + escapeHtml(heading.text) + '</li>').join('') + '</ol>') + '</div>' +
+    '<div class="tab-panel"><h2>Evidence</h2>' + listItems(artifact.evidenceLinks, 'No evidence links are listed yet.', outPath) + '</div>' +
+    '<div class="tab-panel"><h2>Canonical Source</h2><p>' + linkFor(outPath, artifact.source, artifact.source || 'source') + '</p><pre>' + escapeHtml(source || 'Source not found or not readable.') + '</pre></div>' +
+    '<div class="tab-panel"><h2>Metadata</h2><table><tbody><tr><th>ID</th><td>' + escapeHtml(artifact.id) + '</td></tr><tr><th>Type</th><td>' + escapeHtml(artifact.type) + '</td></tr><tr><th>Owner</th><td>' + escapeHtml(artifact.owner) + '</td></tr><tr><th>Renderer</th><td>' + escapeHtml(artifact.renderer || rendererName) + '</td></tr><tr><th>Source hash</th><td>' + escapeHtml(artifact.sourceHash || '') + '</td></tr></tbody></table></div>' +
+    '</div></section></main>';
+  return htmlPage(String(title || 'Artifact Review'), body);
+}
+
+function renderIndex(artifacts, outPath, hasModelArtifacts) {
+  const rows = artifacts.map((artifact) => '<tr><td>' + escapeHtml(artifact.id) + '</td><td>' + escapeHtml(artifact.type) + '</td><td>' + escapeHtml(artifact.status) + '</td><td>' + linkFor(outPath, artifact.source, artifact.source) + '</td><td>' + linkFor(outPath, artifact.reviewSurface, artifact.reviewSurface) + '</td></tr>').join('\n');
+  const modelLink = hasModelArtifacts ? '<section class="panel"><h2>Model Reviews</h2><p>' + linkFor(outPath, 'generated/review/models/index.html', 'Open the generated model review index') + '</p></section>' : '';
+  return htmlPage('Artifact Review Index', '<header><h1>Artifact Review Index</h1><p>Static infographic review surfaces generated from canonical source artifacts.</p></header><main>' + modelLink + '<section class="panel"><table><thead><tr><th>ID</th><th>Type</th><th>Status</th><th>Source</th><th>HTML Review</th></tr></thead><tbody>' + rows + '</tbody></table></section></main>');
+}
+
+if (!fs.existsSync(manifestPath)) {
+  console.error('Missing artifact manifest: ' + repoPath(manifestPath));
+  process.exit(1);
+}
+
+fs.mkdirSync(reviewRoot, { recursive: true });
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+const artifacts = Array.isArray(manifest.artifacts) ? manifest.artifacts.filter(isManagedArtifact) : [];
+const hasModelArtifacts = Array.isArray(manifest.artifacts) && manifest.artifacts.some(isModelArtifact);
+const expectedFiles = new Map();
+const generationDate = new Date().toISOString().slice(0, 10);
+
+for (const artifact of artifacts) {
+  artifact.reviewSurface = artifact.reviewSurface || defaultReviewSurface(artifact);
+  artifact.renderer = rendererName;
+  artifact.sourceHash = hashSource(artifact) || artifact.sourceHash;
+  artifact.generatedAt = checkOnly ? (artifact.generatedAt || artifact.freshness?.generatedAt || generationDate) : (sourceGeneratedAt(artifact) || generationDate);
+  artifact.freshness = { ...(artifact.freshness ?? {}), generatedAt: artifact.generatedAt, sourceFirst: true };
+  const outPath = resolveReviewSurface(artifact);
+  expectedFiles.set(outPath, renderArtifact(artifact, outPath));
+}
+
+if (artifacts.length > 0 || hasModelArtifacts) {
+  const indexPath = path.join(reviewRoot, 'index.html');
+  expectedFiles.set(indexPath, renderIndex(artifacts, indexPath, hasModelArtifacts));
+}
+
+if (checkOnly) {
+  const failures = [];
+  for (const [filePath, expected] of expectedFiles) {
+    if (!fs.existsSync(filePath)) {
+      failures.push('missing generated artifact review: ' + repoPath(filePath));
+      continue;
+    }
+    if (fs.readFileSync(filePath, 'utf8') !== expected) failures.push('stale generated artifact review: ' + repoPath(filePath));
+  }
+  const currentManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  if (JSON.stringify(currentManifest, null, 2) + '\n' !== JSON.stringify(manifest, null, 2) + '\n') failures.push('manifest artifact review metadata is stale; run node scripts/generate-artifact-review.mjs');
+  if (failures.length > 0) {
+    console.error('Artifact review drift check failed:');
+    for (const failure of failures) console.error('- ' + failure);
+    process.exit(1);
+  }
+  console.log('Artifact review drift check passed');
+} else {
+  for (const [filePath, html] of expectedFiles) {
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, html);
+  }
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+  console.log('Generated ' + artifacts.length + ' artifact review surface(s) in ' + repoPath(reviewRoot));
+}

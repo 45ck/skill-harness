@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -14,6 +15,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type dependencyConfig struct {
@@ -38,6 +40,56 @@ type selection struct {
 	All   bool
 	Agent []string
 	Repo  []string
+}
+
+type agentStackConfig struct {
+	Version        int                            `json:"version"`
+	Baseline       agentStackBaseline             `json:"baseline"`
+	Profile        string                         `json:"profile"`
+	EnabledAgents  []string                       `json:"enabledAgents,omitempty"`
+	DisabledAgents []string                       `json:"disabledAgents,omitempty"`
+	EnabledPacks   []string                       `json:"enabledPacks,omitempty"`
+	DisabledPacks  []string                       `json:"disabledPacks,omitempty"`
+	Agents         map[string]agentStackAgentRule `json:"agents,omitempty"`
+	RepoLocalPacks []string                       `json:"repoLocalPacks,omitempty"`
+	Policies       map[string]string              `json:"policies,omitempty"`
+}
+
+type agentStackBaseline struct {
+	Source  string `json:"source"`
+	Channel string `json:"channel"`
+	Pin     string `json:"pin,omitempty"`
+}
+
+type agentStackAgentRule struct {
+	AddSkills     []string          `json:"addSkills,omitempty"`
+	RemoveSkills  []string          `json:"removeSkills,omitempty"`
+	ReplaceSkills map[string]string `json:"replaceSkills,omitempty"`
+}
+
+type agentStackResolution struct {
+	Version         int                            `json:"version"`
+	Profile         string                         `json:"profile"`
+	State           string                         `json:"state"`
+	Baseline        agentStackBaseline             `json:"baseline"`
+	EffectiveAgents []string                       `json:"effectiveAgents"`
+	EffectivePacks  []string                       `json:"effectivePacks"`
+	RepoLocalPacks  []string                       `json:"repoLocalPacks,omitempty"`
+	AgentSkills     map[string][]string            `json:"agentSkills"`
+	OptOuts         agentStackOptOuts              `json:"optOuts"`
+	Overlays        map[string]agentStackAgentRule `json:"overlays,omitempty"`
+	Diagnostics     []agentStackDiagnostic         `json:"diagnostics,omitempty"`
+}
+
+type agentStackOptOuts struct {
+	DisabledAgents []string `json:"disabledAgents,omitempty"`
+	DisabledPacks  []string `json:"disabledPacks,omitempty"`
+}
+
+type agentStackDiagnostic struct {
+	Severity string `json:"severity"`
+	Code     string `json:"code"`
+	Message  string `json:"message"`
 }
 
 type projectScope string
@@ -155,6 +207,99 @@ const (
 	beadsSystem   beadsInstallMode = "system"
 )
 
+const (
+	repoSurfaceGenerated      = "generated"
+	repoSurfaceManagedSection = "managed-section"
+	repoSurfaceOverlay        = "overlay"
+	repoSurfaceOwned          = "owned"
+	repoSurfaceIgnored        = "ignored"
+)
+
+type repoBaselineManifest struct {
+	Version  int                     `json:"version"`
+	Baseline repoBaselineSource      `json:"baseline"`
+	Profile  string                  `json:"profile"`
+	Surfaces map[string]surfaceOwner `json:"surfaces,omitempty"`
+	Agents   repoSelectionConfig     `json:"agents,omitempty"`
+	Packs    repoSelectionConfig     `json:"packs,omitempty"`
+	Policies repoPolicyConfig        `json:"policies,omitempty"`
+}
+
+type repoBaselineSource struct {
+	Source  string `json:"source"`
+	Channel string `json:"channel"`
+	Pin     string `json:"pin,omitempty"`
+}
+
+type surfaceOwner struct {
+	Mode string `json:"mode"`
+}
+
+type repoSelectionConfig struct {
+	Enabled  []string `json:"enabled,omitempty"`
+	Disabled []string `json:"disabled,omitempty"`
+}
+
+type repoPolicyConfig struct {
+	Beads           string `json:"beads,omitempty"`
+	Closeout        string `json:"closeout,omitempty"`
+	GlobalWrites    string `json:"globalWrites,omitempty"`
+	PackageInstalls string `json:"packageInstalls,omitempty"`
+	HookChanges     string `json:"hookChanges,omitempty"`
+}
+
+type repoAuditReport struct {
+	Version         int                 `json:"version"`
+	State           string              `json:"state"`
+	ProjectDir      string              `json:"projectDir"`
+	ManifestPath    string              `json:"manifestPath,omitempty"`
+	LockPath        string              `json:"lockPath,omitempty"`
+	ReportPath      string              `json:"reportPath,omitempty"`
+	Profile         string              `json:"profile"`
+	Baseline        repoBaselineSource  `json:"baseline"`
+	Surfaces        []repoSurfaceReport `json:"surfaces"`
+	LocalSkills     map[string][]string `json:"localSkills,omitempty"`
+	LocalAgents     map[string][]string `json:"localAgents,omitempty"`
+	EffectiveAgents []string            `json:"effectiveAgents"`
+	EffectivePacks  []string            `json:"effectivePacks"`
+	Findings        []repoFinding       `json:"findings"`
+	Suggestions     []string            `json:"suggestions"`
+	Policies        repoPolicyConfig    `json:"policies,omitempty"`
+}
+
+type repoSurfaceReport struct {
+	Path   string `json:"path"`
+	Mode   string `json:"mode"`
+	Status string `json:"status"`
+	Kind   string `json:"kind,omitempty"`
+	Count  int    `json:"count,omitempty"`
+}
+
+type repoFinding struct {
+	Severity string `json:"severity"`
+	Code     string `json:"code"`
+	Message  string `json:"message"`
+	Path     string `json:"path,omitempty"`
+}
+
+type repoBaselineLock struct {
+	Version         int                `json:"version"`
+	Baseline        repoBaselineSource `json:"baseline"`
+	Profile         string             `json:"profile"`
+	ResolvedAt      string             `json:"resolvedAt"`
+	EffectiveAgents []string           `json:"effectiveAgents"`
+	EffectivePacks  []string           `json:"effectivePacks"`
+	Surfaces        []repoSurfaceLock  `json:"surfaces"`
+	Findings        []repoFinding      `json:"findings,omitempty"`
+}
+
+type repoSurfaceLock struct {
+	Path        string `json:"path"`
+	Mode        string `json:"mode"`
+	Status      string `json:"status"`
+	ContentHash string `json:"contentHash,omitempty"`
+}
+
 func main() {
 	root, err := findRepoRoot()
 	exitOnErr(err)
@@ -170,10 +315,20 @@ func main() {
 	switch os.Args[1] {
 	case "list":
 		runList(root, deps, loadouts, os.Args[2:])
+	case "resolve":
+		runResolve(root, deps, loadouts, os.Args[2:])
+	case "audit-project":
+		runAuditProject(root, deps, loadouts, os.Args[2:])
+	case "bootstrap":
+		runBootstrap(root, deps, loadouts, os.Args[2:])
+	case "update-project":
+		runUpdateProject(root, deps, loadouts, os.Args[2:])
 	case "install":
 		runInstall(root, deps, loadouts, os.Args[2:])
 	case "setup-project":
 		runSetupProject(root, os.Args[2:])
+	case "repo":
+		runRepo(root, deps, loadouts, os.Args[2:])
 	case "update":
 		runUpdate(root)
 	case "check":
@@ -219,6 +374,124 @@ func runList(root string, deps dependencyConfig, loadouts loadoutConfig, args []
 	}
 }
 
+func runResolve(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	fs := flag.NewFlagSet("resolve", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory.")
+	jsonOutput := fs.Bool("json", false, "Print JSON output.")
+	strict := fs.Bool("strict", false, "Return an error when resolution diagnostics contain errors.")
+	fs.Parse(args)
+
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+	resolution, err := resolveAgentStack(projectDir, deps, loadouts)
+	exitOnErr(err)
+	if *jsonOutput {
+		exitOnErr(writeJSON(os.Stdout, resolution))
+	} else {
+		printAgentStackResolution(resolution)
+	}
+	if *strict && agentStackHasErrors(resolution.Diagnostics) {
+		exitOnErr(errors.New("agent stack resolution has errors"))
+	}
+}
+
+func runAuditProject(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	fs := flag.NewFlagSet("audit-project", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory.")
+	jsonOutput := fs.Bool("json", false, "Print JSON output.")
+	fs.Parse(args)
+
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+	result := auditAgentStackProject(projectDir, deps, loadouts)
+	if *jsonOutput {
+		exitOnErr(writeJSON(os.Stdout, result))
+		return
+	}
+	fmt.Printf("State: %s\n", result.State)
+	for _, reason := range result.Reasons {
+		fmt.Printf("- %s\n", reason)
+	}
+	if len(result.Diagnostics) > 0 {
+		fmt.Println("Diagnostics:")
+		for _, diagnostic := range result.Diagnostics {
+			fmt.Printf("- [%s] %s: %s\n", diagnostic.Severity, diagnostic.Code, diagnostic.Message)
+		}
+	}
+}
+
+func runRepoLock(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	fs := flag.NewFlagSet("repo lock", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory.")
+	jsonOutput := fs.Bool("json", false, "Print JSON output.")
+	fs.Parse(args)
+
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+	report := buildRepoAuditReport(root, deps, loadouts, projectDir)
+	lock := buildRepoBaselineLock(projectDir, report)
+	lockPath := filepath.Join(projectDir, ".skill-harness", "agent-stack.lock.json")
+	exitOnErr(writeJSONFile(lockPath, lock))
+	if *jsonOutput {
+		exitOnErr(writeJSON(os.Stdout, lock))
+		return
+	}
+	fmt.Printf("Wrote %s\n", lockPath)
+}
+
+func runBootstrap(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	fs := flag.NewFlagSet("bootstrap", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory.")
+	agentNative := fs.Bool("agent-native", false, "Scaffold agent-native overlay state.")
+	jsonOutput := fs.Bool("json", false, "Print JSON output.")
+	fs.Parse(args)
+
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+	if !*agentNative {
+		exitOnErr(errors.New("bootstrap currently requires --agent-native"))
+	}
+	exitOnErr(writeDefaultAgentStack(projectDir, false))
+	report := buildRepoAuditReport(root, deps, loadouts, projectDir)
+	if *jsonOutput {
+		exitOnErr(writeJSON(os.Stdout, report))
+		return
+	}
+	fmt.Printf("Agent-native bootstrap scaffolded for %s\n", projectDir)
+	fmt.Printf("State: %s\n", report.State)
+	fmt.Println("Next: run skill-harness resolve --dir . before package installs or global writes.")
+}
+
+func runUpdateProject(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	fs := flag.NewFlagSet("update-project", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory.")
+	jsonOutput := fs.Bool("json", false, "Print JSON output.")
+	writeLock := fs.Bool("write-lock", false, "Write .skill-harness/agent-stack.lock.json after resolution.")
+	fs.Parse(args)
+
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+	report := buildRepoAuditReport(root, deps, loadouts, projectDir)
+	if *writeLock {
+		lock := buildRepoBaselineLock(projectDir, report)
+		lockPath := filepath.Join(projectDir, ".skill-harness", "agent-stack.lock.json")
+		exitOnErr(writeJSONFile(lockPath, lock))
+		report.LockPath = lockPath
+	}
+	if *jsonOutput {
+		exitOnErr(writeJSON(os.Stdout, report))
+		return
+	}
+	fmt.Printf("State: %s\n", report.State)
+	fmt.Printf("Profile: %s\n", report.Profile)
+	for _, finding := range report.Findings {
+		fmt.Printf("- [%s] %s: %s\n", finding.Severity, finding.Code, finding.Message)
+	}
+	if !*writeLock {
+		fmt.Println("Dry run only. Pass --write-lock to refresh .skill-harness/agent-stack.lock.json.")
+	}
+}
+
 func runInstall(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
 	fs := flag.NewFlagSet("install", flag.ExitOnError)
 	all := fs.Bool("all", false, "Install all packs and all agents.")
@@ -227,6 +500,7 @@ func runInstall(root string, deps dependencyConfig, loadouts loadoutConfig, args
 	agentsOnly := fs.Bool("agents-only", false, "Install only agent files without bootstrapping dependency repos.")
 	agentsCSV := fs.String("agents", "", "Comma-separated agent names.")
 	packsCSV := fs.String("packs", "", "Comma-separated dependency repo names.")
+	targetDir := fs.String("dir", "", "Target project directory with .skill-harness/agent-stack.json.")
 	fs.Parse(args)
 
 	if *packsOnly && *agentsOnly {
@@ -242,12 +516,33 @@ func runInstall(root string, deps dependencyConfig, loadouts loadoutConfig, args
 	if *interactive {
 		sel = promptInstallSelection(loadouts, deps)
 	}
+	resolvedFromStack := false
+	stackAgents := []string{}
+	stackRepos := []string{}
+	if *targetDir != "" && !*all && len(sel.Agent) == 0 && len(sel.Repo) == 0 && !*interactive {
+		projectDir, err := filepath.Abs(*targetDir)
+		exitOnErr(err)
+		resolution, err := resolveAgentStack(projectDir, deps, loadouts)
+		exitOnErr(err)
+		exitOnErr(errorOnAgentStackDiagnostics(resolution.Diagnostics))
+		resolvedFromStack = true
+		stackAgents = resolution.EffectiveAgents
+		stackRepos = resolution.EffectivePacks
+	}
 
 	agents := resolveAgents(sel, loadouts)
 	repos := resolveRepos(sel, deps)
+	if resolvedFromStack {
+		agents = stackAgents
+		repos = stackRepos
+	}
 
 	if !*agentsOnly {
-		exitOnErr(runPython(root, "scripts/bootstrap_dependencies.py", bootstrapArgs(sel)...))
+		if resolvedFromStack {
+			exitOnErr(runPython(root, "scripts/bootstrap_dependencies.py", repoArgs(repos)...))
+		} else {
+			exitOnErr(runPython(root, "scripts/bootstrap_dependencies.py", bootstrapArgs(sel)...))
+		}
 	}
 
 	if !*packsOnly {
@@ -338,6 +633,7 @@ func runSetupProject(root string, args []string) {
 	if !*skipClaudeSettings {
 		exitOnErr(allowAgentTeams(projectDir))
 	}
+	exitOnErr(writeDefaultAgentStack(ctx.OperationDir, false))
 
 	proofOptions := projectSetupProofOptions{
 		RequestedArtifactProfile: artifactProfile,
@@ -488,11 +784,21 @@ func runCheck(root string, loadouts loadoutConfig, args []string) {
 	all := fs.Bool("all", false, "Check all agents.")
 	interactive := fs.Bool("interactive", false, "Choose agents interactively.")
 	agentsCSV := fs.String("agents", "", "Comma-separated agent names.")
+	targetDir := fs.String("dir", "", "Target project directory with .skill-harness/agent-stack.json.")
 	fs.Parse(args)
 
 	sel := selection{All: *all, Agent: csvList(*agentsCSV)}
 	if *interactive {
 		sel.Agent = promptAgentList("Check which agents?", sortedKeys(loadouts))
+	}
+	if *targetDir != "" && !*all && len(sel.Agent) == 0 && !*interactive {
+		projectDir, err := filepath.Abs(*targetDir)
+		exitOnErr(err)
+		deps := loadDependencies(root)
+		resolution, err := resolveAgentStack(projectDir, deps, loadouts)
+		exitOnErr(err)
+		exitOnErr(errorOnAgentStackDiagnostics(resolution.Diagnostics))
+		sel.Agent = resolution.EffectiveAgents
 	}
 	agents := resolveAgents(sel, loadouts)
 	exitOnErr(runPython(root, "scripts/check_dependencies.py", agentArgs(agents)...))
@@ -503,11 +809,21 @@ func runRender(root string, loadouts loadoutConfig, args []string) {
 	all := fs.Bool("all", false, "Render all agents.")
 	interactive := fs.Bool("interactive", false, "Choose agents interactively.")
 	agentsCSV := fs.String("agents", "", "Comma-separated agent names.")
+	targetDir := fs.String("dir", "", "Target project directory with .skill-harness/agent-stack.json.")
 	fs.Parse(args)
 
 	sel := selection{All: *all, Agent: csvList(*agentsCSV)}
 	if *interactive {
 		sel.Agent = promptAgentList("Render which agents?", sortedKeys(loadouts))
+	}
+	if *targetDir != "" && !*all && len(sel.Agent) == 0 && !*interactive {
+		projectDir, err := filepath.Abs(*targetDir)
+		exitOnErr(err)
+		deps := loadDependencies(root)
+		resolution, err := resolveAgentStack(projectDir, deps, loadouts)
+		exitOnErr(err)
+		exitOnErr(errorOnAgentStackDiagnostics(resolution.Diagnostics))
+		sel.Agent = resolution.EffectiveAgents
 	}
 	agents := resolveAgents(sel, loadouts)
 	exitOnErr(runPython(root, "scripts/render_codex_agents.py", agentArgs(agents)...))
@@ -541,6 +857,769 @@ func runUninstall(root string, loadouts loadoutConfig, args []string) {
 		_ = os.Remove(filepath.Join(home, ".codex", "agents", agent+".toml"))
 	}
 	fmt.Printf("Removed %d agent(s)\n", len(agents))
+}
+
+func runRepo(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	if len(args) == 0 {
+		printRepoUsage()
+		return
+	}
+	switch args[0] {
+	case "init":
+		runRepoInit(root, deps, loadouts, args[1:])
+	case "audit":
+		runRepoAudit(root, deps, loadouts, args[1:])
+	case "drift":
+		runRepoDrift(root, deps, loadouts, args[1:])
+	case "update":
+		runRepoUpdate(root, deps, loadouts, args[1:])
+	case "trim":
+		runRepoTrim(root, deps, loadouts, args[1:])
+	case "sync":
+		runRepoSync(root, deps, loadouts, args[1:])
+	case "help", "-h", "--help":
+		printRepoUsage()
+	default:
+		exitOnErr(fmt.Errorf("unknown repo command: %s", args[0]))
+	}
+}
+
+func runRepoInit(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	fs := flag.NewFlagSet("repo init", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory.")
+	profile := fs.String("profile", "team", "Baseline profile: minimal, team, or agent-native.")
+	force := fs.Bool("force", false, "Overwrite an existing baseline manifest.")
+	jsonOutput := fs.Bool("json", false, "Print JSON output.")
+	fs.Parse(args)
+
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+	if err := validateRepoProfile(*profile); err != nil {
+		exitOnErr(err)
+	}
+	manifestPath := repoManifestPath(projectDir)
+	if fileExists(manifestPath) && !*force {
+		exitOnErr(fmt.Errorf("%s already exists; use --force to replace it", manifestPath))
+	}
+	manifest := defaultRepoBaselineManifest(*profile, projectDir)
+	exitOnErr(validateRepoManifest(manifest, deps, loadouts))
+	exitOnErr(writeJSONFile(manifestPath, manifest))
+	report := buildRepoAuditReport(root, deps, loadouts, projectDir)
+	if *jsonOutput {
+		exitOnErr(writeJSON(os.Stdout, report))
+		return
+	}
+	fmt.Printf("Wrote %s\n", manifestPath)
+	printRepoReport(report)
+}
+
+func runRepoAudit(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	fs := flag.NewFlagSet("repo audit", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory.")
+	jsonOutput := fs.Bool("json", false, "Print JSON output.")
+	fs.Parse(args)
+
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+	report := buildRepoAuditReport(root, deps, loadouts, projectDir)
+	if *jsonOutput {
+		exitOnErr(writeJSON(os.Stdout, report))
+		return
+	}
+	printRepoReport(report)
+}
+
+func runRepoDrift(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	fs := flag.NewFlagSet("repo drift", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory.")
+	jsonOutput := fs.Bool("json", false, "Print JSON output.")
+	fs.Parse(args)
+
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+	report := buildRepoAuditReport(root, deps, loadouts, projectDir)
+	if *jsonOutput {
+		exitOnErr(writeJSON(os.Stdout, report))
+	} else {
+		printFindings(report.Findings)
+	}
+	if repoHasBlockingFindings(report.Findings) {
+		exitOnErr(errors.New("repo drift found warnings or errors"))
+	}
+}
+
+func runRepoUpdate(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	fs := flag.NewFlagSet("repo update", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory.")
+	checkOnly := fs.Bool("check", false, "Check available baseline changes without writing project surfaces.")
+	jsonOutput := fs.Bool("json", false, "Print JSON output.")
+	fs.Parse(args)
+
+	if !*checkOnly {
+		exitOnErr(errors.New("repo update currently requires --check; use repo sync to refresh lock/report files"))
+	}
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+	report := buildRepoAuditReport(root, deps, loadouts, projectDir)
+	if *jsonOutput {
+		exitOnErr(writeJSON(os.Stdout, report))
+		return
+	}
+	printSuggestions(report.Suggestions)
+}
+
+func runRepoTrim(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	fs := flag.NewFlagSet("repo trim", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory.")
+	dryRun := fs.Bool("dry-run", false, "Show cost-reduction candidates without changing the repo.")
+	jsonOutput := fs.Bool("json", false, "Print JSON output.")
+	fs.Parse(args)
+
+	if !*dryRun {
+		exitOnErr(errors.New("repo trim currently requires --dry-run"))
+	}
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+	report := buildRepoAuditReport(root, deps, loadouts, projectDir)
+	if *jsonOutput {
+		exitOnErr(writeJSON(os.Stdout, report))
+		return
+	}
+	printSuggestions(report.Suggestions)
+}
+
+func runRepoSync(root string, deps dependencyConfig, loadouts loadoutConfig, args []string) {
+	fs := flag.NewFlagSet("repo sync", flag.ExitOnError)
+	targetDir := fs.String("dir", ".", "Target project directory.")
+	jsonOutput := fs.Bool("json", false, "Print JSON output.")
+	fs.Parse(args)
+
+	projectDir, err := filepath.Abs(*targetDir)
+	exitOnErr(err)
+	if !fileExists(repoManifestPath(projectDir)) {
+		exitOnErr(fmt.Errorf("missing %s; run repo init first", repoManifestPath(projectDir)))
+	}
+	report := buildRepoAuditReport(root, deps, loadouts, projectDir)
+	lock := buildRepoBaselineLock(projectDir, report)
+	exitOnErr(writeJSONFile(repoLockPath(projectDir), lock))
+	exitOnErr(writeJSONFile(repoUpdateReportPath(projectDir), report))
+	if *jsonOutput {
+		exitOnErr(writeJSON(os.Stdout, report))
+		return
+	}
+	fmt.Printf("Wrote %s\n", repoLockPath(projectDir))
+	fmt.Printf("Wrote %s\n", repoUpdateReportPath(projectDir))
+	printRepoReport(report)
+}
+
+func buildRepoAuditReport(root string, deps dependencyConfig, loadouts loadoutConfig, projectDir string) repoAuditReport {
+	manifest, manifestExists, manifestErr := readRepoBaselineManifest(projectDir)
+	findings := []repoFinding{}
+	if manifestErr != nil {
+		findings = append(findings, repoFinding{
+			Severity: "error",
+			Code:     "manifest-invalid",
+			Message:  manifestErr.Error(),
+			Path:     repoManifestPath(projectDir),
+		})
+		manifest = inferredRepoManifest(projectDir)
+	} else if !manifestExists {
+		manifest = inferredRepoManifest(projectDir)
+		findings = append(findings, repoFinding{
+			Severity: "info",
+			Code:     "manifest-missing",
+			Message:  "repo is not pinned to a skill-harness baseline manifest",
+			Path:     repoManifestPath(projectDir),
+		})
+	}
+	if err := validateRepoManifest(manifest, deps, loadouts); err != nil {
+		findings = append(findings, repoFinding{
+			Severity: "error",
+			Code:     "manifest-validation",
+			Message:  err.Error(),
+			Path:     repoManifestPath(projectDir),
+		})
+	}
+	surfaces := buildRepoSurfaceReports(projectDir, manifest)
+	for _, finding := range repoSurfaceFindings(surfaces) {
+		findings = append(findings, finding)
+	}
+	localSkills := discoverLocalSkills(projectDir)
+	localAgents := discoverLocalAgents(projectDir)
+	if !manifestExists && len(localSkills) > 0 {
+		findings = append(findings, repoFinding{
+			Severity: "info",
+			Code:     "local-skills-unmanaged",
+			Message:  "repo-local skills were found; repo init will classify them as overlays rather than replacing them",
+		})
+	}
+	effectiveAgents := resolveRepoEffectiveAgents(manifest, loadouts)
+	effectivePacks := resolveRepoEffectivePacks(manifest, effectiveAgents, deps)
+	report := repoAuditReport{
+		Version:         1,
+		State:           repoState(manifestExists, surfaces),
+		ProjectDir:      projectDir,
+		ManifestPath:    repoPathIfExists(repoManifestPath(projectDir)),
+		LockPath:        repoPathIfExists(repoLockPath(projectDir)),
+		ReportPath:      repoPathIfExists(repoUpdateReportPath(projectDir)),
+		Profile:         manifest.Profile,
+		Baseline:        manifest.Baseline,
+		Surfaces:        surfaces,
+		LocalSkills:     localSkills,
+		LocalAgents:     localAgents,
+		EffectiveAgents: effectiveAgents,
+		EffectivePacks:  effectivePacks,
+		Findings:        findings,
+		Suggestions:     repoSuggestions(root, projectDir, manifest, surfaces, effectiveAgents, effectivePacks),
+		Policies:        manifest.Policies,
+	}
+	return report
+}
+
+func defaultRepoBaselineManifest(profile, projectDir string) repoBaselineManifest {
+	manifest := repoBaselineManifest{
+		Version: 1,
+		Baseline: repoBaselineSource{
+			Source:  "skill-harness",
+			Channel: "default",
+			Pin:     currentGitRevision(),
+		},
+		Profile: profile,
+		Surfaces: map[string]surfaceOwner{
+			"AGENTS.md":                              {Mode: repoSurfaceManagedSection},
+			"CLAUDE.md":                              {Mode: repoSurfaceManagedSection},
+			"AGENT_INSTRUCTIONS.md":                  {Mode: repoSurfaceManagedSection},
+			"llms.txt":                               {Mode: repoSurfaceGenerated},
+			".skill-harness/agent-stack.json":        {Mode: repoSurfaceOverlay},
+			".skill-harness/setup-proof.json":        {Mode: repoSurfaceGenerated},
+			".agent-docs":                            {Mode: repoSurfaceGenerated},
+			".beads":                                 {Mode: repoSurfaceOwned},
+			"scripts/beads":                          {Mode: repoSurfaceGenerated},
+			".claude/agents":                         {Mode: repoSurfaceGenerated},
+			".codex/agents":                          {Mode: repoSurfaceGenerated},
+			".claude/skills":                         {Mode: repoSurfaceOverlay},
+			".codex/skills":                          {Mode: repoSurfaceOverlay},
+			".github/skills":                         {Mode: repoSurfaceOverlay},
+			"packs":                                  {Mode: repoSurfaceOverlay},
+			"docs/artifacts/source/models":           {Mode: repoSurfaceOverlay},
+			"docs/artifacts/artifacts.manifest.json": {Mode: repoSurfaceManagedSection},
+			"generated/review":                       {Mode: repoSurfaceGenerated},
+		},
+		Agents: repoSelectionConfig{
+			Enabled: repoProfileAgents(profile, nil),
+		},
+		Policies: repoPolicyConfig{
+			Beads:           "preserve",
+			Closeout:        "repo-owned",
+			GlobalWrites:    "ask",
+			PackageInstalls: "ask",
+			HookChanges:     "ask",
+		},
+	}
+	for path, owner := range manifest.Surfaces {
+		if !pathExists(filepath.Join(projectDir, filepath.FromSlash(path))) && owner.Mode == repoSurfaceOverlay {
+			manifest.Surfaces[path] = surfaceOwner{Mode: repoSurfaceIgnored}
+		}
+	}
+	return manifest
+}
+
+func inferredRepoManifest(projectDir string) repoBaselineManifest {
+	manifest := defaultRepoBaselineManifest("unmanaged", projectDir)
+	manifest.Agents.Enabled = nil
+	for path, owner := range manifest.Surfaces {
+		if !pathExists(filepath.Join(projectDir, filepath.FromSlash(path))) {
+			delete(manifest.Surfaces, path)
+			continue
+		}
+		if owner.Mode == repoSurfaceGenerated || owner.Mode == repoSurfaceManagedSection {
+			manifest.Surfaces[path] = surfaceOwner{Mode: repoSurfaceOwned}
+		}
+	}
+	return manifest
+}
+
+func readRepoBaselineManifest(projectDir string) (repoBaselineManifest, bool, error) {
+	path := repoManifestPath(projectDir)
+	data, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return repoBaselineManifest{}, false, nil
+	}
+	if err != nil {
+		return repoBaselineManifest{}, false, err
+	}
+	var manifest repoBaselineManifest
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		return repoBaselineManifest{}, true, err
+	}
+	if manifest.Version == 0 {
+		manifest.Version = 1
+	}
+	if manifest.Profile == "" {
+		manifest.Profile = "team"
+	}
+	if manifest.Baseline.Source == "" {
+		manifest.Baseline.Source = "skill-harness"
+	}
+	if manifest.Baseline.Channel == "" {
+		manifest.Baseline.Channel = "default"
+	}
+	if manifest.Surfaces == nil {
+		manifest.Surfaces = map[string]surfaceOwner{}
+	}
+	return manifest, true, nil
+}
+
+func validateRepoManifest(manifest repoBaselineManifest, deps dependencyConfig, loadouts loadoutConfig) error {
+	if manifest.Version != 1 {
+		return fmt.Errorf("unsupported baseline manifest version %d", manifest.Version)
+	}
+	for path, owner := range manifest.Surfaces {
+		if strings.TrimSpace(path) == "" {
+			return errors.New("surface path cannot be empty")
+		}
+		if strings.Contains(filepath.Clean(filepath.FromSlash(path)), "..") {
+			return fmt.Errorf("surface path %q must stay inside the project", path)
+		}
+		if !validRepoSurfaceMode(owner.Mode) {
+			return fmt.Errorf("surface %q has unknown mode %q", path, owner.Mode)
+		}
+	}
+	for _, agent := range manifest.Agents.Enabled {
+		if _, ok := loadouts[agent]; !ok {
+			return fmt.Errorf("enabled agent %q is not in loadouts.json", agent)
+		}
+	}
+	for _, agent := range manifest.Agents.Disabled {
+		if _, ok := loadouts[agent]; !ok {
+			return fmt.Errorf("disabled agent %q is not in loadouts.json", agent)
+		}
+	}
+	for _, pack := range append([]string{}, manifest.Packs.Enabled...) {
+		if _, ok := deps.Repos[pack]; !ok {
+			return fmt.Errorf("enabled pack %q is not in dependencies.json", pack)
+		}
+	}
+	for _, pack := range manifest.Packs.Disabled {
+		if _, ok := deps.Repos[pack]; !ok {
+			return fmt.Errorf("disabled pack %q is not in dependencies.json", pack)
+		}
+	}
+	return nil
+}
+
+func buildRepoSurfaceReports(projectDir string, manifest repoBaselineManifest) []repoSurfaceReport {
+	paths := knownRepoSurfacePaths()
+	for path := range manifest.Surfaces {
+		if !stringSliceContains(paths, path) {
+			paths = append(paths, path)
+		}
+	}
+	sort.Strings(paths)
+	reports := []repoSurfaceReport{}
+	for _, path := range paths {
+		owner, ok := manifest.Surfaces[path]
+		if !ok {
+			continue
+		}
+		if owner.Mode == "" {
+			owner.Mode = repoSurfaceOwned
+		}
+		reports = append(reports, describeRepoSurface(projectDir, path, owner.Mode))
+	}
+	return reports
+}
+
+func describeRepoSurface(projectDir, relPath, mode string) repoSurfaceReport {
+	path := filepath.Join(projectDir, filepath.FromSlash(relPath))
+	report := repoSurfaceReport{Path: relPath, Mode: mode, Status: "missing"}
+	info, err := os.Stat(path)
+	if err != nil {
+		return report
+	}
+	report.Status = "present"
+	if info.IsDir() {
+		report.Kind = "dir"
+		report.Count = countImmediateChildren(path)
+	} else {
+		report.Kind = "file"
+		report.Count = 1
+	}
+	return report
+}
+
+func repoSurfaceFindings(surfaces []repoSurfaceReport) []repoFinding {
+	findings := []repoFinding{}
+	for _, surface := range surfaces {
+		if surface.Status == "missing" && surface.Mode != repoSurfaceIgnored {
+			findings = append(findings, repoFinding{
+				Severity: "warning",
+				Code:     "surface-missing",
+				Message:  fmt.Sprintf("%s is declared as %s but is missing", surface.Path, surface.Mode),
+				Path:     surface.Path,
+			})
+		}
+	}
+	return findings
+}
+
+func resolveRepoEffectiveAgents(manifest repoBaselineManifest, loadouts loadoutConfig) []string {
+	agents := manifest.Agents.Enabled
+	if len(agents) == 0 {
+		agents = repoProfileAgents(manifest.Profile, loadouts)
+	}
+	disabled := toSet(manifest.Agents.Disabled)
+	out := []string{}
+	for _, agent := range agents {
+		if disabled[agent] {
+			continue
+		}
+		if _, ok := loadouts[agent]; ok {
+			out = append(out, agent)
+		}
+	}
+	return unique(out)
+}
+
+func resolveRepoEffectivePacks(manifest repoBaselineManifest, agents []string, deps dependencyConfig) []string {
+	packs := []string{}
+	for _, agent := range agents {
+		packs = append(packs, deps.Agents[agent].Repos...)
+	}
+	packs = append(packs, manifest.Packs.Enabled...)
+	disabled := toSet(manifest.Packs.Disabled)
+	out := []string{}
+	for _, pack := range packs {
+		if disabled[pack] {
+			continue
+		}
+		if _, ok := deps.Repos[pack]; ok {
+			out = append(out, pack)
+		}
+	}
+	return unique(out)
+}
+
+func repoProfileAgents(profile string, loadouts loadoutConfig) []string {
+	var candidates []string
+	switch profile {
+	case "minimal":
+		candidates = []string{"delivery-manager", "quality-reviewer"}
+	case "agent-native":
+		candidates = []string{"requirements-analyst", "software-architect", "delivery-manager", "quality-reviewer", "workflow-engineer"}
+	case "team", "unmanaged", "":
+		candidates = []string{"requirements-analyst", "software-architect", "delivery-manager", "quality-reviewer"}
+	default:
+		candidates = []string{"requirements-analyst", "software-architect", "delivery-manager", "quality-reviewer"}
+	}
+	if loadouts == nil {
+		return candidates
+	}
+	out := []string{}
+	for _, agent := range candidates {
+		if _, ok := loadouts[agent]; ok {
+			out = append(out, agent)
+		}
+	}
+	return out
+}
+
+func validateRepoProfile(profile string) error {
+	switch profile {
+	case "minimal", "team", "agent-native":
+		return nil
+	default:
+		return fmt.Errorf("unknown repo profile %q", profile)
+	}
+}
+
+func repoSuggestions(root, projectDir string, manifest repoBaselineManifest, surfaces []repoSurfaceReport, agents, packs []string) []string {
+	suggestions := []string{}
+	if current := currentGitRevision(); current != "" && manifest.Baseline.Pin != "" && current != manifest.Baseline.Pin {
+		suggestions = append(suggestions, fmt.Sprintf("baseline pin differs from current skill-harness revision: %s -> %s", manifest.Baseline.Pin, current))
+	}
+	if len(agents) > 4 {
+		suggestions = append(suggestions, "consider disabling unused agents in .skill-harness/baseline.manifest.json to reduce context and install cost")
+	}
+	if len(packs) > 0 {
+		suggestions = append(suggestions, fmt.Sprintf("effective pack set has %d pack(s); repo trim --dry-run can identify packs to opt out of after workflow review", len(packs)))
+	}
+	for _, surface := range surfaces {
+		if surface.Mode == repoSurfaceOverlay && surface.Status == "present" {
+			suggestions = append(suggestions, fmt.Sprintf("preserve %s as a repo-local overlay during baseline updates", surface.Path))
+		}
+	}
+	if remote := gitRemoteURL(root); remote != "" {
+		suggestions = append(suggestions, fmt.Sprintf("baseline source can be reviewed from %s", remote))
+	}
+	return unique(suggestions)
+}
+
+func repoState(manifestExists bool, surfaces []repoSurfaceReport) string {
+	if manifestExists {
+		return "managed"
+	}
+	for _, surface := range surfaces {
+		if surface.Status == "present" {
+			return "unmanaged"
+		}
+	}
+	return "empty"
+}
+
+func discoverLocalSkills(projectDir string) map[string][]string {
+	roots := []string{".claude/skills", ".codex/skills", ".github/skills", "agent/workspace/skills"}
+	result := map[string][]string{}
+	for _, root := range roots {
+		path := filepath.Join(projectDir, filepath.FromSlash(root))
+		names := listImmediateDirs(path)
+		names = append(names, listStemFiles(path, ".md")...)
+		if len(names) > 0 {
+			result[root] = unique(names)
+		}
+	}
+	if len(result) == 0 {
+		return nil
+	}
+	return result
+}
+
+func discoverLocalAgents(projectDir string) map[string][]string {
+	roots := map[string]string{
+		".claude/agents": ".md",
+		".codex/agents":  ".toml",
+	}
+	result := map[string][]string{}
+	for root, suffix := range roots {
+		names := listStemFiles(filepath.Join(projectDir, filepath.FromSlash(root)), suffix)
+		if len(names) > 0 {
+			result[root] = unique(names)
+		}
+	}
+	if len(result) == 0 {
+		return nil
+	}
+	return result
+}
+
+func buildRepoBaselineLock(projectDir string, report repoAuditReport) repoBaselineLock {
+	surfaces := []repoSurfaceLock{}
+	for _, surface := range report.Surfaces {
+		lock := repoSurfaceLock{
+			Path:   surface.Path,
+			Mode:   surface.Mode,
+			Status: surface.Status,
+		}
+		if surface.Status == "present" && surface.Kind == "file" {
+			lock.ContentHash = hashRepoSurface(filepath.Join(projectDir, filepath.FromSlash(surface.Path)))
+		}
+		surfaces = append(surfaces, lock)
+	}
+	return repoBaselineLock{
+		Version:         1,
+		Baseline:        report.Baseline,
+		Profile:         report.Profile,
+		ResolvedAt:      time.Now().UTC().Format(time.RFC3339),
+		EffectiveAgents: report.EffectiveAgents,
+		EffectivePacks:  report.EffectivePacks,
+		Surfaces:        surfaces,
+		Findings:        report.Findings,
+	}
+}
+
+func hashRepoSurface(path string) string {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	sum := sha256.Sum256(data)
+	return fmt.Sprintf("sha256:%x", sum)
+}
+
+func writeJSONFile(path string, value any) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	return writeJSON(file, value)
+}
+
+func printRepoReport(report repoAuditReport) {
+	fmt.Printf("State: %s\n", report.State)
+	fmt.Printf("Profile: %s\n", report.Profile)
+	fmt.Printf("Effective agents: %d\n", len(report.EffectiveAgents))
+	fmt.Printf("Effective packs: %d\n", len(report.EffectivePacks))
+	if len(report.Surfaces) > 0 {
+		fmt.Println("Surfaces:")
+		for _, surface := range report.Surfaces {
+			fmt.Printf("- %s [%s] %s\n", surface.Path, surface.Mode, surface.Status)
+		}
+	}
+	printFindings(report.Findings)
+	if len(report.Suggestions) > 0 {
+		printSuggestions(report.Suggestions)
+	}
+}
+
+func printFindings(findings []repoFinding) {
+	if len(findings) == 0 {
+		fmt.Println("Findings: none")
+		return
+	}
+	fmt.Println("Findings:")
+	for _, finding := range findings {
+		if finding.Path != "" {
+			fmt.Printf("- [%s] %s: %s (%s)\n", finding.Severity, finding.Code, finding.Message, finding.Path)
+		} else {
+			fmt.Printf("- [%s] %s: %s\n", finding.Severity, finding.Code, finding.Message)
+		}
+	}
+}
+
+func printSuggestions(suggestions []string) {
+	if len(suggestions) == 0 {
+		fmt.Println("Suggestions: none")
+		return
+	}
+	fmt.Println("Suggestions:")
+	for _, suggestion := range suggestions {
+		fmt.Printf("- %s\n", suggestion)
+	}
+}
+
+func repoHasBlockingFindings(findings []repoFinding) bool {
+	for _, finding := range findings {
+		if finding.Severity == "error" || finding.Severity == "warning" {
+			return true
+		}
+	}
+	return false
+}
+
+func knownRepoSurfacePaths() []string {
+	return []string{
+		".agent-docs",
+		".beads",
+		".claude/agents",
+		".claude/skills",
+		".codex/agents",
+		".codex/skills",
+		".github/skills",
+		".skill-harness/agent-stack.json",
+		".skill-harness/setup-proof.json",
+		"AGENT_INSTRUCTIONS.md",
+		"AGENTS.md",
+		"CLAUDE.md",
+		"docs/artifacts/artifacts.manifest.json",
+		"docs/artifacts/source/models",
+		"generated/review",
+		"llms.txt",
+		"packs",
+		"scripts/beads",
+	}
+}
+
+func validRepoSurfaceMode(mode string) bool {
+	switch mode {
+	case repoSurfaceGenerated, repoSurfaceManagedSection, repoSurfaceOverlay, repoSurfaceOwned, repoSurfaceIgnored:
+		return true
+	default:
+		return false
+	}
+}
+
+func repoManifestPath(projectDir string) string {
+	return filepath.Join(projectDir, ".skill-harness", "baseline.manifest.json")
+}
+
+func repoLockPath(projectDir string) string {
+	return filepath.Join(projectDir, ".skill-harness", "baseline.lock.json")
+}
+
+func repoUpdateReportPath(projectDir string) string {
+	return filepath.Join(projectDir, ".skill-harness", "update-report.json")
+}
+
+func repoPathIfExists(path string) string {
+	if pathExists(path) {
+		return path
+	}
+	return ""
+}
+
+func pathExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+func countImmediateChildren(path string) int {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return 0
+	}
+	return len(entries)
+}
+
+func listImmediateDirs(path string) []string {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return nil
+	}
+	out := []string{}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			out = append(out, entry.Name())
+		}
+	}
+	return unique(out)
+}
+
+func listStemFiles(path, suffix string) []string {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return nil
+	}
+	out := []string{}
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), suffix) {
+			continue
+		}
+		out = append(out, strings.TrimSuffix(entry.Name(), suffix))
+	}
+	return unique(out)
+}
+
+func gitRemoteURL(root string) string {
+	command := exec.Command("git", "config", "--get", "remote.origin.url")
+	command.Dir = root
+	output, err := command.Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(output))
+}
+
+func currentGitRevision() string {
+	command := exec.Command("git", "rev-parse", "--short=12", "HEAD")
+	output, err := command.Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(output))
+}
+
+func printRepoUsage() {
+	fmt.Println("skill-harness repo")
+	fmt.Println("  init   --dir <project> [--profile minimal|team|agent-native]")
+	fmt.Println("  audit  --dir <project> [--json]")
+	fmt.Println("  drift  --dir <project> [--json]")
+	fmt.Println("  update --dir <project> --check [--json]")
+	fmt.Println("  trim   --dir <project> --dry-run [--json]")
+	fmt.Println("  sync   --dir <project> [--json]")
 }
 
 func promptInstallSelection(loadouts loadoutConfig, deps dependencyConfig) selection {
@@ -624,6 +1703,17 @@ func bootstrapArgs(sel selection) []string {
 	return args
 }
 
+func repoArgs(repos []string) []string {
+	if len(repos) == 0 {
+		return []string{"--all"}
+	}
+	args := []string{}
+	for _, repo := range repos {
+		args = append(args, "--repo", repo)
+	}
+	return args
+}
+
 func agentArgs(agents []string) []string {
 	if len(agents) == 0 {
 		return []string{"--all"}
@@ -665,6 +1755,455 @@ func resolveRepos(sel selection, deps dependencyConfig) []string {
 		}
 	}
 	return unique(repos)
+}
+
+func resolveAgentStack(projectDir string, deps dependencyConfig, loadouts loadoutConfig) (agentStackResolution, error) {
+	stack, exists, err := readAgentStack(projectDir)
+	if err != nil {
+		return agentStackResolution{}, err
+	}
+	if !exists {
+		stack = defaultAgentStackConfig()
+	}
+	normalizeAgentStack(&stack)
+
+	diagnostics := []agentStackDiagnostic{}
+	agents := resolveAgentStackAgents(stack, loadouts, &diagnostics)
+	agentSkills := map[string][]string{}
+	skillCatalog := knownSkills(loadouts)
+
+	for _, agent := range agents {
+		base := append([]string(nil), loadouts[agent].Skills...)
+		rule := stack.Agents[agent]
+		skills := applyAgentStackSkillRule(agent, base, rule, skillCatalog, len(stack.RepoLocalPacks) > 0, &diagnostics)
+		agentSkills[agent] = skills
+	}
+
+	packs := resolveAgentStackPacks(stack, agents, deps, &diagnostics)
+	for _, pack := range stack.DisabledPacks {
+		for _, agent := range agents {
+			if stringSliceContains(deps.Agents[agent].Repos, pack) {
+				diagnostics = append(diagnostics, agentStackDiagnostic{
+					Severity: "warning",
+					Code:     "disabled-pack-required-by-agent",
+					Message:  fmt.Sprintf("agent %s normally depends on disabled pack %s", agent, pack),
+				})
+			}
+		}
+	}
+
+	state := "clean"
+	if len(stack.Agents) > 0 || len(stack.DisabledAgents) > 0 || len(stack.DisabledPacks) > 0 || len(stack.EnabledPacks) > 0 || len(stack.RepoLocalPacks) > 0 {
+		state = "overridden"
+	}
+	if agentStackHasErrors(diagnostics) {
+		state = "conflicted"
+	}
+
+	return agentStackResolution{
+		Version:         1,
+		Profile:         stack.Profile,
+		State:           state,
+		Baseline:        stack.Baseline,
+		EffectiveAgents: agents,
+		EffectivePacks:  packs,
+		RepoLocalPacks:  unique(stack.RepoLocalPacks),
+		AgentSkills:     agentSkills,
+		OptOuts: agentStackOptOuts{
+			DisabledAgents: unique(stack.DisabledAgents),
+			DisabledPacks:  unique(stack.DisabledPacks),
+		},
+		Overlays:    stack.Agents,
+		Diagnostics: diagnostics,
+	}, nil
+}
+
+func readAgentStack(projectDir string) (agentStackConfig, bool, error) {
+	path := filepath.Join(projectDir, ".skill-harness", "agent-stack.json")
+	data, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return agentStackConfig{}, false, nil
+	}
+	if err != nil {
+		return agentStackConfig{}, false, err
+	}
+	var stack agentStackConfig
+	if err := json.Unmarshal(data, &stack); err != nil {
+		return agentStackConfig{}, true, fmt.Errorf("invalid agent stack config %s: %w", path, err)
+	}
+	return stack, true, nil
+}
+
+func normalizeAgentStack(stack *agentStackConfig) {
+	if stack.Version == 0 {
+		stack.Version = 1
+	}
+	if stack.Profile == "" {
+		stack.Profile = "default"
+	}
+	if stack.Baseline.Source == "" {
+		stack.Baseline.Source = "https://github.com/45ck/skill-harness.git"
+	}
+	if stack.Baseline.Channel == "" {
+		stack.Baseline.Channel = "stable"
+	}
+	if stack.Agents == nil {
+		stack.Agents = map[string]agentStackAgentRule{}
+	}
+	if stack.Policies == nil {
+		stack.Policies = defaultAgentStackPolicies()
+	}
+	stack.EnabledAgents = unique(stack.EnabledAgents)
+	stack.DisabledAgents = unique(stack.DisabledAgents)
+	stack.EnabledPacks = unique(stack.EnabledPacks)
+	stack.DisabledPacks = unique(stack.DisabledPacks)
+	stack.RepoLocalPacks = unique(stack.RepoLocalPacks)
+}
+
+func defaultAgentStackConfig() agentStackConfig {
+	return agentStackConfig{
+		Version: 1,
+		Baseline: agentStackBaseline{
+			Source:  "https://github.com/45ck/skill-harness.git",
+			Channel: "stable",
+		},
+		Profile:  "default",
+		Policies: defaultAgentStackPolicies(),
+	}
+}
+
+func defaultAgentStackPolicies() map[string]string {
+	return map[string]string{
+		"packageInstalls":   "ask",
+		"globalWrites":      "ask",
+		"hookChanges":       "ask",
+		"ciChanges":         "ask",
+		"guardrailOverride": "ask",
+	}
+}
+
+func writeDefaultAgentStack(projectDir string, force bool) error {
+	path := filepath.Join(projectDir, ".skill-harness", "agent-stack.json")
+	if !force && fileExists(path) {
+		return nil
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	data, err := json.MarshalIndent(defaultAgentStackConfig(), "", "  ")
+	if err != nil {
+		return err
+	}
+	data = append(data, '\n')
+	return os.WriteFile(path, data, 0o644)
+}
+
+func resolveAgentStackAgents(stack agentStackConfig, loadouts loadoutConfig, diagnostics *[]agentStackDiagnostic) []string {
+	agents := []string{}
+	if len(stack.EnabledAgents) > 0 {
+		agents = append(agents, stack.EnabledAgents...)
+	} else {
+		agents = defaultProfileAgents(stack.Profile, loadouts)
+	}
+	disabled := toSet(stack.DisabledAgents)
+	filtered := []string{}
+	for _, agent := range unique(agents) {
+		if _, ok := loadouts[agent]; !ok {
+			*diagnostics = append(*diagnostics, agentStackDiagnostic{
+				Severity: "error",
+				Code:     "unknown-agent",
+				Message:  fmt.Sprintf("agent %s is not defined in the baseline loadouts", agent),
+			})
+			continue
+		}
+		if disabled[agent] {
+			continue
+		}
+		filtered = append(filtered, agent)
+	}
+	for _, agent := range stack.DisabledAgents {
+		if _, ok := loadouts[agent]; !ok {
+			*diagnostics = append(*diagnostics, agentStackDiagnostic{
+				Severity: "error",
+				Code:     "unknown-disabled-agent",
+				Message:  fmt.Sprintf("disabled agent %s is not defined in the baseline loadouts", agent),
+			})
+		}
+	}
+	for agent := range stack.Agents {
+		if _, ok := loadouts[agent]; !ok {
+			*diagnostics = append(*diagnostics, agentStackDiagnostic{
+				Severity: "error",
+				Code:     "unknown-agent-overlay",
+				Message:  fmt.Sprintf("overlay references unknown agent %s", agent),
+			})
+		}
+	}
+	return unique(filtered)
+}
+
+func defaultProfileAgents(profile string, loadouts loadoutConfig) []string {
+	switch profile {
+	case "minimal":
+		return []string{"requirements-analyst", "software-architect", "workflow-engineer"}
+	case "security":
+		return []string{"security-reviewer", "pentest-reviewer", "software-architect", "workflow-engineer"}
+	default:
+		return sortedKeys(loadouts)
+	}
+}
+
+func resolveAgentStackPacks(stack agentStackConfig, agents []string, deps dependencyConfig, diagnostics *[]agentStackDiagnostic) []string {
+	packs := []string{}
+	for _, pack := range stack.EnabledPacks {
+		if _, ok := deps.Repos[pack]; !ok {
+			*diagnostics = append(*diagnostics, agentStackDiagnostic{
+				Severity: "error",
+				Code:     "unknown-enabled-pack",
+				Message:  fmt.Sprintf("enabled pack %s is not defined in the baseline dependencies", pack),
+			})
+			continue
+		}
+		packs = append(packs, pack)
+	}
+	for _, agent := range agents {
+		cfg, ok := deps.Agents[agent]
+		if !ok {
+			*diagnostics = append(*diagnostics, agentStackDiagnostic{
+				Severity: "error",
+				Code:     "missing-agent-dependencies",
+				Message:  fmt.Sprintf("agent %s has no dependency mapping", agent),
+			})
+			continue
+		}
+		packs = append(packs, cfg.Repos...)
+	}
+	disabled := toSet(stack.DisabledPacks)
+	filtered := []string{}
+	for _, pack := range unique(packs) {
+		if _, ok := deps.Repos[pack]; !ok {
+			*diagnostics = append(*diagnostics, agentStackDiagnostic{
+				Severity: "error",
+				Code:     "unknown-pack",
+				Message:  fmt.Sprintf("pack %s is not defined in the baseline dependencies", pack),
+			})
+			continue
+		}
+		if disabled[pack] {
+			continue
+		}
+		filtered = append(filtered, pack)
+	}
+	for _, pack := range stack.DisabledPacks {
+		if _, ok := deps.Repos[pack]; !ok {
+			*diagnostics = append(*diagnostics, agentStackDiagnostic{
+				Severity: "error",
+				Code:     "unknown-disabled-pack",
+				Message:  fmt.Sprintf("disabled pack %s is not defined in the baseline dependencies", pack),
+			})
+		}
+	}
+	return unique(filtered)
+}
+
+func applyAgentStackSkillRule(agent string, base []string, rule agentStackAgentRule, skillCatalog map[string]bool, hasRepoLocalPacks bool, diagnostics *[]agentStackDiagnostic) []string {
+	remove := toSet(rule.RemoveSkills)
+	out := []string{}
+	for _, skill := range base {
+		if remove[skill] {
+			continue
+		}
+		if replacement, ok := rule.ReplaceSkills[skill]; ok {
+			out = append(out, replacement)
+			continue
+		}
+		out = append(out, skill)
+	}
+	for _, skill := range rule.RemoveSkills {
+		if !stringSliceContains(base, skill) {
+			*diagnostics = append(*diagnostics, agentStackDiagnostic{
+				Severity: "warning",
+				Code:     "remove-skill-not-in-agent",
+				Message:  fmt.Sprintf("agent %s does not include removed skill %s in the baseline", agent, skill),
+			})
+		}
+	}
+	for oldSkill, newSkill := range rule.ReplaceSkills {
+		if !stringSliceContains(base, oldSkill) {
+			*diagnostics = append(*diagnostics, agentStackDiagnostic{
+				Severity: "warning",
+				Code:     "replace-skill-not-in-agent",
+				Message:  fmt.Sprintf("agent %s does not include replaced skill %s in the baseline", agent, oldSkill),
+			})
+		}
+		if !skillCatalog[newSkill] && !hasRepoLocalPacks {
+			*diagnostics = append(*diagnostics, agentStackDiagnostic{
+				Severity: "warning",
+				Code:     "unknown-replacement-skill",
+				Message:  fmt.Sprintf("replacement skill %s is not in the baseline skill catalog and no repoLocalPacks are configured", newSkill),
+			})
+		}
+	}
+	for _, skill := range rule.AddSkills {
+		if !skillCatalog[skill] && !hasRepoLocalPacks {
+			*diagnostics = append(*diagnostics, agentStackDiagnostic{
+				Severity: "warning",
+				Code:     "unknown-added-skill",
+				Message:  fmt.Sprintf("added skill %s is not in the baseline skill catalog and no repoLocalPacks are configured", skill),
+			})
+		}
+		out = append(out, skill)
+	}
+	return unique(out)
+}
+
+func knownSkills(loadouts loadoutConfig) map[string]bool {
+	out := map[string]bool{}
+	for _, loadout := range loadouts {
+		for _, skill := range loadout.Skills {
+			out[skill] = true
+		}
+	}
+	return out
+}
+
+func auditAgentStackProject(projectDir string, deps dependencyConfig, loadouts loadoutConfig) agentStackAudit {
+	stackPath := filepath.Join(projectDir, ".skill-harness", "agent-stack.json")
+	lockPath := filepath.Join(projectDir, ".skill-harness", "agent-stack.lock.json")
+	proofPath := filepath.Join(projectDir, ".skill-harness", "setup-proof.json")
+	hasStack := fileExists(stackPath)
+	hasLock := fileExists(lockPath)
+	hasProof := fileExists(proofPath)
+	hasClaudeAgents := dirHasFiles(filepath.Join(projectDir, ".claude", "agents"))
+	hasCodexAgents := dirHasFiles(filepath.Join(projectDir, ".codex", "agents"))
+
+	result := agentStackAudit{
+		State: "unmanaged",
+		Paths: map[string]bool{
+			".skill-harness/agent-stack.json":      hasStack,
+			".skill-harness/agent-stack.lock.json": hasLock,
+			".skill-harness/setup-proof.json":      hasProof,
+			".claude/agents":                       hasClaudeAgents,
+			".codex/agents":                        hasCodexAgents,
+		},
+	}
+	if !hasStack {
+		if hasClaudeAgents || hasCodexAgents {
+			result.State = "generated-only"
+			result.Reasons = append(result.Reasons, "agent files exist but no repo-local agent stack overlay was found")
+		} else {
+			result.Reasons = append(result.Reasons, "no agent stack overlay or generated agent files were found")
+		}
+		return result
+	}
+	resolution, err := resolveAgentStack(projectDir, deps, loadouts)
+	if err != nil {
+		result.State = "conflicted"
+		result.Reasons = append(result.Reasons, err.Error())
+		return result
+	}
+	result.Resolution = &resolution
+	result.Diagnostics = resolution.Diagnostics
+	if agentStackHasErrors(resolution.Diagnostics) {
+		result.State = "conflicted"
+		result.Reasons = append(result.Reasons, "agent stack overlay has resolution errors")
+		return result
+	}
+	result.State = "agent-native"
+	result.Reasons = append(result.Reasons, "repo-local agent stack overlay is present")
+	if !hasLock {
+		result.Reasons = append(result.Reasons, "lockfile is missing; run resolve/update once lockfile support is enabled")
+	}
+	if !hasProof {
+		result.Reasons = append(result.Reasons, "setup proof is missing")
+	}
+	return result
+}
+
+type agentStackAudit struct {
+	State       string                 `json:"state"`
+	Reasons     []string               `json:"reasons"`
+	Paths       map[string]bool        `json:"paths"`
+	Diagnostics []agentStackDiagnostic `json:"diagnostics,omitempty"`
+	Resolution  *agentStackResolution  `json:"resolution,omitempty"`
+}
+
+func printAgentStackResolution(resolution agentStackResolution) {
+	fmt.Printf("Profile: %s\n", resolution.Profile)
+	fmt.Printf("State: %s\n", resolution.State)
+	fmt.Printf("Baseline: %s (%s)\n", resolution.Baseline.Source, resolution.Baseline.Channel)
+	if resolution.Baseline.Pin != "" {
+		fmt.Printf("Pin: %s\n", resolution.Baseline.Pin)
+	}
+	fmt.Println("Effective agents:")
+	for _, agent := range resolution.EffectiveAgents {
+		fmt.Printf("- %s (%d skills)\n", agent, len(resolution.AgentSkills[agent]))
+	}
+	fmt.Println("Effective packs:")
+	for _, pack := range resolution.EffectivePacks {
+		fmt.Printf("- %s\n", pack)
+	}
+	if len(resolution.RepoLocalPacks) > 0 {
+		fmt.Println("Repo-local packs:")
+		for _, pack := range resolution.RepoLocalPacks {
+			fmt.Printf("- %s\n", pack)
+		}
+	}
+	if len(resolution.Diagnostics) > 0 {
+		fmt.Println("Diagnostics:")
+		for _, diagnostic := range resolution.Diagnostics {
+			fmt.Printf("- [%s] %s: %s\n", diagnostic.Severity, diagnostic.Code, diagnostic.Message)
+		}
+	}
+}
+
+func agentStackHasErrors(diagnostics []agentStackDiagnostic) bool {
+	for _, diagnostic := range diagnostics {
+		if diagnostic.Severity == "error" {
+			return true
+		}
+	}
+	return false
+}
+
+func errorOnAgentStackDiagnostics(diagnostics []agentStackDiagnostic) error {
+	if !agentStackHasErrors(diagnostics) {
+		return nil
+	}
+	messages := []string{}
+	for _, diagnostic := range diagnostics {
+		if diagnostic.Severity == "error" {
+			messages = append(messages, diagnostic.Code+": "+diagnostic.Message)
+		}
+	}
+	return errors.New(strings.Join(messages, "; "))
+}
+
+func writeJSON(writer io.Writer, value any) error {
+	encoder := json.NewEncoder(writer)
+	encoder.SetIndent("", "  ")
+	return encoder.Encode(value)
+}
+
+func toSet(values []string) map[string]bool {
+	out := map[string]bool{}
+	for _, value := range values {
+		out[value] = true
+	}
+	return out
+}
+
+func dirHasFiles(path string) bool {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return false
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			return true
+		}
+	}
+	return false
 }
 
 func copyClaudeAgents(root string, agents []string) error {
@@ -1105,6 +2644,10 @@ func buildProjectSetupProof(ctx projectSetupContext, options projectSetupProofOp
 				Status:  "available",
 				Command: string(ctx.PackageManager),
 			},
+			"agentStack": {
+				Status: "scaffolded",
+				Paths:  []string{".skill-harness/agent-stack.json"},
+			},
 			"setupProof": {
 				Status: "written",
 				Paths:  []string{".skill-harness/setup-proof.json"},
@@ -1116,7 +2659,7 @@ func buildProjectSetupProof(ctx projectSetupContext, options projectSetupProofOp
 				Path:   ".skill-harness/setup-proof.json",
 			},
 		},
-		GeneratedPaths: []string{".skill-harness/setup-proof.json"},
+		GeneratedPaths: []string{".skill-harness/agent-stack.json", ".skill-harness/setup-proof.json"},
 		Skipped:        []string{},
 	}
 
@@ -1313,10 +2856,12 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile arti
 		scripts = map[string]any{}
 	}
 	defaultScripts := map[string]string{
-		"artifacts:check":          "node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
+		"artifacts:check":          "node scripts/generate-artifact-review.mjs --check && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
+		"artifacts:generate":       "node scripts/generate-artifact-review.mjs",
 		"artifacts:html:check":     "node scripts/check-artifact-html-policy.mjs",
 		"artifacts:manifest:check": "node scripts/check-artifact-manifest.mjs",
 		"artifacts:open":           "node scripts/open-artifact-review.mjs",
+		"artifacts:review":         "node scripts/generate-artifact-review.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
 	}
 	if agentDocsEnabled {
 		defaultScripts["docs:check"] = "agent-docs check"
@@ -1328,11 +2873,13 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile arti
 		defaultScripts["agent-loop:review"] = "node scripts/check-agent-loop-policy.mjs && node scripts/check-artifact-manifest.mjs"
 	}
 	if mode != modelingModeOff {
-		defaultScripts["artifacts:check"] = "node scripts/check-artifact-manifest.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check && node scripts/check-artifact-html-policy.mjs"
+		defaultScripts["artifacts:check"] = "node scripts/generate-artifact-review.mjs --check && node scripts/check-artifact-manifest.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check && node scripts/check-artifact-html-policy.mjs"
+		defaultScripts["artifacts:generate"] = "node scripts/generate-artifact-review.mjs && node scripts/generate-model-review.mjs"
 		defaultScripts["artifacts:model:generate"] = "node scripts/generate-model-review.mjs"
 		defaultScripts["artifacts:model:check"] = "node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check"
 		defaultScripts["artifacts:model:drift"] = "node scripts/generate-model-review.mjs --check"
-		defaultScripts["artifacts:model:review"] = "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-html-policy.mjs"
+		defaultScripts["artifacts:model:review"] = "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs"
+		defaultScripts["artifacts:review"] = "node scripts/generate-artifact-review.mjs && node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs"
 		defaultScripts["models:generate"] = "node scripts/generate-model-review.mjs"
 		defaultScripts["models:check"] = "node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check"
 		defaultScripts["models:drift"] = "node scripts/generate-model-review.mjs --check"
@@ -1482,6 +3029,7 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 					"allowExternalAssets":   false,
 					"allowNetworkCalls":     false,
 					"requireSemanticHTML":   true,
+					"interactionLanes":      artifactHTMLInteractionLanes(),
 					"requiredCSP":           artifactRequiredCSP(),
 				},
 			},
@@ -1592,6 +3140,12 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	checkerPath := filepath.Join(projectDir, "scripts", "check-artifact-html-policy.mjs")
 	if !fileExists(checkerPath) {
 		if err := os.WriteFile(checkerPath, []byte(developerArtifactPolicyScript()), 0o644); err != nil {
+			return err
+		}
+	}
+	reviewGeneratorPath := filepath.Join(projectDir, "scripts", "generate-artifact-review.mjs")
+	if !fileExists(reviewGeneratorPath) {
+		if err := os.WriteFile(reviewGeneratorPath, []byte(developerArtifactReviewGeneratorScript()), 0o644); err != nil {
 			return err
 		}
 	}
@@ -1959,6 +3513,27 @@ func artifactRequiredCSP() string {
 	return "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 }
 
+func artifactHTMLInteractionLanes() map[string]any {
+	return map[string]any{
+		"default": map[string]any{
+			"name":                  "css-only",
+			"allowInlineJavaScript": false,
+			"allowedPatterns":       []string{"radio tabs", "details summary", "anchor navigation", "inline svg states"},
+			"csp":                   artifactRequiredCSP(),
+		},
+		"reviewed-inline-js": map[string]any{
+			"name":                   "reviewed-inline-js",
+			"allowInlineJavaScript":  false,
+			"requiresManifestFlag":   "htmlInteractionLane: reviewed-inline-js",
+			"requiresHumanReview":    true,
+			"requiresCheckerSupport": true,
+			"requiresCspChange":      true,
+			"blockedApis":            []string{"fetch", "XMLHttpRequest", "WebSocket", "EventSource", "sendBeacon", "serviceWorker", "document.cookie", "localStorage", "sessionStorage"},
+			"status":                 "reserved-not-enabled",
+		},
+	}
+}
+
 func developerArtifactReadme(profile artifactProfile, mode modelingMode) string {
 	effectiveProfile := effectiveArtifactProfile(profile)
 	modelingSection := ""
@@ -1991,6 +3566,7 @@ Use this directory for durable developer artifacts and generated review surfaces
 - Treat HTML as a generated review surface for scanning, comparison, diagrams, dashboards, prototypes, mockups, and desktop app previews.
 - Do not make generated HTML the only durable source for a decision.
 - Record source-backed review surfaces in artifacts.manifest.json so agents and humans can detect stale output.
+- For human-facing discovery, planning, product, business, data, research, UX, and mockup artifacts, set reviewRequired: true in artifacts.manifest.json and generate infographic HTML with node scripts/generate-artifact-review.mjs.
 
 ## Layout
 
@@ -2017,6 +3593,7 @@ Use this directory for durable developer artifacts and generated review surfaces
 - Keep source artifacts agent-readable and diffable. Generated HTML, screenshots, videos, SVGs, PNGs, and comparison pages are review surfaces only.
 - High-fidelity HTML is the default human review surface for UI, customer-facing workflow, product, and mockup reviews. Low-fidelity sketches are scratch only and should not become canonical approval surfaces.
 - Visual review surfaces should show realistic data, states, error paths, assumptions, evidence strength, source links, and freshness metadata.
+- Non-UI human review surfaces should be infographic-style by default: summary metrics, charts or timelines, evidence/freshness panels, review verdicts, and links back to source.
 - Label synthetic user, simulated customer, or agent-generated evidence separately from real user or customer evidence.
 - Use a team of agents when ownership crosses a real boundary: requirements-analyst for product intent, delivery-manager for business constraints, backend-engineer for data shape, research-writer for evidence, ux-researcher for high-fidelity UX review, system-modeler for structural impact, and quality-reviewer for readiness gates.
 - Record every durable generated visual artifact in artifacts.manifest.json with source, reviewSurface, owner, evidenceLinks, status, and freshness.
@@ -2051,7 +3628,8 @@ Use this directory for durable developer artifacts and generated review surfaces
 
 - Self-contained static HTML only by default.
 - No external scripts, external assets, or network calls unless the project explicitly opts in.
-- No inline JavaScript unless the project explicitly opts in and reviews the script.
+- Default interaction is CSS/HTML only: radio tabs, details/summary, anchor navigation, and inline SVG states.
+- Do not use inline JavaScript. The reviewed inline-JS lane is reserved until manifest metadata, CSP/checker support, and human approval requirements are implemented together.
 - Every HTML review artifact must include the required CSP meta tag from .skill-harness/project.json.
 - Use semantic headings, landmarks, meaningful link text, and alt text for embedded images.
 - No secrets, credentials, tokens, private logs, or customer data.
@@ -2062,6 +3640,7 @@ Use this directory for durable developer artifacts and generated review surfaces
 Run this policy check before handing off generated HTML:
 
     node scripts/check-artifact-manifest.mjs
+    node scripts/generate-artifact-review.mjs --check
     node scripts/check-artifact-html-policy.mjs
     node scripts/open-artifact-review.mjs --print
 `, profile, effectiveProfile, modelingSection)
@@ -2487,6 +4066,12 @@ if (!fs.existsSync(manifestPath)) {
       if (artifact.status === 'ready' && reviewPath && !fs.existsSync(reviewPath)) {
         failures.push(label + ' ready review surface does not exist: ' + artifact.reviewSurface);
       }
+    } else if (artifact.status === 'ready' && artifact.reviewRequired === true) {
+      failures.push(label + ' ready artifact with reviewRequired=true needs a generated HTML reviewSurface');
+    }
+
+    if (artifact.status === 'ready' && artifact.reviewRequired === true && artifact.reviewSurface && path.extname(artifact.reviewSurface) !== '.html') {
+      failures.push(label + ' ready artifact with reviewRequired=true must use an HTML reviewSurface');
     }
 
     if (artifact.status === 'ready' && (!Array.isArray(artifact.evidenceLinks) || artifact.evidenceLinks.length === 0)) {
@@ -2502,6 +4087,226 @@ if (failures.length > 0) {
 }
 
 console.log('Artifact manifest policy passed');
+`
+}
+
+func developerArtifactReviewGeneratorScript() string {
+	return `import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const checkOnly = process.argv.slice(2).includes('--check');
+const rendererName = 'skill-harness artifact review generator';
+const config = JSON.parse(fs.readFileSync(path.join(root, '.skill-harness', 'project.json'), 'utf8'));
+const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
+const manifestPath = path.join(root, developerArtifacts.manifest?.path ?? 'docs/artifacts/artifacts.manifest.json');
+const reviewRoot = path.resolve(root, developerArtifacts.reviewSurface?.outDir ?? 'generated/review');
+const requiredCsp = developerArtifacts.htmlPolicy?.requiredCSP ?? "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+const families = new Set(['product', 'business', 'data', 'research', 'ux']);
+
+function repoPath(filePath) {
+  return path.relative(root, filePath).replaceAll(path.sep, '/');
+}
+
+function isInside(parent, child) {
+  const relative = path.relative(parent, child);
+  return relative === '' || (!!relative && !relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+function safeName(value) {
+  return String(value || 'artifact').toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'artifact';
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+}
+
+function escapeAttribute(value) {
+  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;');
+}
+
+function hrefBetween(fromFile, targetPath) {
+  if (typeof targetPath !== 'string' || targetPath.trim() === '') return '';
+  const resolved = path.resolve(root, targetPath);
+  if (!resolved.startsWith(root + path.sep) && resolved !== root) return '';
+  return encodeURI(path.relative(path.dirname(fromFile), resolved).replaceAll(path.sep, '/'));
+}
+
+function linkFor(fromFile, targetPath, label) {
+  const href = hrefBetween(fromFile, targetPath);
+  if (!href) return escapeHtml(label ?? targetPath ?? '');
+  return '<a href="' + escapeAttribute(href) + '">' + escapeHtml(label ?? targetPath) + '</a>';
+}
+
+function readSource(artifact) {
+  const fullPath = path.resolve(root, artifact.source ?? '');
+  if ((!fullPath.startsWith(root + path.sep) && fullPath !== root) || !fs.existsSync(fullPath) || !fs.statSync(fullPath).isFile()) return '';
+  return fs.readFileSync(fullPath, 'utf8');
+}
+
+function hashSource(artifact) {
+  const fullPath = path.resolve(root, artifact.source ?? '');
+  if ((!fullPath.startsWith(root + path.sep) && fullPath !== root) || !fs.existsSync(fullPath) || !fs.statSync(fullPath).isFile()) return '';
+  return crypto.createHash('sha256').update(fs.readFileSync(fullPath)).digest('hex');
+}
+
+function sourceGeneratedAt(artifact) {
+  const match = readSource(artifact).match(/^freshness:\s*\r?\n(?:\s+.+\r?\n)*?\s+generatedAt:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/m);
+  return match ? match[1] : '';
+}
+
+function firstParagraph(markdown) {
+  const withoutFrontmatter = String(markdown || '').replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
+  const fence = String.fromCharCode(96).repeat(3);
+  const withoutFences = withoutFrontmatter.replace(new RegExp(fence + '[\\s\\S]*?' + fence, 'g'), '');
+  for (const line of withoutFences.split(/\r?\n/).map((item) => item.trim())) {
+    if (line && !line.startsWith('#') && !line.startsWith('|') && !line.startsWith('- ') && !line.match(/^\d+\./)) return line;
+  }
+  return '';
+}
+
+function sourceTitle(markdown) {
+  const withoutFrontmatter = String(markdown || '').replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
+  const match = withoutFrontmatter.match(/^#\s+(.+)$/m);
+  return match ? match[1].trim() : '';
+}
+
+function headings(markdown) {
+  return String(markdown || '').split(/\r?\n/).map((line) => line.match(/^(#{2,3})\s+(.+)$/)).filter(Boolean).map((match) => ({ level: match[1].length, text: match[2].trim() })).slice(0, 8);
+}
+
+function familyFor(artifact) {
+  if (families.has(artifact.family)) return artifact.family;
+  const source = String(artifact.source ?? '').replaceAll('\\', '/');
+  const match = source.match(/docs\/artifacts\/source\/([^/]+)\//);
+  if (match && families.has(match[1])) return match[1];
+  if (['research-synthesis', 'claim-evidence-matrix'].includes(artifact.type)) return 'research';
+  if (['product-brief', 'opportunity-brief', 'planning-artifact'].includes(artifact.type)) return 'product';
+  if (['business-case', 'stakeholder-map'].includes(artifact.type)) return 'business';
+  if (['data-dictionary', 'metric-definition', 'lineage-map'].includes(artifact.type)) return 'data';
+  if (['high-fidelity-prototype', 'interaction-state-board', 'journey-map', 'visual-review'].includes(artifact.type)) return 'ux';
+  return 'review';
+}
+
+function defaultReviewSurface(artifact) {
+  const family = familyFor(artifact);
+  if (families.has(family)) return 'generated/review/' + family + '/' + safeName(artifact.id) + '.html';
+  return 'generated/review/' + safeName(artifact.id) + '.html';
+}
+
+function isModelArtifact(artifact) {
+  return artifact?.type === 'model-view' || artifact?.type === 'model-diff' || typeof artifact?.modelKind === 'string';
+}
+
+function isManagedArtifact(artifact) {
+  if (!artifact || isModelArtifact(artifact)) return false;
+  if (artifact.renderer === rendererName) return true;
+  return artifact.reviewRequired === true && !artifact.reviewSurface;
+}
+
+function resolveReviewSurface(artifact) {
+  const outPath = path.resolve(root, artifact.reviewSurface ?? '');
+  if (!isInside(reviewRoot, outPath) || path.extname(outPath).toLowerCase() !== '.html') {
+    throw new Error('artifact ' + (artifact.id ?? '<unknown>') + ' reviewSurface must be an HTML file under ' + repoPath(reviewRoot));
+  }
+  return outPath;
+}
+
+function listItems(values, emptyText, currentFile) {
+  if (!Array.isArray(values) || values.length === 0) return '<p class="muted">' + escapeHtml(emptyText) + '</p>';
+  return '<ul>' + values.map((value) => {
+    const text = typeof value === 'string' ? value : JSON.stringify(value);
+    if (currentFile && typeof value === 'string') return '<li>' + linkFor(currentFile, value, value) + '</li>';
+    return '<li>' + escapeHtml(text) + '</li>';
+  }).join('') + '</ul>';
+}
+
+function sourceStats(source) {
+  const lines = String(source || '').split(/\r?\n/).filter((line) => line.trim() !== '').length;
+  const sectionCount = headings(source).filter((heading) => heading.level === 2).length;
+  const tableCount = (String(source || '').match(/\n\|.+\|\r?\n/g) ?? []).length;
+  return { lines, sectionCount, tableCount };
+}
+
+function widthClass(value) {
+  return 'w' + Math.min(100, Math.max(20, value * 20));
+}
+
+function htmlPage(title, body) {
+  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="' + escapeAttribute(requiredCsp) + '">\n<title>' + escapeHtml(title) + '</title>\n<style>\n:root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;--bg:#eef2f6;--panel:#fff;--text:#1f2937;--muted:#5b6472;--line:#d8dee8;--navy:#172033;--teal:#0f766e;--blue:#2457c5;--amber:#a15c07;--green:#16794b;--violet:#6546a3}*{box-sizing:border-box}body{margin:0;color:var(--text);background:var(--bg)}a{color:#174ea6}header{background:var(--navy);color:#fff;padding:28px;border-bottom:6px solid var(--teal)}header h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:0}header p{max-width:1040px;margin:0;color:#dce6f1}main{max-width:1240px;margin:0 auto;padding:18px}h2,h3{margin:0 0 10px;line-height:1.2;letter-spacing:0}p{margin:0 0 12px}.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{border:1px solid var(--line);border-top:5px solid var(--teal);border-radius:8px;padding:12px;background:#fff;min-height:104px}.metric strong{display:block;font-size:28px;line-height:1;margin-bottom:6px}.metric span{color:var(--muted);font-size:13px}.blue{border-top-color:var(--blue)}.amber{border-top-color:var(--amber)}.green{border-top-color:var(--green)}.violet{border-top-color:var(--violet)}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:650}.tab-panel{display:none;margin-top:14px}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4){display:block}.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.step{border:1px solid var(--line);border-radius:8px;background:#f9fbfd;padding:12px;min-height:96px}.step strong{display:block;margin-bottom:5px}.step span,.muted{color:var(--muted)}.bar-row{display:grid;grid-template-columns:172px minmax(0,1fr) 52px;gap:10px;align-items:center;margin:10px 0}.bar-track{height:18px;background:#e8edf4;border-radius:999px;overflow:hidden}.bar{display:block;height:100%;border-radius:999px;background:var(--teal)}.w100{width:100%}.w80{width:80%}.w60{width:60%}.w40{width:40%}.w20{width:20%}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid var(--line);text-align:left;vertical-align:top;padding:9px}th{background:#f7f9fc}pre{white-space:pre-wrap;overflow:auto;background:#101828;color:#e5edf7;padding:14px;border-radius:8px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#eef2f6;border:1px solid #dae2ec;border-radius:4px;padding:1px 4px}ul,ol{margin:8px 0 0 20px;padding:0}li{margin:4px 0}.callout{border-left:5px solid var(--teal);background:#effaf8;padding:12px 14px;border-radius:7px;margin:12px 0}@media(max-width:920px){.grid,.metrics{grid-template-columns:1fr}main{padding:12px}.bar-row{grid-template-columns:1fr}}\n</style>\n</head>\n<body>\n' + body + '\n</body>\n</html>\n';
+}
+
+function renderArtifact(artifact, outPath) {
+  const source = readSource(artifact);
+  const summary = artifact.summary || artifact.purpose || firstParagraph(source) || 'Source-backed human review artifact.';
+  const family = familyFor(artifact);
+  const stats = sourceStats(source);
+  const title = artifact.title || sourceTitle(source) || artifact.id;
+  const sectionHeads = headings(source);
+  const evidenceCount = Array.isArray(artifact.evidenceLinks) ? artifact.evidenceLinks.length : 0;
+  const updateCount = Array.isArray(artifact.updateTriggers) ? artifact.updateTriggers.length : 0;
+  return htmlPage(String(title || 'Artifact Review'), '<header><h1>' + escapeHtml(title) + '</h1><p>' + escapeHtml(summary) + '</p></header><main><section class="grid"><div class="panel"><h2>Review Verdict</h2><p>' + escapeHtml(summary) + '</p><div class="callout"><strong>Source first:</strong> edit ' + linkFor(outPath, artifact.source, artifact.source) + ' before regenerating this review surface.</div></div><div class="metrics"><div class="metric green"><strong>' + escapeHtml(artifact.status || 'draft') + '</strong><span>Status</span></div><div class="metric blue"><strong>' + evidenceCount + '</strong><span>Evidence links</span></div><div class="metric amber"><strong>' + stats.sectionCount + '</strong><span>Major sections</span></div><div class="metric violet"><strong>' + escapeHtml(family) + '</strong><span>Artifact family</span></div></div></section><section class="panel"><h2>Infographic Snapshot</h2><div class="bar-row"><span>Evidence coverage</span><span class="bar-track"><span class="bar ' + widthClass(evidenceCount) + '"></span></span><strong>' + evidenceCount + '</strong></div><div class="bar-row"><span>Source depth</span><span class="bar-track"><span class="bar ' + widthClass(stats.sectionCount) + '"></span></span><strong>' + stats.sectionCount + '</strong></div><div class="bar-row"><span>Update triggers</span><span class="bar-track"><span class="bar ' + widthClass(updateCount) + '"></span></span><strong>' + updateCount + '</strong></div></section><section class="panel"><h2>Source-To-Review Flow</h2><div class="flow"><div class="step"><strong>Canonical Source</strong><span>' + escapeHtml(artifact.source || '') + '</span></div><div class="step"><strong>Generated HTML</strong><span>' + escapeHtml(artifact.reviewSurface || '') + '</span></div><div class="step"><strong>Evidence</strong><span>' + evidenceCount + ' linked item(s)</span></div><div class="step"><strong>Freshness</strong><span>' + escapeHtml(artifact.generatedAt || artifact.freshness?.generatedAt || 'not-recorded') + '</span></div></div></section><section class="panel tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-evidence" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-metadata" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-evidence">Evidence</label><label for="tab-source">Source</label><label for="tab-metadata">Metadata</label></div><div class="tab-panels"><div class="tab-panel"><h2>Review Sections</h2>' + (sectionHeads.length === 0 ? '<p class="muted">No headings found in source.</p>' : '<ol>' + sectionHeads.map((heading) => '<li>' + escapeHtml(heading.text) + '</li>').join('') + '</ol>') + '</div><div class="tab-panel"><h2>Evidence</h2>' + listItems(artifact.evidenceLinks, 'No evidence links are listed yet.', outPath) + '</div><div class="tab-panel"><h2>Canonical Source</h2><p>' + linkFor(outPath, artifact.source, artifact.source || 'source') + '</p><pre>' + escapeHtml(source || 'Source not found or not readable.') + '</pre></div><div class="tab-panel"><h2>Metadata</h2><table><tbody><tr><th>ID</th><td>' + escapeHtml(artifact.id) + '</td></tr><tr><th>Type</th><td>' + escapeHtml(artifact.type) + '</td></tr><tr><th>Owner</th><td>' + escapeHtml(artifact.owner) + '</td></tr><tr><th>Renderer</th><td>' + escapeHtml(artifact.renderer || rendererName) + '</td></tr><tr><th>Source hash</th><td>' + escapeHtml(artifact.sourceHash || '') + '</td></tr></tbody></table></div></div></section></main>');
+}
+
+function renderIndex(artifacts, outPath, hasModelArtifacts) {
+  const rows = artifacts.map((artifact) => '<tr><td>' + escapeHtml(artifact.id) + '</td><td>' + escapeHtml(artifact.type) + '</td><td>' + escapeHtml(artifact.status) + '</td><td>' + linkFor(outPath, artifact.source, artifact.source) + '</td><td>' + linkFor(outPath, artifact.reviewSurface, artifact.reviewSurface) + '</td></tr>').join('\n');
+  const modelLink = hasModelArtifacts ? '<section class="panel"><h2>Model Reviews</h2><p>' + linkFor(outPath, 'generated/review/models/index.html', 'Open the generated model review index') + '</p></section>' : '';
+  return htmlPage('Artifact Review Index', '<header><h1>Artifact Review Index</h1><p>Static infographic review surfaces generated from canonical source artifacts.</p></header><main>' + modelLink + '<section class="panel"><table><thead><tr><th>ID</th><th>Type</th><th>Status</th><th>Source</th><th>HTML Review</th></tr></thead><tbody>' + rows + '</tbody></table></section></main>');
+}
+
+if (!fs.existsSync(manifestPath)) {
+  console.error('Missing artifact manifest: ' + repoPath(manifestPath));
+  process.exit(1);
+}
+
+fs.mkdirSync(reviewRoot, { recursive: true });
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+const artifacts = Array.isArray(manifest.artifacts) ? manifest.artifacts.filter(isManagedArtifact) : [];
+const hasModelArtifacts = Array.isArray(manifest.artifacts) && manifest.artifacts.some(isModelArtifact);
+const expectedFiles = new Map();
+const generationDate = new Date().toISOString().slice(0, 10);
+
+for (const artifact of artifacts) {
+  artifact.reviewSurface = artifact.reviewSurface || defaultReviewSurface(artifact);
+  artifact.renderer = rendererName;
+  artifact.sourceHash = hashSource(artifact) || artifact.sourceHash;
+  artifact.generatedAt = checkOnly ? (artifact.generatedAt || artifact.freshness?.generatedAt || generationDate) : (sourceGeneratedAt(artifact) || generationDate);
+  artifact.freshness = { ...(artifact.freshness ?? {}), generatedAt: artifact.generatedAt, sourceFirst: true };
+  const outPath = resolveReviewSurface(artifact);
+  expectedFiles.set(outPath, renderArtifact(artifact, outPath));
+}
+
+if (artifacts.length > 0 || hasModelArtifacts) {
+  const indexPath = path.join(reviewRoot, 'index.html');
+  expectedFiles.set(indexPath, renderIndex(artifacts, indexPath, hasModelArtifacts));
+}
+
+if (checkOnly) {
+  const failures = [];
+  for (const [filePath, expected] of expectedFiles) {
+    if (!fs.existsSync(filePath)) {
+      failures.push('missing generated artifact review: ' + repoPath(filePath));
+      continue;
+    }
+    if (fs.readFileSync(filePath, 'utf8') !== expected) failures.push('stale generated artifact review: ' + repoPath(filePath));
+  }
+  const currentManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  if (JSON.stringify(currentManifest, null, 2) + '\n' !== JSON.stringify(manifest, null, 2) + '\n') failures.push('manifest artifact review metadata is stale; run node scripts/generate-artifact-review.mjs');
+  if (failures.length > 0) {
+    console.error('Artifact review drift check failed:');
+    for (const failure of failures) console.error('- ' + failure);
+    process.exit(1);
+  }
+  console.log('Artifact review drift check passed');
+} else {
+  for (const [filePath, html] of expectedFiles) {
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, html);
+  }
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+  console.log('Generated ' + artifacts.length + ' artifact review surface(s) in ' + repoPath(reviewRoot));
+}
 `
 }
 
@@ -2819,18 +4624,24 @@ function firstExisting(paths) {
 }
 
 function discoverTarget() {
-  if (explicitTarget) {
-    const resolved = resolveReviewPath(explicitTarget);
-    if (resolved && fs.existsSync(resolved)) return resolved;
-    throw new Error('review artifact not found or outside repo: ' + explicitTarget);
-  }
-
   const config = readJSON(path.join(root, '.skill-harness', 'project.json')) ?? {};
   const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
   const reviewDir = developerArtifacts.reviewSurface?.outDir ?? 'generated/review';
   const modelReviewDir = developerArtifacts.modeling?.reviewDir ?? developerArtifacts.modelPolicy?.uml?.reviewDir ?? path.join(reviewDir, 'models');
   const manifestPath = path.join(root, developerArtifacts.manifest?.path ?? 'docs/artifacts/artifacts.manifest.json');
   const manifest = readJSON(manifestPath);
+
+  if (explicitTarget) {
+    const resolved = resolveReviewPath(explicitTarget);
+    if (resolved && fs.existsSync(resolved)) return resolved;
+    const artifact = (manifest?.artifacts ?? []).find((item) => item?.id === explicitTarget || item?.modelId === explicitTarget);
+    if (artifact?.reviewSurface) {
+      const reviewPath = resolveReviewPath(artifact.reviewSurface);
+      if (reviewPath && fs.existsSync(reviewPath)) return reviewPath;
+    }
+    throw new Error('review artifact not found by path or artifact id: ' + explicitTarget);
+  }
+
   const manifestTargets = [];
   for (const artifact of Array.isArray(manifest?.artifacts) ? manifest.artifacts : []) {
     if (typeof artifact?.reviewSurface === 'string' && artifact.reviewSurface.endsWith('.html')) {
@@ -2840,8 +4651,8 @@ function discoverTarget() {
   }
 
   const discovered = firstExisting([
-    path.join(root, modelReviewDir, 'index.html'),
     path.join(root, reviewDir, 'index.html'),
+    path.join(root, modelReviewDir, 'index.html'),
     ...manifestTargets,
   ]);
   if (discovered) return discovered;
@@ -3211,6 +5022,11 @@ const blockedApiPatterns = [
   /\bsessionStorage\b/
 ];
 
+const blockedAttributePatterns = [
+  /\son[a-z]+\s*=/i,
+  /\b(?:href|src|action)\s*=\s*["']\s*javascript:/i
+];
+
 const externalReferencePattern = /\b(?:src|href|action)=["'](?:https?:|\/\/)/i;
 
 function walk(dir) {
@@ -3239,6 +5055,9 @@ function checkFile(filePath) {
   }
   for (const pattern of blockedApiPatterns) {
     if (pattern.test(html)) failures.push('blocked browser API: ' + pattern);
+  }
+  for (const pattern of blockedAttributePatterns) {
+    if (pattern.test(html)) failures.push('blocked inline event or javascript URL pattern: ' + pattern);
   }
   if (externalReferencePattern.test(html)) {
     failures.push('external src/href/action reference');
@@ -3528,6 +5347,15 @@ func unique(values []string) []string {
 	return out
 }
 
+func stringSliceContains(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
+}
+
 func sortedKeys[T any](input map[string]T) []string {
 	keys := make([]string, 0, len(input))
 	for key := range input {
@@ -3550,7 +5378,12 @@ func printUsage(loadouts loadoutConfig, deps dependencyConfig) {
 	fmt.Println()
 	fmt.Println("Commands:")
 	fmt.Println("  list [--agents] [--packs]")
-	fmt.Println("  install [--all] [--interactive] [--packs-only] [--agents-only] [--agents=a,b] [--packs=x,y]")
+	fmt.Println("  resolve [--dir path] [--json] [--strict]")
+	fmt.Println("  audit-project [--dir path] [--json]")
+	fmt.Println("  bootstrap --agent-native [--dir path] [--json]")
+	fmt.Println("  update-project [--dir path] [--json] [--write-lock]")
+	fmt.Println("  repo init|audit|drift|update|trim|sync [--dir path] [--json]")
+	fmt.Println("  install [--dir path] [--all] [--interactive] [--packs-only] [--agents-only] [--agents=a,b] [--packs=x,y]")
 	fmt.Println("  setup-project [--dir path] [--scope auto|root|workspace] [--package-manager auto|npm|pnpm|yarn|bun] [--developer-artifacts-profile auto|codex-app|claude-desktop|cli|tui|media|agent-loop|none] [--modeling-mode auto|off|baseline|uml-first] [--enable-modeling] [--skip-modeling] [--install-only] [--skip-noslop] [--skip-agent-docs] [--skip-beads] [--beads-worktrees] [--skip-developer-artifacts] [--skip-claude-settings]")
 	fmt.Println("  beads-worktrees [--dir path] [--force]")
 	fmt.Println("  update")

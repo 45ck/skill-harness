@@ -11,17 +11,7 @@
 </head>
 <body>
 <main>
-<div class="hero"><section><h1>Scaffold Engine Component View</h1><p>The scaffold engine combines Go CLI behavior with repo-local scripts. Go writes target project defaults; scripts check and render repo-local evidence.</p></section><section><h2>Review Focus</h2><div class="meta"><div><strong>Status</strong><br>ready</div><div><strong>Kind</strong><br>component</div><div><strong>Drift</strong><br>aligned</div><div><strong>Owner</strong><br>system-modeler</div></div></section></div><section class="meta"><div><strong>ID</strong><br>sh-component-scaffold-engine</div><div><strong>Status</strong><br>ready</div><div><strong>Model ID</strong><br>sh-component-scaffold-engine</div><div><strong>Kind</strong><br>component</div><div><strong>Method</strong><br>c4</div><div><strong>Notation</strong><br>mermaid</div><div><strong>Source</strong><br>docs/artifacts/source/models/sh-component-scaffold-engine.md</div><div><strong>Owner</strong><br>system-modeler</div></section><div class="tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-visual" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-evidence" name="tabs" type="radio"><input id="tab-diff" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-visual">Visuals</label><label for="tab-source">Source</label><label for="tab-evidence">Evidence</label><label for="tab-diff">Diff</label></div><div class="tab-panels"><section class="tab-panel"><h2>Overview</h2><p>The scaffold engine combines Go CLI behavior with repo-local scripts. Go writes target project defaults; scripts check and render repo-local evidence.</p><div class="meta"><div><strong>Abstraction</strong><br>design</div><div><strong>Review Surface</strong><br><a href="sh-component-scaffold-engine.html">generated/review/models/sh-component-scaffold-engine.html</a></div><div><strong>Implementation Touchpoints</strong><br><a href="../../../cmd/skill-harness/main.go">cmd/skill-harness/main.go</a>, <a href="../../../scripts/suite_graph.py">scripts/suite_graph.py</a>, <a href="../../../scripts/render_suite_docs.py">scripts/render_suite_docs.py</a>, <a href="../../../scripts/check_suite_drift.py">scripts/check_suite_drift.py</a>, <a href="../../../scripts/check-artifact-manifest.mjs">scripts/check-artifact-manifest.mjs</a>, <a href="../../../scripts/check-model-artifact-policy.mjs">scripts/check-model-artifact-policy.mjs</a>, <a href="../../../scripts/generate-model-review.mjs">scripts/generate-model-review.mjs</a></div><div><strong>Doc Touchpoints</strong><br><a href="../../../docs/agent-loadouts.md">docs/agent-loadouts.md</a>, <a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a></div></div></section><section class="tab-panel"><h2>Visuals</h2><div class="diagram-card"><div class="diagram-header"><strong>mermaid component</strong><span class="muted">static preview, source-backed</span></div><div class="diagram-body"><pre>flowchart LR
-  CLI[&quot;cmd/skill-harness&quot;] --&gt; Scaffold[&quot;Developer artifact scaffold&quot;]
-  Scaffold --&gt; ProjectConfig[&quot;.skill-harness/project.json&quot;]
-  Scaffold --&gt; SourceDirs[&quot;docs/artifacts/source/*&quot;]
-  Scaffold --&gt; PackageScripts[&quot;package.json scripts&quot;]
-  Scaffold --&gt; Templates[&quot;artifact templates&quot;]
-  Scaffold --&gt; ReviewDirs[&quot;generated/review/*&quot;]
-  Scaffold --&gt; PolicyScripts[&quot;artifact, visual, and model policy scripts&quot;]
-  PolicyScripts --&gt; Manifest[&quot;docs/artifacts/artifacts.manifest.json&quot;]
-  PolicyScripts --&gt; ReviewHTML[&quot;generated/review/**/*.html&quot;]
-  SuiteScripts[&quot;suite graph scripts&quot;] --&gt; LoadoutDocs[&quot;docs/agent-loadouts.md&quot;]</pre></div></div><h3>Screenshots And Evidence Images</h3><p class="muted">No screenshot or image evidence is listed for this artifact.</p></section><section class="tab-panel"><h2>Canonical Source</h2><p><a href="../../../docs/artifacts/source/models/sh-component-scaffold-engine.md">docs/artifacts/source/models/sh-component-scaffold-engine.md</a></p><pre>---
+<div class="hero"><section><h1>Scaffold Engine Component View</h1><p>The scaffold engine combines Go CLI behavior with repo-local scripts. Go writes target project defaults; scripts check and render repo-local evidence.</p></section><section><h2>Review Focus</h2><div class="meta"><div><strong>Status</strong><br>ready</div><div><strong>Kind</strong><br>component</div><div><strong>Drift</strong><br>aligned</div><div><strong>Owner</strong><br>system-modeler</div></div></section></div><section class="meta"><div><strong>ID</strong><br>sh-component-scaffold-engine</div><div><strong>Status</strong><br>ready</div><div><strong>Model ID</strong><br>sh-component-scaffold-engine</div><div><strong>Kind</strong><br>component</div><div><strong>Method</strong><br>c4</div><div><strong>Notation</strong><br>mermaid</div><div><strong>Source</strong><br>docs/artifacts/source/models/sh-component-scaffold-engine.md</div><div><strong>Owner</strong><br>system-modeler</div></section><div class="tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-visual" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-evidence" name="tabs" type="radio"><input id="tab-diff" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-visual">Visuals</label><label for="tab-source">Source</label><label for="tab-evidence">Evidence</label><label for="tab-diff">Diff</label></div><div class="tab-panels"><section class="tab-panel"><h2>Overview</h2><p>The scaffold engine combines Go CLI behavior with repo-local scripts. Go writes target project defaults; scripts check and render repo-local evidence.</p><div class="meta"><div><strong>Abstraction</strong><br>design</div><div><strong>Review Surface</strong><br><a href="sh-component-scaffold-engine.html">generated/review/models/sh-component-scaffold-engine.html</a></div><div><strong>Implementation Touchpoints</strong><br><a href="../../../cmd/skill-harness/main.go">cmd/skill-harness/main.go</a>, <a href="../../../scripts/suite_graph.py">scripts/suite_graph.py</a>, <a href="../../../scripts/render_suite_docs.py">scripts/render_suite_docs.py</a>, <a href="../../../scripts/check_suite_drift.py">scripts/check_suite_drift.py</a>, <a href="../../../scripts/check-artifact-manifest.mjs">scripts/check-artifact-manifest.mjs</a>, <a href="../../../scripts/check-model-artifact-policy.mjs">scripts/check-model-artifact-policy.mjs</a>, <a href="../../../scripts/generate-artifact-review.mjs">scripts/generate-artifact-review.mjs</a>, <a href="../../../scripts/generate-model-review.mjs">scripts/generate-model-review.mjs</a></div><div><strong>Doc Touchpoints</strong><br><a href="../../../docs/agent-loadouts.md">docs/agent-loadouts.md</a>, <a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a></div></div></section><section class="tab-panel"><h2>Visuals</h2><div class="diagram-card"><div class="diagram-header"><strong>mermaid component</strong><span class="muted">static preview, source-backed</span></div><div class="diagram-body"><svg role="img" aria-label="Static model diagram preview" viewBox="0 0 480 190" xmlns="http://www.w3.org/2000/svg"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0f766e"/></marker></defs><line x1="146" y1="97" x2="179" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><rect x="34" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="90" y="102" text-anchor="middle" font-size="12" fill="#17202a">Resolver</text><rect x="179" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="235" y="102" text-anchor="middle" font-size="12" fill="#17202a">AgentStack</text></svg></div></div><h3>Screenshots And Evidence Images</h3><p class="muted">No screenshot or image evidence is listed for this artifact.</p></section><section class="tab-panel"><h2>Canonical Source</h2><p><a href="../../../docs/artifacts/source/models/sh-component-scaffold-engine.md">docs/artifacts/source/models/sh-component-scaffold-engine.md</a></p><pre>---
 artifactType: model-view
 modelId: sh-component-scaffold-engine
 modelKind: component
@@ -36,6 +26,7 @@ implementationTouchpoints:
   - scripts/check_suite_drift.py
   - scripts/check-artifact-manifest.mjs
   - scripts/check-model-artifact-policy.mjs
+  - scripts/generate-artifact-review.mjs
   - scripts/generate-model-review.mjs
 docTouchpoints:
   - docs/agent-loadouts.md
@@ -47,6 +38,7 @@ evidenceLinks:
 reviewRequired: true
 updateTriggers:
   - scaffold script changes
+  - artifact review generator changes
   - suite graph schema changes
   - agent template rendering changes
 driftVerdict: aligned
@@ -62,14 +54,25 @@ Show the design-level components that collaborate to scaffold and verify suite o
 
 ## Scope
 
-Included components are the CLI command router, dependency/loadout readers, install orchestrator, project setup orchestrator, developer artifact scaffold writer, model policy/review script emitters, Beads worktree wrapper installer, Python helper scripts, agent template sources, target repo filesystem, and external command dependencies.
+Included components are the CLI command router, dependency/loadout readers, agent stack resolver, repo baseline governance auditor, repo lock/report writer, install orchestrator, project setup orchestrator, developer artifact scaffold writer, model policy/review script emitters, Beads worktree wrapper installer, Python helper scripts, agent template sources, target repo filesystem, and external command dependencies.
 
 ## Source Model
 
 ```mermaid
 flowchart LR
   CLI[&quot;cmd/skill-harness&quot;] --&gt; Scaffold[&quot;Developer artifact scaffold&quot;]
+  CLI --&gt; Resolver[&quot;Agent stack resolver&quot;]
+  CLI --&gt; RepoGovernance[&quot;Repo baseline governance&quot;]
   Scaffold --&gt; ProjectConfig[&quot;.skill-harness/project.json&quot;]
+  Scaffold --&gt; AgentStack[&quot;.skill-harness/agent-stack.json&quot;]
+  Resolver --&gt; AgentStack
+  Resolver --&gt; EffectiveState[&quot;effective agents, packs, skills&quot;]
+  EffectiveState --&gt; InstallRender[&quot;install, render, and check --dir&quot;]
+  RepoGovernance --&gt; BaselineManifest[&quot;.skill-harness/baseline.manifest.json&quot;]
+  RepoGovernance --&gt; SurfaceModes[&quot;generated, managed-section, overlay, owned, ignored&quot;]
+  RepoGovernance --&gt; BaselineLock[&quot;.skill-harness/baseline.lock.json&quot;]
+  RepoGovernance --&gt; UpdateReport[&quot;.skill-harness/update-report.json&quot;]
+  RepoGovernance --&gt; StackLock[&quot;.skill-harness/agent-stack.lock.json&quot;]
   Scaffold --&gt; SourceDirs[&quot;docs/artifacts/source/*&quot;]
   Scaffold --&gt; PackageScripts[&quot;package.json scripts&quot;]
   Scaffold --&gt; Templates[&quot;artifact templates&quot;]
@@ -77,12 +80,14 @@ flowchart LR
   Scaffold --&gt; PolicyScripts[&quot;artifact, visual, and model policy scripts&quot;]
   PolicyScripts --&gt; Manifest[&quot;docs/artifacts/artifacts.manifest.json&quot;]
   PolicyScripts --&gt; ReviewHTML[&quot;generated/review/**/*.html&quot;]
+  GenericRenderer[&quot;generic artifact review generator&quot;] --&gt; ReviewHTML
+  ModelRenderer[&quot;model review generator&quot;] --&gt; ReviewHTML
   SuiteScripts[&quot;suite graph scripts&quot;] --&gt; LoadoutDocs[&quot;docs/agent-loadouts.md&quot;]
 ```
 
 ## Responsibility Split
 
-Go owns portable project setup. Node scripts own artifact and HTML checks because target projects commonly already have Node for package scripts. Python scripts own suite graph generation because existing suite maintenance scripts are Python.
+Go owns portable project setup, agent stack resolution, repo baseline governance, repo audit state, and lock/report writing. Repo governance is conservative: it writes only baseline manifest, lock, and update-report files, while classifying project-specific skills, agents, Beads state, and instruction files as overlay or owned unless a repo opts into generated or managed-section treatment. Node scripts own artifact and HTML checks because target projects commonly already have Node for package scripts. Python scripts own suite graph generation because existing suite maintenance scripts are Python.
 
 ## Evidence
 
@@ -90,8 +95,8 @@ Evidence comes from the Go CLI, Node artifact scripts, Python suite scripts, loa
 
 ## Freshness
 
-Update this model when scaffold writers, suite graph scripts, agent rendering scripts, or target repo output contracts change.
-</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../cmd/skill-harness/main_test.go">cmd/skill-harness/main_test.go</a></li><li><a href="../../../scripts/dependencies.json">scripts/dependencies.json</a></li><li><a href="../../../scripts/agent_loadouts.json">scripts/agent_loadouts.json</a></li></ul><h3>Update Triggers</h3><ul><li>scaffold script changes</li><li>suite graph schema changes</li><li>agent template rendering changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>698f81406895c094c042a08120c207772b348f69223bebfbfb61ffe9b0b377ce</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-23</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
+Update this model when scaffold writers, repo governance commands, artifact review generators, suite graph scripts, agent rendering scripts, or target repo output contracts change.
+</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../cmd/skill-harness/main_test.go">cmd/skill-harness/main_test.go</a></li><li><a href="../../../scripts/dependencies.json">scripts/dependencies.json</a></li><li><a href="../../../scripts/agent_loadouts.json">scripts/agent_loadouts.json</a></li></ul><h3>Update Triggers</h3><ul><li>scaffold script changes</li><li>artifact review generator changes</li><li>suite graph schema changes</li><li>agent template rendering changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>d699f49cec457a0c27d6cd23d52ec348f2aa3f59c5a4c690fd9caa1de20ffc07</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-24</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
 </main>
 </body>
 </html>

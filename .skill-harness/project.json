@@ -196,6 +196,39 @@
         "allowExternalAssets": false,
         "allowNetworkCalls": false,
         "requireSemanticHTML": true,
+        "interactionLanes": {
+          "default": {
+            "name": "css-only",
+            "allowInlineJavaScript": false,
+            "allowedPatterns": [
+              "radio tabs",
+              "details summary",
+              "anchor navigation",
+              "inline svg states"
+            ],
+            "csp": "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+          },
+          "reviewed-inline-js": {
+            "name": "reviewed-inline-js",
+            "allowInlineJavaScript": false,
+            "requiresManifestFlag": "htmlInteractionLane: reviewed-inline-js",
+            "requiresHumanReview": true,
+            "requiresCheckerSupport": true,
+            "requiresCspChange": true,
+            "blockedApis": [
+              "fetch",
+              "XMLHttpRequest",
+              "WebSocket",
+              "EventSource",
+              "sendBeacon",
+              "serviceWorker",
+              "document.cookie",
+              "localStorage",
+              "sessionStorage"
+            ],
+            "status": "reserved-not-enabled"
+          }
+        },
         "requiredCSP": "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
       }
     }

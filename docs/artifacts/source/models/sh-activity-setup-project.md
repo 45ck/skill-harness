@@ -32,7 +32,7 @@ Capture the concrete setup-project control flow, including early exits and optio
 
 ## Scope
 
-The activity includes target resolution, monorepo scope handling, package manager detection, artifact profile and modeling mode resolution, package metadata creation, package installation, Beads setup, Claude settings, developer artifact/model/visual-source scaffolding, optional `agent-docs` and `noslop` initialization, quality gate installation, setup proof writing, and the install-only early-exit path.
+The activity includes target resolution, monorepo scope handling, package manager detection, artifact profile and modeling mode resolution, package metadata creation, package installation, Beads setup, Claude settings, agent stack overlay scaffolding, developer artifact/model/visual-source scaffolding, optional `agent-docs` and `noslop` initialization, quality gate installation, setup proof writing, and the install-only early-exit path.
 
 ## Source Model
 
@@ -45,7 +45,8 @@ flowchart TD
   Beads -->|no| SkipBeads["Record skipped Beads"]
   InitBeads --> Agents
   SkipBeads --> Agents["Render or skip agent settings"]
-  Agents --> Artifacts{"Developer artifacts enabled?"}
+  Agents --> Stack["Write or preserve agent-stack.json"]
+  Stack --> Artifacts{"Developer artifacts enabled?"}
   Artifacts -->|yes| Scaffold["Write source, visual review, artifact, and model scaffold"]
   Artifacts -->|no| Proof["Write setup proof"]
   Scaffold --> Proof

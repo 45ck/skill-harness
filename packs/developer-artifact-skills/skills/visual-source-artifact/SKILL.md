@@ -13,6 +13,7 @@ Use a source-first pair:
 
 - Canonical source: Markdown, TOON, JSON, YAML, specgraph-compatible docs, model text, or structured data.
 - Generated review surface: static HTML, dashboard, state board, prototype, journey map, schema map, evidence board, or comparison page under `generated/review/`.
+- For human-facing discovery and planning, the generated review surface should be infographic-style HTML under `generated/review/<family>/`.
 
 Generated visual files are never the only durable source. Edit source first, then regenerate or discard the review surface.
 
@@ -21,6 +22,7 @@ Generated visual files are never the only durable source. Edit source first, the
 - High-fidelity is the default for UI, product, customer-facing workflow, and mockup review.
 - Low-fidelity sketches are scratch artifacts only unless the project explicitly records them as research evidence.
 - Use realistic states, dense data, error paths, accessibility cues, assumptions, and evidence strength in the review surface.
+- Use scan-friendly metrics, charts, timelines, evidence/freshness panels, and source links for non-UI human review artifacts.
 
 ## Artifact Families
 
@@ -47,8 +49,9 @@ Generated visual files are never the only durable source. Edit source first, the
 3. Define the canonical source path under `docs/artifacts/source/<family>/` unless a domain docs path is better.
 4. Define the generated review path under `generated/review/<family>/`.
 5. List evidence links and label real evidence separately from synthetic user or agent-simulation evidence.
-6. Add or update the manifest entry with source, review surface, owner, evidence, status, and freshness.
-7. Run manifest and HTML policy checks before handoff when the project has them.
+6. Add or update the manifest entry with source, review surface, owner, evidence, status, freshness, and `reviewRequired: true` when a generated HTML surface is expected.
+7. Run `node scripts/generate-artifact-review.mjs` when available.
+8. Run manifest and HTML policy checks before handoff when the project has them.
 
 ## Output
 

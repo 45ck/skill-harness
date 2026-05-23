@@ -45,7 +45,7 @@ Capture the concrete setup-project control flow, including early exits and optio
 
 ## Scope
 
-The activity includes target resolution, monorepo scope handling, package manager detection, artifact profile and modeling mode resolution, package metadata creation, package installation, Beads setup, Claude settings, developer artifact/model/visual-source scaffolding, optional `agent-docs` and `noslop` initialization, quality gate installation, setup proof writing, and the install-only early-exit path.
+The activity includes target resolution, monorepo scope handling, package manager detection, artifact profile and modeling mode resolution, package metadata creation, package installation, Beads setup, Claude settings, agent stack overlay scaffolding, developer artifact/model/visual-source scaffolding, optional `agent-docs` and `noslop` initialization, quality gate installation, setup proof writing, and the install-only early-exit path.
 
 ## Source Model
 
@@ -58,7 +58,8 @@ flowchart TD
   Beads --&gt;|no| SkipBeads[&quot;Record skipped Beads&quot;]
   InitBeads --&gt; Agents
   SkipBeads --&gt; Agents[&quot;Render or skip agent settings&quot;]
-  Agents --&gt; Artifacts{&quot;Developer artifacts enabled?&quot;}
+  Agents --&gt; Stack[&quot;Write or preserve agent-stack.json&quot;]
+  Stack --&gt; Artifacts{&quot;Developer artifacts enabled?&quot;}
   Artifacts --&gt;|yes| Scaffold[&quot;Write source, visual review, artifact, and model scaffold&quot;]
   Artifacts --&gt;|no| Proof[&quot;Write setup proof&quot;]
   Scaffold --&gt; Proof
@@ -72,7 +73,7 @@ The unit tests exercise scaffold creation, package scripts, policy checks, model
 ## Freshness
 
 Update this model when setup-project adds or removes branches, changes default profiles, or changes setup proof contents.
-</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../cmd/skill-harness/main_test.go">cmd/skill-harness/main_test.go</a></li><li><a href="../../../.skill-harness/setup-proof.json">.skill-harness/setup-proof.json</a></li></ul><h3>Update Triggers</h3><ul><li>setup-project flag behavior changes</li><li>generated scaffold file changes</li><li>setup proof schema changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>5e3c43ec6e76f78b304c80e98d82ce47d058d43d8cf9d7db154a55c55550edf0</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-23</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
+</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../cmd/skill-harness/main_test.go">cmd/skill-harness/main_test.go</a></li><li><a href="../../../.skill-harness/setup-proof.json">.skill-harness/setup-proof.json</a></li></ul><h3>Update Triggers</h3><ul><li>setup-project flag behavior changes</li><li>generated scaffold file changes</li><li>setup proof schema changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>e4423461855ea2174b9ea022e639603f6f19a77d0afa1f3b7f674fefe6ab6a9f</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-23</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
 </main>
 </body>
 </html>

@@ -13,6 +13,21 @@ Use this file when another agent needs to install or use `skill-harness` correct
 
 For public contribution, support, and security expectations, use [CONTRIBUTING.md](CONTRIBUTING.md), [SUPPORT.md](SUPPORT.md), and [SECURITY.md](SECURITY.md). This file is the operational guide for agents and maintainers.
 
+## Agent-native bootstrap
+
+The preferred downstream setup path is prompt-first. A human should be able to open a target repo in Codex, Claude Code, or another coding agent and ask the agent to bootstrap the repo from the `skill-harness` baseline. The agent should inspect the repo, choose the smallest useful profile, use repo-local overlay config for customizations, ask before approval-sensitive side effects, and leave setup/update evidence in `.skill-harness/`.
+
+Use [docs/agent-native-bootstrap.md](docs/agent-native-bootstrap.md) for the copyable bootstrap prompt and operational rules. The planning source is [docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md](docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md).
+
+Useful commands:
+
+```bash
+./skill-harness resolve --dir path/to/project
+./skill-harness bootstrap --dir path/to/project --agent-native
+./skill-harness install --dir path/to/project
+./skill-harness update-project --dir path/to/project --write-lock
+```
+
 ## Shared suite install
 
 Run this from the repo root when the goal is to install the shared packs and agents:
@@ -162,6 +177,7 @@ For the fully automated equivalent of the above, use the `setup-project` command
 - For Mermaid, C4, UML-style, UWE-inspired, dependency, and architecture-space views, keep the diagram/model source durable and pre-render diagrams into HTML as inline SVG or static markup.
 - Auto-detect model impact for every engineering change. If code, API, workflow, dependency, deployment, UI structure, or agent behavior changes, update the relevant canonical model source or record why no model change is needed.
 - In UML-first or baseline modeling mode, keep authored model sources in repo-relative text files, prefer `docs/artifacts/source/models/` when there is no better domain docs path, update `docs/artifacts/source/models/model-inventory.md`, put generated human HTML model reviews under `generated/review/models/`, run `node scripts/generate-model-review.mjs`, and validate with `node scripts/check-model-artifact-policy.mjs`.
+- For human-facing discovery, planning, research, product, business, data, UX, and mockup artifacts, create canonical source under `docs/artifacts/source/<family>/`, add a manifest entry with `reviewRequired: true`, run `node scripts/generate-artifact-review.mjs`, and hand off the generated infographic HTML under `generated/review/<family>/`. Do not substitute Markdown-only output when a human review surface was requested.
 - Do not add browser Mermaid runtimes, external scripts, or external assets to generated review HTML by default.
 - Use `--developer-artifacts-profile agent-loop` only for governed self-improving agent workflows; generated trace receipts belong under `generated/agent-runs/` and should stay out of git unless summarized and redacted.
 

@@ -70,6 +70,77 @@
       }
     },
     {
+      "id": "agent-native-bootstrap-update-plan-2026-05-24",
+      "type": "planning-artifact",
+      "source": "docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md",
+      "status": "draft",
+      "owner": "codex",
+      "sourceHash": "9bc1876673195e0b5b034f7282fceb1979e2d871a0e72059c9eb4c03c315c816",
+      "evidenceLinks": [
+        "README.md",
+        "AGENT_INSTRUCTIONS.md",
+        "docs/adoption-audit-2026-04-29.md",
+        "scripts/dependencies.json",
+        "scripts/agent_loadouts.json",
+        "scripts/render_codex_agents.py",
+        "scripts/render_claude_agents.py",
+        "cmd/skill-harness/main.go"
+      ],
+      "freshness": {
+        "generatedAt": "2026-05-24",
+        "sourceFirst": true
+      }
+    },
+    {
+      "id": "generic-infographic-artifact-workflow-plan-2026-05-24",
+      "type": "implementation-plan",
+      "source": "docs/artifacts/source/product/generic-infographic-artifact-workflow-plan-2026-05-24.md",
+      "status": "ready",
+      "owner": "codex",
+      "reviewRequired": true,
+      "evidenceLinks": [
+        "AGENTS.md",
+        "docs/developer-artifacts.md",
+        "scripts/generate-artifact-review.mjs",
+        "scripts/check-artifact-manifest.mjs",
+        "scripts/check-artifact-html-policy.mjs",
+        "cmd/skill-harness/main.go"
+      ],
+      "freshness": {
+        "generatedAt": "2026-05-24",
+        "sourceFirst": true
+      },
+      "reviewSurface": "generated/review/product/generic-infographic-artifact-workflow-plan-2026-05-24.html",
+      "renderer": "skill-harness artifact review generator",
+      "sourceHash": "096bdf3ffba1a4777c1d0cf0b0a0c22c638f843cbc608dd9cc87c527140ef290",
+      "generatedAt": "2026-05-24"
+    },
+    {
+      "id": "managed-baseline-overlay-plan-2026-05-24",
+      "type": "planning-artifact",
+      "source": "docs/artifacts/source/product/managed-baseline-overlay-plan-2026-05-24.md",
+      "status": "draft",
+      "owner": "codex",
+      "reviewRequired": true,
+      "evidenceLinks": [
+        "README.md",
+        "docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md",
+        "docs/artifacts/source/skill-harness-opportunity-review-2026-05-23.md",
+        "scripts/bootstrap_dependencies.py",
+        "scripts/render_codex_agents.py",
+        "scripts/render_claude_agents.py",
+        "cmd/skill-harness/main.go"
+      ],
+      "freshness": {
+        "generatedAt": "2026-05-24",
+        "sourceFirst": true
+      },
+      "reviewSurface": "generated/review/product/managed-baseline-overlay-plan-2026-05-24.html",
+      "renderer": "skill-harness artifact review generator",
+      "sourceHash": "5bab5104bfd37272ac779359384fae5e52f2df23912287f17e534d04524612d6",
+      "generatedAt": "2026-05-24"
+    },
+    {
       "id": "sh-system-context",
       "title": "Skill Harness System Context",
       "type": "model-view",
@@ -82,7 +153,7 @@
       "abstractionLevel": "runtime",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-system-context.html",
-      "sourceHash": "19d9511baedae5e39f547310c42be3d7e8a2c6260a2e2598dcdf366b38b06e5a",
+      "sourceHash": "b29cd74a641d097882ba41fe740e3b6f827e275b7ad968cb63af1a69e983138d",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -121,9 +192,9 @@
       "abstractionLevel": "domain",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-domain-artifact-governance.html",
-      "sourceHash": "ae7061da22ad153d60eacc21920c4ed8c038c64c8a5454ce6df3296e2d12f63c",
+      "sourceHash": "f7b72ebab9fc109533d60221da9a16283f7ed96743e236bfb116db765d7a3277",
       "renderer": "skill-harness model review generator",
-      "generatedAt": "2026-05-23",
+      "generatedAt": "2026-05-24",
       "implementationTouchpoints": [
         ".skill-harness/project.json",
         "docs/artifacts/artifacts.manifest.json",
@@ -131,6 +202,7 @@
         "scripts/check-model-artifact-policy.mjs",
         "scripts/check-artifact-html-policy.mjs",
         "scripts/open-artifact-review.mjs",
+        "scripts/generate-artifact-review.mjs",
         "scripts/generate-model-review.mjs"
       ],
       "docTouchpoints": [
@@ -147,6 +219,8 @@
         "artifact manifest schema changes",
         "visual-source-first policy changes",
         "HTML policy changes",
+        "interaction lane policy changes",
+        "generated review semantics changes",
         "model metadata contract changes"
       ],
       "driftVerdict": "aligned"
@@ -164,7 +238,7 @@
       "abstractionLevel": "domain",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-usecase-cli-workflows.html",
-      "sourceHash": "34a813e8cd83ebccf3c6ed92bef9ef98a26c56919eade0a4f291095480cf7a7d",
+      "sourceHash": "52418a7e8f40d25d45a267651649b8e7383add82befa6030e9727eea5b9d0b45",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -200,7 +274,7 @@
       "abstractionLevel": "runtime",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-activity-setup-project.html",
-      "sourceHash": "5e3c43ec6e76f78b304c80e98d82ce47d058d43d8cf9d7db154a55c55550edf0",
+      "sourceHash": "e4423461855ea2174b9ea022e639603f6f19a77d0afa1f3b7f674fefe6ab6a9f",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -235,9 +309,9 @@
       "abstractionLevel": "design",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-component-scaffold-engine.html",
-      "sourceHash": "698f81406895c094c042a08120c207772b348f69223bebfbfb61ffe9b0b377ce",
+      "sourceHash": "d699f49cec457a0c27d6cd23d52ec348f2aa3f59c5a4c690fd9caa1de20ffc07",
       "renderer": "skill-harness model review generator",
-      "generatedAt": "2026-05-23",
+      "generatedAt": "2026-05-24",
       "implementationTouchpoints": [
         "cmd/skill-harness/main.go",
         "scripts/suite_graph.py",
@@ -245,6 +319,7 @@
         "scripts/check_suite_drift.py",
         "scripts/check-artifact-manifest.mjs",
         "scripts/check-model-artifact-policy.mjs",
+        "scripts/generate-artifact-review.mjs",
         "scripts/generate-model-review.mjs"
       ],
       "docTouchpoints": [
@@ -259,6 +334,7 @@
       "reviewRequired": true,
       "updateTriggers": [
         "scaffold script changes",
+        "artifact review generator changes",
         "suite graph schema changes",
         "agent template rendering changes"
       ],
@@ -277,13 +353,14 @@
       "abstractionLevel": "decision",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-state-artifact-freshness.html",
-      "sourceHash": "65122c2c921d8f535eb7479ddc3199bf18f06deabb9a79ba226ca40d23f7e83e",
+      "sourceHash": "c17609d48cef20086daaf86e29f5d44aa5d28b40ea072ad630ee0c0583dba768",
       "renderer": "skill-harness model review generator",
-      "generatedAt": "2026-05-23",
+      "generatedAt": "2026-05-24",
       "implementationTouchpoints": [
         "docs/artifacts/artifacts.manifest.json",
         "scripts/check-artifact-manifest.mjs",
         "scripts/generate-model-review.mjs",
+        "scripts/generate-artifact-review.mjs",
         "scripts/check-artifact-html-policy.mjs",
         "scripts/open-artifact-review.mjs",
         ".github/workflows/quality.yml"
@@ -299,6 +376,7 @@
       "reviewRequired": true,
       "updateTriggers": [
         "sourceHash policy changes",
+        "generic artifact review generation changes",
         "generated HTML or visual review changes",
         "visual-source-first policy changes",
         "CI quality gate changes"

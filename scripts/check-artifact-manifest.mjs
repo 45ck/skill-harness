@@ -67,6 +67,12 @@ if (!fs.existsSync(manifestPath)) {
         failures.push(label + ' HTML review surface must be under ' + repoPath(reviewRoot));
       }
       if (artifact.status === 'ready' && reviewPath && !fs.existsSync(reviewPath)) failures.push(label + ' ready review surface does not exist: ' + artifact.reviewSurface);
+    } else if (artifact.status === 'ready' && artifact.reviewRequired === true) {
+      failures.push(label + ' ready artifact with reviewRequired=true needs a generated HTML reviewSurface');
+    }
+
+    if (artifact.status === 'ready' && artifact.reviewRequired === true && artifact.reviewSurface && path.extname(artifact.reviewSurface) !== '.html') {
+      failures.push(label + ' ready artifact with reviewRequired=true must use an HTML reviewSurface');
     }
     if (artifact.status === 'ready' && (!Array.isArray(artifact.evidenceLinks) || artifact.evidenceLinks.length === 0)) {
       failures.push(label + ' ready artifact needs evidenceLinks');

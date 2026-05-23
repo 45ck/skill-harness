@@ -41,6 +41,7 @@ This creates:
 - `generated/review/ux/`
 - `scripts/check-artifact-manifest.mjs`
 - `scripts/check-artifact-html-policy.mjs`
+- `scripts/generate-artifact-review.mjs`
 - `scripts/open-artifact-review.mjs`
 
 It also adds `generated/review/` to `.gitignore` and adds package scripts when applicable:
@@ -49,6 +50,8 @@ It also adds `generated/review/` to `.gitignore` and adds package scripts when a
 - `docs:generate`
 - `docs:report`
 - `artifacts:check`
+- `artifacts:generate`
+- `artifacts:review`
 - `artifacts:manifest:check`
 - `artifacts:html:check`
 - `artifacts:open`
@@ -100,11 +103,13 @@ Generated HTML review artifacts must be static and self-contained by default:
 
 - clear human review structure with overview, visuals, source, evidence, and diff/comparison sections when relevant
 - tabs or equivalent navigation for dense artifacts, implemented without external runtimes
+- infographic-style summary metrics, charts, timelines, evidence/freshness panels, and source links when the artifact is for human decision review
 - screenshots or evidence images embedded as data URLs when they are listed in the manifest and safe to include
 - no external scripts
 - no external assets
 - no network calls
-- no inline JavaScript unless explicitly reviewed and allowed by the project
+- no inline JavaScript in the default lane; the only default interaction patterns are CSS/HTML features such as radio tabs, details/summary, anchor navigation, and inline SVG states
+- inline JavaScript is reserved for a future reviewed policy lane; it remains blocked until explicit manifest metadata, human approval, CSP/checker updates, and blocked browser API coverage are implemented together
 - required CSP meta tag
 - semantic headings, landmarks, meaningful link text, and alt text
 - no secrets, tokens, credentials, private logs, customer data, or large opaque blobs
@@ -122,6 +127,8 @@ Run:
 
 ```bash
 node scripts/check-artifact-html-policy.mjs
+node scripts/generate-artifact-review.mjs
+node scripts/generate-artifact-review.mjs --check
 node scripts/open-artifact-review.mjs --print
 node scripts/open-artifact-review.mjs --json --print
 ```
@@ -148,6 +155,7 @@ Rules:
 - Put generated visual review surfaces under `generated/review/<family>/`.
 - High-fidelity HTML/prototype review is the default for UI, product, customer-facing workflow, and mockup artifacts. Low-fidelity sketches are scratch unless explicitly captured as research evidence.
 - Visual review surfaces should expose realistic states, data density, error paths, assumptions, evidence strength, source links, and freshness metadata.
+- Human-facing discovery and planning work should produce source plus generated HTML by default when the intended audience is a human reviewer. Mark those manifest entries with `reviewRequired: true` and generate the infographic surface with `node scripts/generate-artifact-review.mjs`.
 - Label synthetic user, simulated customer, or agent-generated evidence separately from real user/customer evidence.
 - Record durable generated visual artifacts in `docs/artifacts/artifacts.manifest.json` with source, reviewSurface, owner, evidenceLinks, status, and freshness.
 - Use a team of agents when boundaries cross: requirements for product intent, delivery for business constraints, backend for data shape, research for evidence, UX for high-fidelity review, system-modeler for structure/workflow impact, and quality-reviewer for readiness gates.
@@ -185,6 +193,7 @@ Run:
 
 ```bash
 node scripts/check-model-artifact-policy.mjs
+node scripts/generate-artifact-review.mjs
 node scripts/generate-model-review.mjs
 node scripts/generate-model-review.mjs --check
 node scripts/check-artifact-html-policy.mjs

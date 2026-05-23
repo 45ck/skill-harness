@@ -11,15 +11,7 @@
 </head>
 <body>
 <main>
-<div class="hero"><section><h1>CLI Workflow Use Cases</h1><p>The CLI supports maintainers and agents that need to inspect, install, render, check, and scaffold project capabilities.</p></section><section><h2>Review Focus</h2><div class="meta"><div><strong>Status</strong><br>ready</div><div><strong>Kind</strong><br>use-case</div><div><strong>Drift</strong><br>aligned</div><div><strong>Owner</strong><br>system-modeler</div></div></section></div><section class="meta"><div><strong>ID</strong><br>sh-usecase-cli-workflows</div><div><strong>Status</strong><br>ready</div><div><strong>Model ID</strong><br>sh-usecase-cli-workflows</div><div><strong>Kind</strong><br>use-case</div><div><strong>Method</strong><br>uml</div><div><strong>Notation</strong><br>mermaid</div><div><strong>Source</strong><br>docs/artifacts/source/models/sh-usecase-cli-workflows.md</div><div><strong>Owner</strong><br>system-modeler</div></section><div class="tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-visual" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-evidence" name="tabs" type="radio"><input id="tab-diff" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-visual">Visuals</label><label for="tab-source">Source</label><label for="tab-evidence">Evidence</label><label for="tab-diff">Diff</label></div><div class="tab-panels"><section class="tab-panel"><h2>Overview</h2><p>The CLI supports maintainers and agents that need to inspect, install, render, check, and scaffold project capabilities.</p><div class="meta"><div><strong>Abstraction</strong><br>domain</div><div><strong>Review Surface</strong><br><a href="sh-usecase-cli-workflows.html">generated/review/models/sh-usecase-cli-workflows.html</a></div><div><strong>Implementation Touchpoints</strong><br><a href="../../../cmd/skill-harness/main.go">cmd/skill-harness/main.go</a>, <a href="../../../README.md">README.md</a></div><div><strong>Doc Touchpoints</strong><br><a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a>, <a href="../../../AGENT_INSTRUCTIONS.md">AGENT_INSTRUCTIONS.md</a></div></div></section><section class="tab-panel"><h2>Visuals</h2><div class="diagram-card"><div class="diagram-header"><strong>mermaid use-case</strong><span class="muted">static preview, source-backed</span></div><div class="diagram-body"><pre>flowchart TD
-  Maintainer[&quot;Maintainer or agent&quot;] --&gt; Install[&quot;Install suite&quot;]
-  Maintainer --&gt; Render[&quot;Render agents&quot;]
-  Maintainer --&gt; Check[&quot;Check installed skills and templates&quot;]
-  Maintainer --&gt; List[&quot;List agents and packs&quot;]
-  Maintainer --&gt; Setup[&quot;Setup project&quot;]
-  Setup --&gt; Artifacts[&quot;Scaffold developer artifacts&quot;]
-  Setup --&gt; Models[&quot;Scaffold model review policy&quot;]
-  Setup --&gt; Beads[&quot;Initialize or respect Beads&quot;]</pre></div></div><h3>Screenshots And Evidence Images</h3><p class="muted">No screenshot or image evidence is listed for this artifact.</p></section><section class="tab-panel"><h2>Canonical Source</h2><p><a href="../../../docs/artifacts/source/models/sh-usecase-cli-workflows.md">docs/artifacts/source/models/sh-usecase-cli-workflows.md</a></p><pre>---
+<div class="hero"><section><h1>CLI Workflow Use Cases</h1><p>The CLI supports maintainers and agents that need to inspect, resolve, install, render, check, scaffold, audit, bootstrap, and update project capabilities.</p></section><section><h2>Review Focus</h2><div class="meta"><div><strong>Status</strong><br>ready</div><div><strong>Kind</strong><br>use-case</div><div><strong>Drift</strong><br>aligned</div><div><strong>Owner</strong><br>system-modeler</div></div></section></div><section class="meta"><div><strong>ID</strong><br>sh-usecase-cli-workflows</div><div><strong>Status</strong><br>ready</div><div><strong>Model ID</strong><br>sh-usecase-cli-workflows</div><div><strong>Kind</strong><br>use-case</div><div><strong>Method</strong><br>uml</div><div><strong>Notation</strong><br>mermaid</div><div><strong>Source</strong><br>docs/artifacts/source/models/sh-usecase-cli-workflows.md</div><div><strong>Owner</strong><br>system-modeler</div></section><div class="tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-visual" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-evidence" name="tabs" type="radio"><input id="tab-diff" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-visual">Visuals</label><label for="tab-source">Source</label><label for="tab-evidence">Evidence</label><label for="tab-diff">Diff</label></div><div class="tab-panels"><section class="tab-panel"><h2>Overview</h2><p>The CLI supports maintainers and agents that need to inspect, resolve, install, render, check, scaffold, audit, bootstrap, and update project capabilities.</p><div class="meta"><div><strong>Abstraction</strong><br>domain</div><div><strong>Review Surface</strong><br><a href="sh-usecase-cli-workflows.html">generated/review/models/sh-usecase-cli-workflows.html</a></div><div><strong>Implementation Touchpoints</strong><br><a href="../../../cmd/skill-harness/main.go">cmd/skill-harness/main.go</a>, <a href="../../../README.md">README.md</a></div><div><strong>Doc Touchpoints</strong><br><a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a>, <a href="../../../AGENT_INSTRUCTIONS.md">AGENT_INSTRUCTIONS.md</a></div></div></section><section class="tab-panel"><h2>Visuals</h2><div class="diagram-card"><div class="diagram-header"><strong>mermaid use-case</strong><span class="muted">static preview, source-backed</span></div><div class="diagram-body"><svg role="img" aria-label="Static model diagram preview" viewBox="0 0 1050 190" xmlns="http://www.w3.org/2000/svg"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0f766e"/></marker></defs><line x1="146" y1="97" x2="179" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="436" y1="97" x2="179" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="581" y1="97" x2="179" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="726" y1="97" x2="179" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="871" y1="97" x2="904" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><rect x="34" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="90" y="102" text-anchor="middle" font-size="12" fill="#17202a">RepoAudit</text><rect x="179" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="235" y="102" text-anchor="middle" font-size="12" fill="#17202a">BaselineManifest</text><rect x="324" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="380" y="102" text-anchor="middle" font-size="12" fill="#17202a">RepoDrift</text><rect x="469" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="525" y="102" text-anchor="middle" font-size="12" fill="#17202a">RepoUpdate</text><rect x="614" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="670" y="102" text-anchor="middle" font-size="12" fill="#17202a">RepoTrim</text><rect x="759" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="815" y="102" text-anchor="middle" font-size="12" fill="#17202a">Setup</text><rect x="904" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="960" y="102" text-anchor="middle" font-size="12" fill="#17202a">StackConfig</text></svg></div></div><h3>Screenshots And Evidence Images</h3><p class="muted">No screenshot or image evidence is listed for this artifact.</p></section><section class="tab-panel"><h2>Canonical Source</h2><p><a href="../../../docs/artifacts/source/models/sh-usecase-cli-workflows.md">docs/artifacts/source/models/sh-usecase-cli-workflows.md</a></p><pre>---
 artifactType: model-view
 modelId: sh-usecase-cli-workflows
 modelKind: use-case
@@ -46,7 +38,7 @@ driftVerdict: aligned
 
 # CLI Workflow Use Cases
 
-The CLI supports maintainers and agents that need to inspect, install, render, check, and scaffold project capabilities.
+The CLI supports maintainers and agents that need to inspect, resolve, install, render, check, scaffold, audit, bootstrap, and update project capabilities.
 
 ## Purpose
 
@@ -54,7 +46,7 @@ Show the user goals that the CLI exposes to repo maintainers and agent operators
 
 ## Scope
 
-Top-level use cases are install full suite, install selected packs, install selected agents, run interactive install, set up a project, validate dependencies, render agents, install Beads worktrees, uninstall agents, and open artifact review. Flag variants are extensions unless they materially change behavior.
+Top-level use cases are install full suite, install selected packs, install selected agents, run interactive install, resolve an agent stack overlay, bootstrap agent-native repo state, initialize repo baseline governance, audit repo adoption state, check drift, sync baseline lock/report files, check available baseline updates, dry-run trim suggestions, set up a project, validate dependencies, render agents, install Beads worktrees, uninstall agents, and open artifact review. Flag variants are extensions unless they materially change behavior.
 
 ## Source Model
 
@@ -64,15 +56,40 @@ flowchart TD
   Maintainer --&gt; Render[&quot;Render agents&quot;]
   Maintainer --&gt; Check[&quot;Check installed skills and templates&quot;]
   Maintainer --&gt; List[&quot;List agents and packs&quot;]
+  Maintainer --&gt; ResolveStack[&quot;Resolve agent stack overlay&quot;]
+  Maintainer --&gt; Bootstrap[&quot;Bootstrap agent-native repo&quot;]
+  Maintainer --&gt; Audit[&quot;Audit project adoption state&quot;]
+  Maintainer --&gt; RepoInit[&quot;Initialize repo baseline governance&quot;]
+  Maintainer --&gt; RepoAudit[&quot;Audit repo baseline surfaces&quot;]
+  Maintainer --&gt; RepoDrift[&quot;Check repo drift&quot;]
+  Maintainer --&gt; RepoUpdate[&quot;Check baseline updates&quot;]
+  Maintainer --&gt; RepoTrim[&quot;Dry-run trim suggestions&quot;]
+  Maintainer --&gt; RepoSync[&quot;Sync lock and update report&quot;]
+  Maintainer --&gt; UpdateProject[&quot;Update project lock state&quot;]
   Maintainer --&gt; Setup[&quot;Setup project&quot;]
+  ResolveStack --&gt; EffectiveState[&quot;Effective agents, packs, skills, and diagnostics&quot;]
+  Bootstrap --&gt; StackConfig[&quot;.skill-harness/agent-stack.json&quot;]
+  UpdateProject --&gt; StackLock[&quot;.skill-harness/agent-stack.lock.json&quot;]
+  RepoInit --&gt; BaselineManifest[&quot;.skill-harness/baseline.manifest.json&quot;]
+  RepoAudit --&gt; BaselineManifest
+  RepoDrift --&gt; BaselineManifest
+  RepoUpdate --&gt; BaselineManifest
+  RepoTrim --&gt; BaselineManifest
+  RepoSync --&gt; BaselineLock[&quot;.skill-harness/baseline.lock.json&quot;]
+  RepoSync --&gt; UpdateReport[&quot;.skill-harness/update-report.json&quot;]
   Setup --&gt; Artifacts[&quot;Scaffold developer artifacts&quot;]
+  Setup --&gt; StackConfig
   Setup --&gt; Models[&quot;Scaffold model review policy&quot;]
   Setup --&gt; Beads[&quot;Initialize or respect Beads&quot;]
 ```
 
 ## Use-Case Notes
 
-`setup-project` is the workflow most tightly coupled to developer artifacts. It creates repo-local policy, scripts, proof files, source directories, and review surfaces while respecting flags that skip Beads, agent-docs, Claude settings, or modeling.
+`setup-project` is the workflow most tightly coupled to developer artifacts. It creates repo-local policy, scripts, proof files, source directories, review surfaces, and a default agent stack overlay while respecting flags that skip Beads, agent-docs, Claude settings, or modeling.
+
+Agent-native commands keep setup prompt-first. `resolve` is read-only, `bootstrap --agent-native` creates local desired state without package installs, `install --dir`, `render --dir`, and `check --dir` consume resolved state when no explicit selections are passed, and `update-project --write-lock` records the resolved baseline state for future reconciliation.
+
+Repo governance commands add a project-safe distribution layer over the agent stack. `repo init` creates `.skill-harness/baseline.manifest.json`; `repo audit` reports managed, overlay, owned, generated, ignored, and missing surfaces; `repo drift` fails on warning/error findings; `repo sync` refreshes lock and update-report files only; `repo update --check` and `repo trim --dry-run` are observe-only paths for accepting baseline improvements and reducing unused agents or packs.
 
 ## Evidence
 
@@ -81,7 +98,7 @@ Evidence comes from `cmd/skill-harness/main.go`, CLI tests, `README.md`, and `do
 ## Freshness
 
 Update this model when commands, setup flags, package scripts, or artifact-opening behavior change.
-</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../cmd/skill-harness/main_test.go">cmd/skill-harness/main_test.go</a></li><li><a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a></li></ul><h3>Update Triggers</h3><ul><li>new CLI command or flag</li><li>setup-project behavior change</li><li>render or install behavior change</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>34a813e8cd83ebccf3c6ed92bef9ef98a26c56919eade0a4f291095480cf7a7d</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-23</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
+</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../cmd/skill-harness/main_test.go">cmd/skill-harness/main_test.go</a></li><li><a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a></li></ul><h3>Update Triggers</h3><ul><li>new CLI command or flag</li><li>setup-project behavior change</li><li>render or install behavior change</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>52418a7e8f40d25d45a267651649b8e7383add82befa6030e9727eea5b9d0b45</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-23</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
 </main>
 </body>
 </html>

@@ -145,6 +145,107 @@ func TestParseAndResolveModelingModes(t *testing.T) {
 	}
 }
 
+func TestResolveAgentStackAppliesOverlay(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, ".skill-harness", "agent-stack.json"), `{
+  "version": 1,
+  "baseline": {
+    "source": "https://github.com/45ck/skill-harness.git",
+    "channel": "main"
+  },
+  "profile": "minimal",
+  "disabledPacks": ["demo-production-skills"],
+  "agents": {
+    "software-architect": {
+      "removeSkills": ["public-private-hybrid-cloud-reviewer"],
+      "addSkills": ["repo-architecture-reviewer"]
+    }
+  },
+  "repoLocalPacks": ["packs/project-skills"]
+}
+`)
+
+	deps := dependencyConfig{
+		Repos: map[string]repoConfig{
+			"software-architecture-skills":  {Path: "packs/software-architecture-skills"},
+			"documentation-evidence-skills": {Path: "packs/documentation-evidence-skills"},
+			"coding-workflow-skills":        {Path: "packs/coding-workflow-skills"},
+			"frontier-agent-playbook":       {URL: "https://example.invalid/frontier.git"},
+			"demo-production-skills":        {Path: "packs/demo-production-skills"},
+		},
+		Agents: map[string]agentConfig{
+			"requirements-analyst": {Repos: []string{"documentation-evidence-skills", "frontier-agent-playbook"}},
+			"software-architect":   {Repos: []string{"software-architecture-skills", "demo-production-skills"}},
+			"workflow-engineer":    {Repos: []string{"coding-workflow-skills", "frontier-agent-playbook"}},
+		},
+	}
+	loadouts := loadoutConfig{
+		"requirements-analyst": {Skills: []string{"problem-statement-refiner"}},
+		"software-architect":   {Skills: []string{"architecture-option-generator", "public-private-hybrid-cloud-reviewer"}},
+		"workflow-engineer":    {Skills: []string{"issue-driven-delivery"}},
+	}
+
+	resolution, err := resolveAgentStack(root, deps, loadouts)
+	if err != nil {
+		t.Fatalf("resolveAgentStack returned error: %v", err)
+	}
+	if resolution.Profile != "minimal" {
+		t.Fatalf("expected minimal profile, got %q", resolution.Profile)
+	}
+	if !containsString(resolution.EffectiveAgents, "software-architect") || containsString(resolution.EffectiveAgents, "security-reviewer") {
+		t.Fatalf("unexpected effective agents: %#v", resolution.EffectiveAgents)
+	}
+	if containsString(resolution.EffectivePacks, "demo-production-skills") {
+		t.Fatalf("disabled pack should not be effective: %#v", resolution.EffectivePacks)
+	}
+	architectSkills := resolution.AgentSkills["software-architect"]
+	if containsString(architectSkills, "public-private-hybrid-cloud-reviewer") {
+		t.Fatalf("removed skill remained in software-architect loadout: %#v", architectSkills)
+	}
+	if !containsString(architectSkills, "repo-architecture-reviewer") {
+		t.Fatalf("repo-local skill missing from software-architect loadout: %#v", architectSkills)
+	}
+	if resolution.State != "overridden" {
+		t.Fatalf("expected overridden state, got %q", resolution.State)
+	}
+	if len(resolution.Diagnostics) == 0 {
+		t.Fatal("expected disabled-pack-required-by-agent warning")
+	}
+}
+
+func TestResolveAgentStackReportsUnknownReferences(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, ".skill-harness", "agent-stack.json"), `{
+  "version": 1,
+  "profile": "default",
+  "enabledAgents": ["missing-agent"],
+  "disabledPacks": ["missing-pack"]
+}
+`)
+	resolution, err := resolveAgentStack(root, dependencyConfig{Repos: map[string]repoConfig{}, Agents: map[string]agentConfig{}}, loadoutConfig{})
+	if err != nil {
+		t.Fatalf("resolveAgentStack returned error: %v", err)
+	}
+	if resolution.State != "conflicted" {
+		t.Fatalf("expected conflicted state, got %q", resolution.State)
+	}
+	if !agentStackHasErrors(resolution.Diagnostics) {
+		t.Fatalf("expected error diagnostics, got %#v", resolution.Diagnostics)
+	}
+}
+
+func TestWriteDefaultAgentStackDoesNotOverwrite(t *testing.T) {
+	root := t.TempDir()
+	stackPath := filepath.Join(root, ".skill-harness", "agent-stack.json")
+	mustWriteFile(t, stackPath, "{\"version\":1,\"profile\":\"minimal\"}\n")
+	if err := writeDefaultAgentStack(root, false); err != nil {
+		t.Fatalf("writeDefaultAgentStack returned error: %v", err)
+	}
+	if got := mustReadText(t, stackPath); got != "{\"version\":1,\"profile\":\"minimal\"}\n" {
+		t.Fatalf("expected existing stack to be preserved, got %q", got)
+	}
+}
+
 func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
@@ -196,6 +297,9 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	}
 	if !fileExists(filepath.Join(root, "scripts", "check-artifact-manifest.mjs")) {
 		t.Fatal("expected artifact manifest checker script")
+	}
+	if !fileExists(filepath.Join(root, "scripts", "generate-artifact-review.mjs")) {
+		t.Fatal("expected generic artifact review generator script")
 	}
 	if !fileExists(filepath.Join(root, "scripts", "open-artifact-review.mjs")) {
 		t.Fatal("expected artifact review opener script")
@@ -255,6 +359,12 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	if scripts["artifacts:manifest:check"] != "node scripts/check-artifact-manifest.mjs" {
 		t.Fatalf("expected artifact manifest check script, got %#v", scripts["artifacts:manifest:check"])
 	}
+	if scripts["artifacts:generate"] != "node scripts/generate-artifact-review.mjs" {
+		t.Fatalf("expected generic artifact generate script, got %#v", scripts["artifacts:generate"])
+	}
+	if scripts["artifacts:review"] != "node scripts/generate-artifact-review.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs" {
+		t.Fatalf("expected generic artifact review script, got %#v", scripts["artifacts:review"])
+	}
 	if scripts["artifacts:open"] != "node scripts/open-artifact-review.mjs" {
 		t.Fatalf("expected artifact open script, got %#v", scripts["artifacts:open"])
 	}
@@ -265,6 +375,14 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	openPolicy, ok := reviewSurface["openPolicy"].(map[string]any)
 	if !ok || openPolicy["preferHostBrowserTool"] != true {
 		t.Fatalf("expected host browser open policy, got %#v", reviewSurface["openPolicy"])
+	}
+	htmlPolicy, ok := artifacts["htmlPolicy"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected htmlPolicy config, got %#v", artifacts["htmlPolicy"])
+	}
+	interactionLanes, ok := htmlPolicy["interactionLanes"].(map[string]any)
+	if !ok || interactionLanes["default"] == nil || interactionLanes["reviewed-inline-js"] == nil {
+		t.Fatalf("expected HTML interaction lanes, got %#v", htmlPolicy["interactionLanes"])
 	}
 }
 
@@ -474,6 +592,15 @@ func TestWriteDeveloperArtifactScaffoldModeling(t *testing.T) {
 	if !strings.Contains(fmt.Sprint(scripts["artifacts:check"]), "check-model-artifact-policy.mjs") {
 		t.Fatalf("expected artifacts:check to include model policy, got %#v", scripts["artifacts:check"])
 	}
+	if scripts["artifacts:generate"] != "node scripts/generate-artifact-review.mjs && node scripts/generate-model-review.mjs" {
+		t.Fatalf("expected combined artifact generate script, got %#v", scripts["artifacts:generate"])
+	}
+	if scripts["artifacts:review"] != "node scripts/generate-artifact-review.mjs && node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs" {
+		t.Fatalf("expected combined artifact review script, got %#v", scripts["artifacts:review"])
+	}
+	if scripts["artifacts:model:review"] != "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs" {
+		t.Fatalf("expected strict model artifact review script, got %#v", scripts["artifacts:model:review"])
+	}
 	if scripts["artifacts:model:check"] != "node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check" {
 		t.Fatalf("expected model check script, got %#v", scripts["artifacts:model:check"])
 	}
@@ -577,6 +704,88 @@ func TestModelReviewGeneratorCreatesHumanHTML(t *testing.T) {
 	runNodeScript(t, root, "scripts/generate-model-review.mjs", false, "--check")
 }
 
+func TestArtifactReviewGeneratorCreatesInfographicHTML(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, modelingModeOff); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	sourcePath := filepath.Join(root, "docs", "artifacts", "source", "research", "html-artifacts.md")
+	source := "# HTML Artifact Discovery\n\n## Purpose\n\nDecide how human review artifacts should be generated.\n\n## Evidence\n\n- docs/developer-artifacts.md\n"
+	mustWriteFile(t, sourcePath, source)
+	writeManifest(t, root, []map[string]any{
+		{
+			"id":             "html-artifact-discovery",
+			"type":           "research-synthesis",
+			"source":         "docs/artifacts/source/research/html-artifacts.md",
+			"status":         "ready",
+			"owner":          "research-writer",
+			"reviewRequired": true,
+			"evidenceLinks":  []string{"docs/developer-artifacts.md"},
+		},
+	})
+
+	runNodeScript(t, root, "scripts/generate-artifact-review.mjs", true)
+	runNodeScript(t, root, "scripts/generate-artifact-review.mjs", true, "--check")
+	htmlPath := filepath.Join(root, "generated", "review", "research", "html-artifact-discovery.html")
+	if !fileExists(htmlPath) {
+		t.Fatal("expected generated infographic HTML")
+	}
+	html := mustReadText(t, htmlPath)
+	for _, want := range []string{"Infographic Snapshot", "Source-To-Review Flow", "Canonical Source", "Evidence", "Content-Security-Policy"} {
+		if !strings.Contains(html, want) {
+			t.Fatalf("expected generated artifact HTML to contain %q", want)
+		}
+	}
+	if !strings.Contains(html, "<h1>HTML Artifact Discovery</h1>") {
+		t.Fatalf("expected generated artifact HTML to use source H1 as fallback title")
+	}
+	runNodeScript(t, root, "scripts/check-artifact-manifest.mjs", true)
+	runNodeScript(t, root, "scripts/check-artifact-html-policy.mjs", true)
+
+	output := runNodeScript(t, root, "scripts/open-artifact-review.mjs", true, "--json", "--print", "html-artifact-discovery")
+	if !strings.Contains(output, `"repoPath": "generated/review/research/html-artifact-discovery.html"`) {
+		t.Fatalf("expected opener to resolve artifact id, got:\n%s", output)
+	}
+
+	mustWriteFile(t, sourcePath, source+"\nChanged without regeneration.\n")
+	runNodeScript(t, root, "scripts/generate-artifact-review.mjs", false, "--check")
+}
+
+func TestArtifactReviewGeneratorRejectsUnsafeReviewSurface(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, modelingModeOff); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	source := "# Unsafe Surface\n\n## Purpose\n\nExercise write-boundary checks.\n"
+	mustWriteFile(t, filepath.Join(root, "docs", "artifacts", "source", "research", "unsafe.md"), source)
+	writeManifest(t, root, []map[string]any{
+		{
+			"id":             "unsafe-surface",
+			"type":           "research-synthesis",
+			"source":         "docs/artifacts/source/research/unsafe.md",
+			"status":         "ready",
+			"owner":          "security-reviewer",
+			"reviewRequired": true,
+			"reviewSurface":  "../escaped.html",
+			"renderer":       "skill-harness artifact review generator",
+			"sourceHash":     sha256Hex(source),
+			"evidenceLinks":  []string{"docs/developer-artifacts.md"},
+		},
+	})
+
+	output := runNodeScript(t, root, "scripts/generate-artifact-review.mjs", false)
+	if !strings.Contains(output, "reviewSurface must be an HTML file under generated/review") {
+		t.Fatalf("expected unsafe reviewSurface failure, got:\n%s", output)
+	}
+	if fileExists(filepath.Join(root, "escaped.html")) || fileExists(filepath.Join(root, "..", "escaped.html")) {
+		t.Fatal("unsafe reviewSurface created an escaped file")
+	}
+}
+
 func TestArtifactReviewOpenScriptPrintsDiscoveredTarget(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
@@ -584,13 +793,14 @@ func TestArtifactReviewOpenScriptPrintsDiscoveredTarget(t *testing.T) {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
 
+	mustWriteFile(t, filepath.Join(root, "generated", "review", "index.html"), "<!doctype html><html><body><main><h1>Artifacts</h1></main></body></html>")
 	mustWriteFile(t, filepath.Join(root, "generated", "review", "models", "index.html"), "<!doctype html><html><body><main><h1>Models</h1></main></body></html>")
 	output := runNodeScript(t, root, "scripts/open-artifact-review.mjs", true, "--print")
-	if !strings.Contains(output, "file://") || !strings.Contains(output, "generated/review/models/index.html") {
-		t.Fatalf("expected printed file URL for model review index, got:\n%s", output)
+	if !strings.Contains(output, "file://") || !strings.Contains(output, "generated/review/index.html") {
+		t.Fatalf("expected printed file URL for artifact review index, got:\n%s", output)
 	}
 	jsonOutput := runNodeScript(t, root, "scripts/open-artifact-review.mjs", true, "--json", "--print")
-	for _, want := range []string{`"hostAction":`, `"openMode": "print"`, `"repoPath": "generated/review/models/index.html"`, `"url": "file://`} {
+	for _, want := range []string{`"hostAction":`, `"openMode": "print"`, `"repoPath": "generated/review/index.html"`, `"url": "file://`} {
 		if !strings.Contains(jsonOutput, want) {
 			t.Fatalf("expected JSON opener output to contain %q, got:\n%s", want, jsonOutput)
 		}
@@ -781,6 +991,7 @@ func TestCLISetupProjectMediaProfileScaffoldsAndWiresTools(t *testing.T) {
 	assertCommandContains(t, commands, "npx", "agent-docs install-gates --quality")
 
 	for _, path := range []string{
+		filepath.Join(projectDir, ".skill-harness", "agent-stack.json"),
 		filepath.Join(projectDir, ".skill-harness", "project.json"),
 		filepath.Join(projectDir, ".skill-harness", "setup-proof.json"),
 		filepath.Join(projectDir, "docs", "artifacts", "artifacts.manifest.json"),
@@ -822,6 +1033,9 @@ func TestCLISetupProjectMediaProfileScaffoldsAndWiresTools(t *testing.T) {
 	}
 	if proof.Tools["claudeSettings"].Status != "skipped" {
 		t.Fatalf("expected claude settings skipped proof, got %#v", proof.Tools["claudeSettings"])
+	}
+	if proof.Tools["agentStack"].Status != "scaffolded" {
+		t.Fatalf("expected agent stack scaffolded proof, got %#v", proof.Tools["agentStack"])
 	}
 	if !containsString(proof.GeneratedPaths, "generated/media/") {
 		t.Fatalf("expected media generated path in proof, got %#v", proof.GeneratedPaths)
@@ -876,6 +1090,126 @@ func TestCLIRenderAndCheckForwardAgentArgs(t *testing.T) {
 	assertNoCommandContains(t, commands, "bootstrap_dependencies.py")
 }
 
+func TestCLIResolvePrintsAgentStackJSON(t *testing.T) {
+	binary := buildSkillHarnessBinary(t)
+	projectDir := t.TempDir()
+	mustWriteFile(t, filepath.Join(projectDir, ".skill-harness", "agent-stack.json"), `{
+  "version": 1,
+  "profile": "minimal",
+  "disabledAgents": ["workflow-engineer"]
+}
+`)
+	output := runSkillHarnessCLI(t, binary, fakeTooling(t), "resolve", "--dir", projectDir, "--json")
+	var resolution agentStackResolution
+	if err := json.Unmarshal([]byte(output), &resolution); err != nil {
+		t.Fatalf("resolve output should be JSON: %v\n%s", err, output)
+	}
+	if resolution.Profile != "minimal" {
+		t.Fatalf("expected minimal profile, got %q", resolution.Profile)
+	}
+	if containsString(resolution.EffectiveAgents, "workflow-engineer") {
+		t.Fatalf("disabled workflow-engineer should not be effective: %#v", resolution.EffectiveAgents)
+	}
+	if !containsString(resolution.OptOuts.DisabledAgents, "workflow-engineer") {
+		t.Fatalf("expected disabled agent in opt-outs, got %#v", resolution.OptOuts.DisabledAgents)
+	}
+}
+
+func TestRepoAuditDetectsRepoLocalOverlays(t *testing.T) {
+	root := repoRootForTest(t)
+	deps := loadDependencies(root)
+	loadouts := loadLoadouts(root)
+	projectDir := t.TempDir()
+	mustWriteFile(t, filepath.Join(projectDir, "AGENTS.md"), "# Project rules\n")
+	mustWriteFile(t, filepath.Join(projectDir, ".codex", "skills", "custom-debug", "SKILL.md"), "# Custom debug\n")
+
+	report := buildRepoAuditReport(root, deps, loadouts, projectDir)
+
+	if report.State != "unmanaged" {
+		t.Fatalf("expected unmanaged repo, got %q", report.State)
+	}
+	if !containsString(report.LocalSkills[".codex/skills"], "custom-debug") {
+		t.Fatalf("expected repo-local skill discovery, got %#v", report.LocalSkills)
+	}
+	var agentsSurface repoSurfaceReport
+	for _, surface := range report.Surfaces {
+		if surface.Path == "AGENTS.md" {
+			agentsSurface = surface
+			break
+		}
+	}
+	if agentsSurface.Status != "present" || agentsSurface.Mode != repoSurfaceOwned {
+		t.Fatalf("expected AGENTS.md to be present and owned, got %#v", agentsSurface)
+	}
+}
+
+func TestCLIRepoInitAndSyncWritesManifestLockAndReport(t *testing.T) {
+	binary := buildSkillHarnessBinary(t)
+	projectDir := t.TempDir()
+	mustWriteFile(t, filepath.Join(projectDir, "AGENTS.md"), "# Project rules\n")
+
+	runSkillHarnessCLI(t, binary, fakeTooling(t), "repo", "init", "--dir", projectDir, "--profile", "minimal")
+	if !fileExists(filepath.Join(projectDir, ".skill-harness", "baseline.manifest.json")) {
+		t.Fatalf("expected baseline manifest to be written")
+	}
+
+	runSkillHarnessCLI(t, binary, fakeTooling(t), "repo", "sync", "--dir", projectDir)
+	if !fileExists(filepath.Join(projectDir, ".skill-harness", "baseline.lock.json")) {
+		t.Fatalf("expected baseline lock to be written")
+	}
+	if !fileExists(filepath.Join(projectDir, ".skill-harness", "update-report.json")) {
+		t.Fatalf("expected update report to be written")
+	}
+
+	output := runSkillHarnessCLI(t, binary, fakeTooling(t), "repo", "audit", "--dir", projectDir, "--json")
+	var report repoAuditReport
+	if err := json.Unmarshal([]byte(output), &report); err != nil {
+		t.Fatalf("repo audit output should be JSON: %v\n%s", err, output)
+	}
+	if report.State != "managed" || report.Profile != "minimal" {
+		t.Fatalf("expected managed minimal report, got state=%q profile=%q", report.State, report.Profile)
+	}
+}
+
+func TestRepoDriftReportsMissingManagedSurface(t *testing.T) {
+	root := repoRootForTest(t)
+	deps := loadDependencies(root)
+	loadouts := loadLoadouts(root)
+	projectDir := t.TempDir()
+	mustWriteFile(t, filepath.Join(projectDir, ".skill-harness", "baseline.manifest.json"), `{
+  "version": 1,
+  "profile": "minimal",
+  "baseline": {"source": "skill-harness", "channel": "default"},
+  "surfaces": {
+    "AGENTS.md": {"mode": "managed-section"}
+  }
+}
+`)
+
+	report := buildRepoAuditReport(root, deps, loadouts, projectDir)
+	if !hasRepoFinding(report.Findings, "surface-missing") {
+		t.Fatalf("expected surface-missing finding, got %#v", report.Findings)
+	}
+}
+
+func TestCLIInstallUsesResolvedAgentStackRepos(t *testing.T) {
+	binary := buildSkillHarnessBinary(t)
+	projectDir := t.TempDir()
+	mustWriteFile(t, filepath.Join(projectDir, ".skill-harness", "agent-stack.json"), `{
+  "version": 1,
+  "profile": "minimal",
+  "disabledPacks": ["frontier-agent-playbook"]
+}
+`)
+	tooling := fakeTooling(t, "python")
+
+	runSkillHarnessCLI(t, binary, tooling, "install", "--dir", projectDir, "--packs-only")
+
+	commands := tooling.commands(t)
+	assertCommandContains(t, commands, "python", "bootstrap_dependencies.py")
+	assertNoCommandContains(t, commands, "--repo frontier-agent-playbook")
+}
+
 func developerArtifactsConfig(t *testing.T, config map[string]any) map[string]any {
 	t.Helper()
 	capabilities, ok := config["capabilities"].(map[string]any)
@@ -918,6 +1252,15 @@ func containsJSONValue(values []any, want string) bool {
 func containsString(values []string, want string) bool {
 	for _, value := range values {
 		if value == want {
+			return true
+		}
+	}
+	return false
+}
+
+func hasRepoFinding(findings []repoFinding, code string) bool {
+	for _, finding := range findings {
+		if finding.Code == code {
 			return true
 		}
 	}
