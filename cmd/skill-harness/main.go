@@ -4552,6 +4552,13 @@ function dotQuote(value) {
   return '"' + String(value ?? '').replaceAll('\\', '\\\\').replaceAll('"', '\\"') + '"';
 }
 
+function dotHtmlText(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+}
+
 function normalizeToolId(value) {
   const raw = String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   if (['vega', 'vega-lite', 'vegalite'].includes(raw)) return 'vega-lite';
@@ -4812,7 +4819,7 @@ function uweGraphvizDot(spec, graph) {
   const lines = [
     'digraph UweNavigation {',
     '  graph [rankdir=LR, bgcolor="transparent", pad="0.22", nodesep="0.42", ranksep="0.78", compound=true, fontname="Segoe UI", label=' + dotQuote(spec.title ?? 'UWE navigation model') + ', labelloc=t];',
-    '  node [shape=box, style="rounded,filled", fixedsize=true, width=2.92, height=2.34, margin=0, fontname="Segoe UI", fontsize=12, color="#9fb3c8", fillcolor="#ffffff"];',
+    '  node [shape=plain, margin=0, fontname="Segoe UI", fontsize=12];',
     '  edge [fontname="Segoe UI", fontsize=10, color="#64748b", fontcolor="#334155", arrowsize=0.72];'
   ];
   for (const className of classNames) {
@@ -4823,15 +4830,24 @@ function uweGraphvizDot(spec, graph) {
     lines.push('    color="#cbd5e1";');
     lines.push('    fillcolor="#f8fafc";');
     lines.push('    style="rounded,filled";');
-    for (const node of nodes) {
-      const label = '\\n\\n\\n\\n\\n' + String(node.label || node.id).slice(0, 36) + '\\n' + String(node.route || node.facet || node.role || '').slice(0, 42);
-      lines.push('    ' + dotQuote(node.id) + ' [label=' + dotQuote(label) + '];');
-    }
+    for (const node of nodes) lines.push('    ' + dotQuote(node.id) + ' [label=<' + uweNodeHtmlLabel(node) + '>];');
     lines.push('  }');
   }
   for (const edge of graph.edges) lines.push('  ' + dotQuote(edge.from) + ' -> ' + dotQuote(edge.to) + (edge.label ? ' [label=' + dotQuote(edge.label) + ']' : '') + ';');
   lines.push('}');
   return lines.join('\n');
+}
+
+function uweNodeHtmlLabel(node) {
+  const label = dotHtmlText(String(node.label || node.id).slice(0, 36));
+  const route = dotHtmlText(String(node.route || node.facet || node.role || '').slice(0, 42));
+  const screenshotToken = 'screenshot:' + dotHtmlText(node.id);
+  return '<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" COLOR="#9fb3c8">' +
+    '<TR><TD BGCOLOR="#effaf8"><FONT FACE="Segoe UI" POINT-SIZE="11" COLOR="#0f766e">«navigation node»</FONT></TD></TR>' +
+    '<TR><TD FIXEDSIZE="TRUE" WIDTH="190" HEIGHT="92" BGCOLOR="#eef2f6"><FONT FACE="Segoe UI" POINT-SIZE="9" COLOR="#64748b">' + screenshotToken + '</FONT></TD></TR>' +
+    '<TR><TD ALIGN="LEFT"><FONT FACE="Segoe UI" POINT-SIZE="12"><B>' + label + '</B></FONT></TD></TR>' +
+    '<TR><TD ALIGN="LEFT"><FONT FACE="Segoe UI" POINT-SIZE="10" COLOR="#334155">' + route + '</FONT></TD></TR>' +
+    '</TABLE>';
 }
 
 function polygonBounds(group) {
@@ -4854,32 +4870,33 @@ function polygonBounds(group) {
 function injectUweScreenshots(svg, graph) {
   let output = svg;
   for (const node of graph.nodes) {
-    const title = '<title>' + escapeHtml(node.id) + '</title>';
-    const start = output.indexOf(title);
+    const token = 'screenshot:' + escapeHtml(node.id);
+    const start = output.indexOf(token);
     if (start < 0) continue;
     const groupStart = output.lastIndexOf('<g ', start);
     const groupEnd = output.indexOf('</g>', start);
     if (groupStart < 0 || groupEnd < 0) continue;
     const group = output.slice(groupStart, groupEnd + 4);
     if (!group.includes('class="node"')) continue;
-    const bounds = polygonBounds(group);
-    if (!bounds) continue;
     const dataUrl = imageDataUrl(node.screenshot);
-    const x = bounds.minX;
-    const y = bounds.minY;
-    const width = bounds.maxX - bounds.minX;
-    const imageX = x + 9;
-    const imageY = y + 31;
-    const imageWidth = width - 18;
-    const imageHeight = Math.min(92, (bounds.maxY - bounds.minY) * 0.56);
-    const cleaned = group.replace(/<text\b[\s\S]*?<\/text>/g, '');
-    const replacement = cleaned.replace('</g>',
-      '<text xml:space="preserve" x="' + (x + 10).toFixed(1) + '" y="' + (y + 18).toFixed(1) + '" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="700" fill="#0f766e">«navigation node»</text>' +
-      (dataUrl
-        ? '<image href="' + escapeAttribute(dataUrl) + '" x="' + imageX.toFixed(1) + '" y="' + imageY.toFixed(1) + '" width="' + imageWidth.toFixed(1) + '" height="' + imageHeight.toFixed(1) + '" preserveAspectRatio="xMidYMid meet"></image>'
-        : '<rect x="' + imageX.toFixed(1) + '" y="' + imageY.toFixed(1) + '" width="' + imageWidth.toFixed(1) + '" height="' + imageHeight.toFixed(1) + '" rx="6" fill="#eef2f6" stroke="#d8dee8"></rect><text x="' + (x + width / 2).toFixed(1) + '" y="' + (imageY + imageHeight / 2).toFixed(1) + '" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#64748b">no screenshot</text>') +
-      '<text xml:space="preserve" x="' + (x + 10).toFixed(1) + '" y="' + (bounds.maxY - 26).toFixed(1) + '" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" fill="#111827">' + escapeHtml(String(node.label || node.id).slice(0, 30)) + '</text>' +
-      '<text xml:space="preserve" x="' + (x + 10).toFixed(1) + '" y="' + (bounds.maxY - 10).toFixed(1) + '" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#334155">' + escapeHtml(String(node.route || node.facet || node.role || 'navigationNode').slice(0, 38)) + '</text></g>');
+    if (!dataUrl) continue;
+    const tokenStart = group.indexOf(token);
+    const beforeToken = group.slice(0, tokenStart);
+    const polygonStart = beforeToken.lastIndexOf('<polygon ');
+    const polygonEnd = polygonStart >= 0 ? group.indexOf('>', polygonStart) : -1;
+    if (polygonStart < 0 || polygonEnd < 0) continue;
+    const bounds = polygonBounds(group.slice(polygonStart, polygonEnd + 1));
+    if (!bounds) continue;
+    const imageX = bounds.minX + 6;
+    const imageY = bounds.minY + 6;
+    const imageWidth = bounds.maxX - bounds.minX - 12;
+    const imageHeight = bounds.maxY - bounds.minY - 12;
+    const tokenTextStart = group.lastIndexOf('<text ', tokenStart);
+    const tokenTextEnd = tokenTextStart >= 0 ? group.indexOf('</text>', tokenStart) + '</text>'.length : -1;
+    if (tokenTextStart < 0 || tokenTextEnd < 0) continue;
+    const replacement = group.slice(0, tokenTextStart) +
+      '<image href="' + escapeAttribute(dataUrl) + '" x="' + imageX.toFixed(1) + '" y="' + imageY.toFixed(1) + '" width="' + imageWidth.toFixed(1) + '" height="' + imageHeight.toFixed(1) + '" preserveAspectRatio="xMidYMid meet"></image>' +
+      group.slice(tokenTextEnd);
     output = output.slice(0, groupStart) + replacement + output.slice(groupEnd + 4);
   }
   return output.replace(/<polygon fill="none" stroke="black"/g, '<polygon fill="#ffffff" stroke="#9fb3c8"')
