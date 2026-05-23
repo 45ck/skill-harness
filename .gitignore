@@ -4,6 +4,7 @@ Thumbs.db
 /skill-harness.exe
 social-preview.png
 dist/
+generated/review/
 
 # Beads / Dolt files (added by bd init)
 .dolt/
