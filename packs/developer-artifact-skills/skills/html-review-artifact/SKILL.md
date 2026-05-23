@@ -13,6 +13,7 @@ Use this skill when a human needs to scan, compare, inspect, or interact with a 
 - Use inline CSS only.
 - Use inline JavaScript only when interaction materially improves review.
 - Do not load external scripts, fonts, images, analytics, or network resources.
+- For Mermaid, C4, UML-style, and architecture diagrams, embed pre-rendered inline SVG or static markup by default.
 - Do not include secrets, tokens, credentials, private logs, or customer data.
 - Link to the canonical source artifact and issue.
 - Use semantic headings, landmarks, meaningful link text, and alt text for embedded images.

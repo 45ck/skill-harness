@@ -16,19 +16,19 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## system-modeler
 
-- Skills: use-case-modeler, use-case-description-writer, sequence-diagram-builder, activity-diagram-builder, state-model-builder, domain-class-modeler, model-consistency-checker, scenario-to-uml-transformer, frontier-model-context, digital-expert-test
+- Skills: use-case-modeler, use-case-description-writer, sequence-diagram-builder, activity-diagram-builder, state-model-builder, domain-class-modeler, model-consistency-checker, scenario-to-uml-transformer, frontier-model-context, digital-expert-test, model-review-artifact
 
 ## system-modeler-beads
 
-- Skills: use-case-modeler, use-case-description-writer, sequence-diagram-builder, activity-diagram-builder, state-model-builder, domain-class-modeler, model-consistency-checker, scenario-to-uml-transformer, frontier-model-context, digital-expert-test
+- Skills: use-case-modeler, use-case-description-writer, sequence-diagram-builder, activity-diagram-builder, state-model-builder, domain-class-modeler, model-consistency-checker, scenario-to-uml-transformer, frontier-model-context, digital-expert-test, model-review-artifact
 
 ## software-architect
 
-- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, html-review-artifact, artifact-evidence-gate
+- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate
 
 ## software-architect-beads
 
-- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, html-review-artifact, artifact-evidence-gate
+- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate
 
 ## web-engineer
 
@@ -76,7 +76,7 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## research-writer
 
-- Skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, developer-artifact-shaper, html-review-artifact, artifact-evidence-gate
+- Skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate
 
 ## workflow-engineer
 

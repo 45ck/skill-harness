@@ -48,7 +48,7 @@ That command:
 - runs `noslop init`
 - runs `bd init`
 - runs `agent-docs install-gates --quality`
-- scaffolds developer artifact guidance by default, with Markdown/TOON/specgraph as canonical source and generated HTML as an optional review surface
+- scaffolds developer artifact guidance by default, with Markdown/TOON/specgraph as canonical source, generated HTML as an optional review surface, and a manifest for provenance/freshness
 
 ## Benchmark results
 
@@ -191,6 +191,8 @@ Choose a developer artifact profile:
 ```
 
 Artifact profiles are guidance and scaffold settings, not a separate runtime. `auto` is the default and resolves to `dual`: canonical Markdown/TOON/specgraph sources plus optional generated review surfaces. Use `codex-app` or `claude-desktop` for desktop workflows with file-backed previews, `cli` or `tui` for terminal-heavy projects, and `none`, `--skip-artifacts`, or `--skip-developer-artifacts` for minimal projects. The shorter `--artifact-profile markdown|html|dual|none` form remains supported as an alias.
+
+Developer artifact scaffolding also creates `docs/artifacts/artifacts.manifest.json` and `scripts/check-artifact-manifest.mjs`. Use the manifest to record source-backed generated views, including Mermaid, C4, UML-style, dependency, and architecture-space artifacts. Generated HTML should embed pre-rendered diagrams, such as inline SVG, instead of loading browser diagram runtimes by default.
 
 ### Validate installed agent dependencies
 

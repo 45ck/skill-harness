@@ -14,6 +14,7 @@ Pick the artifact format from the job it must do:
 - Markdown or TOON for canonical source, git diffs, CLI/TUI handoff, and long-lived docs.
 - HTML for generated human review surfaces, dense comparisons, visual diagrams, prototypes, dashboards, or desktop app previews.
 - Dual when a durable source and a rich review surface are both useful.
+- Model review artifacts use durable text sources and generated static review views; do not make rendered diagrams the only source.
 
 Do not make generated HTML the only durable source for a decision.
 
@@ -23,7 +24,8 @@ Do not make generated HTML the only durable source for a decision.
 2. Identify the canonical source location.
 3. Decide the review surface: markdown, html, or dual.
 4. Name the evidence that must be linked.
-5. State the update rule: edit source first, regenerate review surface second.
+5. Decide whether the artifact should be listed in `docs/artifacts/artifacts.manifest.json`.
+6. State the update rule: edit source first, regenerate review surface second.
 
 ## Output
 
@@ -31,5 +33,6 @@ Do not make generated HTML the only durable source for a decision.
 ### Canonical Source
 ### Review Surface
 ### Evidence Links
+### Manifest Entry
 ### Update Rule
 

@@ -106,8 +106,39 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	if !fileExists(filepath.Join(root, "scripts", "check-artifact-html-policy.mjs")) {
 		t.Fatal("expected HTML policy checker script")
 	}
+	if !fileExists(filepath.Join(root, "scripts", "check-artifact-manifest.mjs")) {
+		t.Fatal("expected artifact manifest checker script")
+	}
+	if !fileExists(filepath.Join(root, "docs", "artifacts", "artifacts.manifest.json")) {
+		t.Fatal("expected artifact manifest")
+	}
+	if !fileExists(filepath.Join(root, "docs", "artifacts", "templates", "model-artifact.md")) {
+		t.Fatal("expected model artifact template")
+	}
 	if !gitignoreHasLine(mustReadText(t, filepath.Join(root, ".gitignore")), "generated/review/") {
 		t.Fatal("expected generated review output to be gitignored")
+	}
+	manifest, ok := artifacts["manifest"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected manifest config, got %#v", artifacts["manifest"])
+	}
+	if manifest["path"] != "docs/artifacts/artifacts.manifest.json" {
+		t.Fatalf("expected manifest path, got %#v", manifest["path"])
+	}
+	modelPolicy, ok := artifacts["modelPolicy"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected model policy config, got %#v", artifacts["modelPolicy"])
+	}
+	if modelPolicy["defaultReviewEmbedding"] != "inline-svg" {
+		t.Fatalf("expected inline-svg review embedding, got %#v", modelPolicy["defaultReviewEmbedding"])
+	}
+	notations, ok := modelPolicy["allowedNotations"].([]any)
+	if !ok || !containsJSONValue(notations, "mermaid") {
+		t.Fatalf("expected mermaid notation in model policy, got %#v", modelPolicy["allowedNotations"])
+	}
+	scripts := packageScripts(t, filepath.Join(root, "package.json"))
+	if scripts["artifacts:manifest:check"] != "node scripts/check-artifact-manifest.mjs" {
+		t.Fatalf("expected artifact manifest check script, got %#v", scripts["artifacts:manifest:check"])
 	}
 }
 
@@ -147,6 +178,32 @@ func developerArtifactsConfig(t *testing.T, config map[string]any) map[string]an
 		t.Fatalf("expected developerArtifacts map, got %#v", capabilities["developerArtifacts"])
 	}
 	return artifacts
+}
+
+func packageScripts(t *testing.T, packagePath string) map[string]any {
+	t.Helper()
+	data, err := os.ReadFile(packagePath)
+	if err != nil {
+		t.Fatalf("read package.json: %v", err)
+	}
+	var metadata map[string]any
+	if err := json.Unmarshal(data, &metadata); err != nil {
+		t.Fatalf("package.json should be valid JSON: %v", err)
+	}
+	scripts, ok := metadata["scripts"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected package scripts, got %#v", metadata["scripts"])
+	}
+	return scripts
+}
+
+func containsJSONValue(values []any, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
 }
 
 func mustReadText(t *testing.T, path string) string {

@@ -12,6 +12,7 @@ Use this skill when ending a session, handing work to another agent, or preparin
 - governing issue or task
 - canonical artifact source
 - generated review surface, if any
+- manifest entry or freshness status, if generated review output exists
 - changed files or relevant files
 - verification evidence
 - unresolved assumptions

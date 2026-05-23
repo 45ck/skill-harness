@@ -12,6 +12,7 @@ Use this skill before treating a developer artifact as ready for handoff, review
 - The artifact has a clear purpose and owner.
 - The canonical source is named.
 - Generated views link back to source.
+- Source-backed generated views are listed in `docs/artifacts/artifacts.manifest.json` when the project uses the scaffold.
 - Evidence is concrete: files, issues, tests, screenshots, logs, traces, or citations.
 - Claims are separated from assumptions.
 - Stale generated outputs are identified.

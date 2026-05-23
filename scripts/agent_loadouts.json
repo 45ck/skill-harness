@@ -55,7 +55,8 @@
       "model-consistency-checker",
       "scenario-to-uml-transformer",
       "frontier-model-context",
-      "digital-expert-test"
+      "digital-expert-test",
+      "model-review-artifact"
     ]
   },
   "system-modeler-beads": {
@@ -69,7 +70,8 @@
       "model-consistency-checker",
       "scenario-to-uml-transformer",
       "frontier-model-context",
-      "digital-expert-test"
+      "digital-expert-test",
+      "model-review-artifact"
     ]
   },
   "software-architect": {
@@ -91,6 +93,7 @@
       "llm-default-architecture",
       "verification-first-delivery",
       "developer-artifact-shaper",
+      "model-review-artifact",
       "html-review-artifact",
       "artifact-evidence-gate"
     ]
@@ -114,6 +117,7 @@
       "llm-default-architecture",
       "verification-first-delivery",
       "developer-artifact-shaper",
+      "model-review-artifact",
       "html-review-artifact",
       "artifact-evidence-gate"
     ]
@@ -315,6 +319,7 @@
       "digital-expert-test",
       "pre-ai-scarcity-thinking",
       "developer-artifact-shaper",
+      "model-review-artifact",
       "html-review-artifact",
       "artifact-evidence-gate"
     ]

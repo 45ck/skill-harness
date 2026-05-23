@@ -9,6 +9,7 @@ Developer artifacts use this source-of-truth split:
 - canonical source: Markdown, TOON, specgraph / `agent-docs`, or existing project docs
 - generated review surface: static HTML under `generated/review/`
 - handoff evidence: linked files, Beads issues, tests, reports, logs, screenshots, or runtime proof
+- artifact provenance: `docs/artifacts/artifacts.manifest.json`
 
 HTML is never the only durable source for a decision. Edit the source first, then regenerate or discard the review surface.
 
@@ -23,9 +24,11 @@ Default setup:
 This creates:
 
 - `.skill-harness/project.json`
+- `docs/artifacts/artifacts.manifest.json`
 - `docs/artifacts/source/`
 - `docs/artifacts/templates/`
 - `generated/review/`
+- `scripts/check-artifact-manifest.mjs`
 - `scripts/check-artifact-html-policy.mjs`
 
 It also adds `generated/review/` to `.gitignore` and adds package scripts when applicable:
@@ -33,6 +36,8 @@ It also adds `generated/review/` to `.gitignore` and adds package scripts when a
 - `docs:check`
 - `docs:generate`
 - `docs:report`
+- `artifacts:check`
+- `artifacts:manifest:check`
 - `artifacts:html:check`
 
 If `--skip-agent-docs` is used, the artifact scaffold still works, but it does not add scripts that call `agent-docs`.
@@ -81,12 +86,31 @@ node scripts/check-artifact-html-policy.mjs
 
 The checker rejects common unsafe constructs including `<script>`, iframes, object/embed/form tags, meta refresh, external `src` / `href` / `action` references, and browser APIs such as `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, `sendBeacon`, `serviceWorker`, `document.cookie`, `localStorage`, and `sessionStorage`.
 
+## Model And Diagram Artifacts
+
+Mermaid, C4, UML-style, UWE-inspired, dependency, and architecture-space views fit the developer artifact model when they stay source-backed:
+
+- keep canonical model source in Markdown, TOON, specgraph, Mermaid text, PlantUML text, or existing project docs
+- generate static HTML review surfaces from that source
+- pre-render diagrams as inline SVG or static markup; do not load a browser Mermaid runtime by default
+- record model kind, notation, abstraction level, source path, generated review path, owner, evidence links, renderer, and source hash in the manifest
+- treat Mermaid C4 as a useful review notation, but mark the C4 level explicitly: context, container, component, dynamic, or deployment
+- treat dependency graphs as generated evidence unless the project has a separate model source of truth
+- keep UWE UML semantics in structured source; generate simplified review diagrams only when they help humans inspect the workflow
+
+Run the manifest check before handing off model-backed artifacts:
+
+```bash
+node scripts/check-artifact-manifest.mjs
+```
+
 ## Skill Pack
 
 The embedded `developer-artifact-skills` pack provides:
 
 - `developer-artifact-shaper`: choose artifact type, canonical source, and review surface
 - `html-review-artifact`: create safe generated HTML review artifacts
+- `model-review-artifact`: shape source-backed Mermaid, C4, UML-style, dependency, and architecture-space model views
 - `artifact-evidence-gate`: check source links, evidence, freshness, and safety
 - `artifact-handoff-pack`: assemble the minimal handoff bundle
 
@@ -123,4 +147,3 @@ Run:
 go test ./cmd/skill-harness
 node -e "JSON.parse(require('fs').readFileSync('scripts/dependencies.json','utf8')); JSON.parse(require('fs').readFileSync('scripts/agent_loadouts.json','utf8'))"
 ```
-

@@ -945,7 +945,9 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool) error {
 		scripts = map[string]any{}
 	}
 	defaultScripts := map[string]string{
-		"artifacts:html:check": "node scripts/check-artifact-html-policy.mjs",
+		"artifacts:check":          "node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
+		"artifacts:html:check":     "node scripts/check-artifact-html-policy.mjs",
+		"artifacts:manifest:check": "node scripts/check-artifact-manifest.mjs",
 	}
 	if agentDocsEnabled {
 		defaultScripts["docs:check"] = "agent-docs check"
@@ -1030,6 +1032,54 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 					"tooling": canonicalTooling,
 					"paths":   []string{"docs", "docs/artifacts/source"},
 				},
+				"artifactTypes": []string{
+					"decision",
+					"plan",
+					"spec",
+					"handoff",
+					"evidence-pack",
+					"blast-radius",
+					"architecture-view",
+					"model-view",
+					"review-dashboard",
+				},
+				"manifest": map[string]any{
+					"path":            "docs/artifacts/artifacts.manifest.json",
+					"schemaVersion":   1,
+					"requireSource":   true,
+					"requireEvidence": false,
+					"freshness": map[string]any{
+						"trackSourceHash": true,
+						"hashAlgorithm":   "sha256",
+					},
+				},
+				"modelPolicy": map[string]any{
+					"canonicalSource":        true,
+					"generatedReviewOnly":    true,
+					"renderDiagramsOffline":  true,
+					"defaultReviewEmbedding": "inline-svg",
+					"allowedNotations":       []string{"mermaid", "markdown", "toon", "plantuml"},
+					"allowedModelKinds": []string{
+						"sequence",
+						"state",
+						"class",
+						"domain",
+						"context",
+						"container",
+						"component",
+						"dynamic",
+						"deployment",
+						"dependency",
+						"use-case",
+						"activity",
+						"architecture-space",
+					},
+					"c4": map[string]any{
+						"notation":     "mermaid",
+						"experimental": true,
+						"levels":       []string{"context", "container", "component", "dynamic", "deployment"},
+					},
+				},
 				"reviewSurface": map[string]any{
 					"format":          "html",
 					"outDir":          "generated/review",
@@ -1074,6 +1124,27 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	templatePath := filepath.Join(projectDir, "docs", "artifacts", "templates", "review-artifact.md")
 	if !fileExists(templatePath) {
 		if err := os.WriteFile(templatePath, []byte(developerArtifactTemplate()), 0o644); err != nil {
+			return err
+		}
+	}
+
+	modelTemplatePath := filepath.Join(projectDir, "docs", "artifacts", "templates", "model-artifact.md")
+	if !fileExists(modelTemplatePath) {
+		if err := os.WriteFile(modelTemplatePath, []byte(developerModelArtifactTemplate()), 0o644); err != nil {
+			return err
+		}
+	}
+
+	manifestPath := filepath.Join(projectDir, "docs", "artifacts", "artifacts.manifest.json")
+	if !fileExists(manifestPath) {
+		if err := os.WriteFile(manifestPath, []byte(developerArtifactManifest()), 0o644); err != nil {
+			return err
+		}
+	}
+
+	manifestCheckerPath := filepath.Join(projectDir, "scripts", "check-artifact-manifest.mjs")
+	if !fileExists(manifestCheckerPath) {
+		if err := os.WriteFile(manifestCheckerPath, []byte(developerArtifactManifestScript()), 0o644); err != nil {
 			return err
 		}
 	}
@@ -1127,12 +1198,22 @@ Use this directory for durable developer artifacts and generated review surfaces
 - Keep canonical decisions, specs, investigations, and handoff notes in Markdown, TOON, or specgraph-compatible sources.
 - Treat HTML as a generated review surface for scanning, comparison, diagrams, prototypes, and desktop app previews.
 - Do not make generated HTML the only durable source for a decision.
+- Record source-backed review surfaces in artifacts.manifest.json so agents and humans can detect stale output.
 
 ## Layout
 
 - source/ - canonical artifact sources when they do not belong in a domain-specific docs folder.
 - templates/ - local templates for recurring artifact types.
+- artifacts.manifest.json - provenance and freshness index for source-backed review artifacts.
 - ../../generated/review/ - generated HTML or rich review artifacts for humans.
+
+## Model And Diagram Policy
+
+- Keep Mermaid, C4, UML-style, and architecture-space sources in Markdown, TOON, or specgraph-compatible source artifacts.
+- Pre-render diagrams into generated HTML as inline SVG or static markup; do not load a browser Mermaid runtime by default.
+- Treat Mermaid C4 as a review notation and record the level explicitly: context, container, component, dynamic, or deployment.
+- Treat dependency graphs as generated evidence unless the project has a separate model source of truth.
+- Link every generated model view back to its source artifact, issue, and evidence.
 
 ## HTML Review Policy
 
@@ -1147,6 +1228,7 @@ Use this directory for durable developer artifacts and generated review surfaces
 
 Run this policy check before handing off generated HTML:
 
+    node scripts/check-artifact-manifest.mjs
     node scripts/check-artifact-html-policy.mjs
 `, profile, effectiveProfile)
 }
@@ -1175,6 +1257,161 @@ The smallest useful explanation for a reviewer.
 ## Follow-Up
 
 - [ ] Action item
+`
+}
+
+func developerModelArtifactTemplate() string {
+	return `# Model Artifact: [Title]
+
+**Status:** Draft
+**Artifact type:** model-view
+**Model kind:** sequence | state | class | domain | context | container | component | dynamic | deployment | dependency | use-case | activity | architecture-space
+**Notation:** mermaid | markdown | toon | plantuml
+**Canonical source:** [path or issue]
+**Generated review:** [generated/review/path.html]
+
+## Purpose
+
+What system behavior, boundary, dependency, or architecture question this model helps review.
+
+## Scope
+
+- System or subsystem:
+- Abstraction level: domain | design | runtime | deployment | decision
+- Owner:
+
+## Source Model
+
+Keep diagram source here or link to the canonical source artifact. Generated HTML should render from this source.
+
+## Evidence
+
+- Specs:
+- Code:
+- Tests:
+- Runtime evidence:
+
+## Freshness
+
+- Source hash:
+- Renderer and version:
+- Last generated:
+`
+}
+
+func developerArtifactManifest() string {
+	return `{
+  "version": 1,
+  "rules": {
+    "editSourceFirst": true,
+    "generatedReviewIsCanonical": false,
+    "hashAlgorithm": "sha256"
+  },
+  "artifacts": []
+}
+`
+}
+
+func developerArtifactManifestScript() string {
+	return `import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const configPath = path.join(root, '.skill-harness', 'project.json');
+const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
+const manifestPath = path.join(root, developerArtifacts.manifest?.path ?? 'docs/artifacts/artifacts.manifest.json');
+const reviewRoot = path.resolve(root, developerArtifacts.reviewSurface?.outDir ?? 'generated/review');
+const allowedTypes = new Set(developerArtifacts.artifactTypes ?? []);
+const allowedModelKinds = new Set(developerArtifacts.modelPolicy?.allowedModelKinds ?? []);
+const allowedNotations = new Set(developerArtifacts.modelPolicy?.allowedNotations ?? []);
+
+function relativeForMessage(filePath) {
+  return path.relative(root, filePath).replaceAll(path.sep, '/');
+}
+
+function resolveInsideRoot(relativePath, fieldName, failures) {
+  if (typeof relativePath !== 'string' || relativePath.trim() === '') return null;
+  if (path.isAbsolute(relativePath)) {
+    failures.push(fieldName + ' must be a repo-relative path: ' + relativePath);
+    return null;
+  }
+  const resolved = path.resolve(root, relativePath);
+  if (!resolved.startsWith(root + path.sep) && resolved !== root) {
+    failures.push(fieldName + ' escapes the repo root: ' + relativePath);
+    return null;
+  }
+  return resolved;
+}
+
+function hashFile(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+const failures = [];
+if (!fs.existsSync(manifestPath)) {
+  failures.push('missing artifact manifest: ' + relativeForMessage(manifestPath));
+} else {
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  if (manifest.version !== 1) failures.push('manifest.version must be 1');
+  if (!Array.isArray(manifest.artifacts)) failures.push('manifest.artifacts must be an array');
+
+  for (const [index, artifact] of (manifest.artifacts ?? []).entries()) {
+    const label = artifact?.id ? 'artifact ' + artifact.id : 'artifact #' + index;
+    if (!artifact || typeof artifact !== 'object') {
+      failures.push(label + ' must be an object');
+      continue;
+    }
+    for (const field of ['id', 'type', 'source', 'status']) {
+      if (typeof artifact[field] !== 'string' || artifact[field].trim() === '') {
+        failures.push(label + ' missing required string field: ' + field);
+      }
+    }
+    if (artifact.type && allowedTypes.size > 0 && !allowedTypes.has(artifact.type)) {
+      failures.push(label + ' has unsupported type: ' + artifact.type);
+    }
+    if (artifact.modelKind && allowedModelKinds.size > 0 && !allowedModelKinds.has(artifact.modelKind)) {
+      failures.push(label + ' has unsupported modelKind: ' + artifact.modelKind);
+    }
+    if (artifact.notation && allowedNotations.size > 0 && !allowedNotations.has(artifact.notation)) {
+      failures.push(label + ' has unsupported notation: ' + artifact.notation);
+    }
+
+    const sourcePath = resolveInsideRoot(artifact.source, label + '.source', failures);
+    if (sourcePath && !fs.existsSync(sourcePath)) {
+      failures.push(label + ' source does not exist: ' + artifact.source);
+    }
+    if (sourcePath && artifact.sourceHash) {
+      const actualHash = hashFile(sourcePath);
+      if (artifact.sourceHash !== actualHash) {
+        failures.push(label + ' sourceHash is stale for ' + artifact.source);
+      }
+    }
+
+    if (artifact.reviewSurface) {
+      const reviewPath = resolveInsideRoot(artifact.reviewSurface, label + '.reviewSurface', failures);
+      if (reviewPath && path.extname(reviewPath) === '.html' && !reviewPath.startsWith(reviewRoot + path.sep)) {
+        failures.push(label + ' HTML review surface must be under ' + relativeForMessage(reviewRoot));
+      }
+      if (artifact.status === 'ready' && reviewPath && !fs.existsSync(reviewPath)) {
+        failures.push(label + ' ready review surface does not exist: ' + artifact.reviewSurface);
+      }
+    }
+
+    if (artifact.status === 'ready' && (!Array.isArray(artifact.evidenceLinks) || artifact.evidenceLinks.length === 0)) {
+      failures.push(label + ' ready artifact needs evidenceLinks');
+    }
+  }
+}
+
+if (failures.length > 0) {
+  console.error('Artifact manifest policy failed:');
+  for (const failure of failures) console.error('- ' + failure);
+  process.exit(1);
+}
+
+console.log('Artifact manifest policy passed');
 `
 }
 

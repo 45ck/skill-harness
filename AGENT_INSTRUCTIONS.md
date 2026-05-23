@@ -56,7 +56,7 @@ Default behavior:
 - run `noslop init`
 - run `bd init`
 - run `agent-docs install-gates --quality`
-- scaffold developer artifact guidance by default; `auto` resolves to a dual profile with canonical Markdown/TOON/specgraph sources and optional generated review surfaces
+- scaffold developer artifact guidance by default; `auto` resolves to a dual profile with canonical Markdown/TOON/specgraph sources, optional generated review surfaces, and an artifact provenance manifest
 
 Useful variants:
 
@@ -124,6 +124,14 @@ noslop init
 - **Skills**: 5 specgraph workflow skills + 3 noslop quality gate skills
 
 For the fully automated equivalent of the above, use the `setup-project` command described in the previous section — it installs both tools, runs their init commands, and sets up git hooks in one step.
+
+## Developer Artifact Rules
+
+- Keep canonical decisions, specs, handoffs, and model sources in Markdown, TOON, specgraph-compatible sources, or existing project docs.
+- Treat generated HTML under `generated/review/` as a human review surface only.
+- Record generated review surfaces in `docs/artifacts/artifacts.manifest.json` with source path, artifact type, evidence links, and freshness data when available.
+- For Mermaid, C4, UML-style, UWE-inspired, dependency, and architecture-space views, keep the diagram/model source durable and pre-render diagrams into HTML as inline SVG or static markup.
+- Do not add browser Mermaid runtimes, external scripts, or external assets to generated review HTML by default.
 
 ## Rules
 

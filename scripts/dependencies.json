@@ -134,7 +134,8 @@
         "uml-analysis-modelling-skills",
         "business-analysis-skills",
         "software-architecture-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "developer-artifact-skills"
       ]
     },
     "system-modeler-beads": {
@@ -142,7 +143,8 @@
         "uml-analysis-modelling-skills",
         "business-analysis-skills",
         "software-architecture-skills",
-        "frontier-agent-playbook"
+        "frontier-agent-playbook",
+        "developer-artifact-skills"
       ]
     },
     "software-architect": {
