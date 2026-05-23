@@ -22,6 +22,10 @@ This is a synthetic Vibecord-style example showing how a UWE navigation model ca
 
 Demonstrate the reusable shape: navigation nodes are the spine, screenshots make each node inspectable, actions show process behavior, and side effects connect UI actions to runtime or data changes.
 
+## Renderer Contract
+
+This atlas is intentionally OSS-first. The source graph is converted to DOT and rendered with Graphviz through `@viz-js/viz`; Skill Harness only injects screenshot evidence into UML node compartments after the renderer has produced SVG. The HTML review surface opts into the reviewed `svg-pan-zoom` lane so the large generated SVG can be panned and zoomed without a custom viewer or network-loaded scripts.
+
 ## Scope
 
 | Field | Value |

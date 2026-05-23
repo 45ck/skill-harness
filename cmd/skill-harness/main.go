@@ -3070,6 +3070,9 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile arti
 	if _, exists := devDependencies["@viz-js/viz"]; !exists {
 		devDependencies["@viz-js/viz"] = "3.27.0"
 	}
+	if _, exists := devDependencies["svg-pan-zoom"]; !exists {
+		devDependencies["svg-pan-zoom"] = "^3.6.2"
+	}
 	defaultScripts := map[string]string{
 		"artifacts:check":          "node scripts/generate-artifact-review.mjs --check && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
 		"artifacts:generate":       "node scripts/generate-artifact-review.mjs",
@@ -4508,6 +4511,13 @@ const defaultInfographicTools = [
   { id: 'rawgraphs', label: 'RAWGraphs', role: 'design-led or unusual infographic forms using tabular data', output: 'exported SVG copied into the generated review surface' },
   { id: 'chartjs', label: 'Chart.js', role: 'simple familiar charts when existing source data already matches Chart.js conventions', output: 'server-rendered image or static SVG equivalent' }
 ];
+const svgPanZoomRuntime = (() => {
+  try {
+    return fs.readFileSync(path.join(root, 'node_modules', 'svg-pan-zoom', 'dist', 'svg-pan-zoom.min.js'), 'utf8');
+  } catch {
+    return '';
+  }
+})();
 const configuredInfographicTools = Array.isArray(developerArtifacts.infographicPolicy?.tools)
   ? developerArtifacts.infographicPolicy.tools
   : defaultInfographicTools;
@@ -4913,9 +4923,9 @@ async function renderUweNavigationGraphvizSvg(spec, graph) {
 
 function renderZoomableUmlSvg(visual, index) {
   const name = 'uwe-zoom-' + index;
-  return '<div class="uml-zoom" role="group" aria-label="Zoomable UML model rendered by open-source Graphviz via @viz-js/viz">' +
+  return '<div class="uml-zoom" data-svg-pan-zoom="true" role="group" aria-label="Zoomable UML model rendered by open-source Graphviz via @viz-js/viz and viewed with svg-pan-zoom">' +
     '<input id="' + name + '-fit" name="' + name + '" type="radio" checked><input id="' + name + '-100" name="' + name + '" type="radio"><input id="' + name + '-150" name="' + name + '" type="radio"><input id="' + name + '-200" name="' + name + '" type="radio">' +
-    '<div class="uml-zoom-controls" aria-label="Static zoom controls"><span>Zoom</span><label for="' + name + '-fit">Fit</label><label for="' + name + '-100">100%</label><label for="' + name + '-150">150%</label><label for="' + name + '-200">200%</label></div>' +
+    '<div class="uml-zoom-controls" aria-label="CSS fallback zoom controls"><span>Zoom</span><label for="' + name + '-fit">Fit</label><label for="' + name + '-100">100%</label><label for="' + name + '-150">150%</label><label for="' + name + '-200">200%</label><span class="viewer-badge">svg-pan-zoom enabled when reviewed JS lane is allowed</span></div>' +
     '<div class="uml-zoom-frame"><div class="uml-zoom-canvas">' + visual + '</div></div>' +
     '</div>';
 }
@@ -5005,7 +5015,7 @@ async function renderInfographicSpec(spec, index) {
   if (isUwe) visual = renderZoomableUmlSvg(visual, index);
   const articleClass = isUwe ? 'chart-panel uml-model-panel' : 'chart-panel';
   const badge = isUwe ? 'UWE / UML profile - Graphviz backend' : (tool || 'source-spec');
-  const rendererNote = isUwe ? '<p class="muted">Generated from source JSON into DOT and rendered with the open-source @viz-js/viz Graphviz engine; screenshots are injected as UML node compartments after render.</p>' : '';
+  const rendererNote = isUwe ? '<p class="muted">Generated from source JSON into DOT, rendered with the open-source @viz-js/viz Graphviz engine, viewed with svg-pan-zoom when the reviewed JS lane is enabled, and extended only by injecting screenshots into UML node compartments after render.</p>' : '';
   return '<article class="' + articleClass + '"><div class="chart-head"><h3>' + escapeHtml(spec.title ?? 'Infographic ' + (index + 1)) + '</h3><span class="tool-badge">' + escapeHtml(badge) + '</span></div><p>' + escapeHtml(spec.summary ?? spec.description ?? (allowed ? 'Rendered as static review markup from a source-declared infographic spec.' : 'Unknown tool requested; rendered with the static fallback.')) + '</p>' + rendererNote + visual + '</article>';
 }
 
@@ -5062,8 +5072,12 @@ function gallerySection(artifact) {
   return '<section class="panel"><h2>Screenshots And Evidence Images</h2><div class="gallery">' + figures.join('\n') + '</div></section>';
 }
 
-function htmlPage(title, body) {
-  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="' + escapeAttribute(requiredCsp) + '">\n<title>' + escapeHtml(title) + '</title>\n<style>\n:root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;--bg:#eef2f6;--panel:#fff;--text:#1f2937;--muted:#5b6472;--line:#d8dee8;--navy:#172033;--teal:#0f766e;--blue:#2457c5;--amber:#a15c07;--green:#16794b;--red:#b42318;--violet:#6546a3}*{box-sizing:border-box}body{margin:0;color:var(--text);background:var(--bg)}a{color:#174ea6}header{background:var(--navy);color:#fff;padding:28px;border-bottom:6px solid var(--teal)}header h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:0}header p{max-width:1040px;margin:0;color:#dce6f1}main{max-width:1240px;margin:0 auto;padding:18px}h2,h3{margin:0 0 10px;line-height:1.2;letter-spacing:0}p{margin:0 0 12px}.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{border:1px solid var(--line);border-top:5px solid var(--teal);border-radius:8px;padding:12px;background:#fff;min-height:104px}.metric strong{display:block;font-size:28px;line-height:1;margin-bottom:6px}.metric span{color:var(--muted);font-size:13px}.blue{border-top-color:var(--blue)}.amber{border-top-color:var(--amber)}.green{border-top-color:var(--green)}.violet{border-top-color:var(--violet)}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:650}.tab-panel{display:none;margin-top:14px}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4){display:block}.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.step{border:1px solid var(--line);border-radius:8px;background:#f9fbfd;padding:12px;min-height:96px}.step strong{display:block;margin-bottom:5px}.step span,.muted{color:var(--muted)}.bar-row{display:grid;grid-template-columns:172px minmax(0,1fr) 52px;gap:10px;align-items:center;margin:10px 0}.bar-track{height:18px;background:#e8edf4;border-radius:999px;overflow:hidden}.bar{display:block;height:100%;border-radius:999px;background:var(--teal)}.w100{width:100%}.w80{width:80%}.w60{width:60%}.w40{width:40%}.w20{width:20%}.toolkit-grid,.chart-grid,.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.uml-review-section{background:#fdfdfb;border-color:#111827}.uml-review-section>h2{font-size:18px;text-transform:uppercase;letter-spacing:.04em;color:#111827}.uml-model-panel{grid-column:1/-1;border:1px solid #111827;border-radius:0;background:#fff;padding:14px}.uml-model-panel .chart-head{border-bottom:1px solid #111827;margin:-14px -14px 12px;padding:10px 12px;background:#f3f4f6}.uml-model-panel .tool-badge{border-color:#111827;border-radius:0;background:#fff;color:#111827}.uml-model-panel p{max-width:980px;color:#374151}.uml-model-panel .graphviz-render{border:0;border-radius:0;background:#fff;padding:0;margin:0}.uml-zoom{border:1px solid #111827;background:#fff;margin-top:10px}.uml-zoom>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.uml-zoom-controls{display:flex;gap:6px;align-items:center;border-bottom:1px solid #111827;background:#f3f4f6;padding:8px 10px}.uml-zoom-controls span{font-size:12px;font-weight:800;text-transform:uppercase;color:#111827}.uml-zoom-controls label{cursor:pointer;border:1px solid #111827;background:#fff;color:#111827;padding:4px 8px;font-size:12px;font-weight:700}.uml-zoom-frame{height:min(72vh,760px);overflow:auto;background:#fff}.uml-zoom-canvas{transform-origin:0 0;transition:transform .12s ease;width:max-content;min-width:100%}.uml-zoom input:nth-of-type(1):checked~.uml-zoom-controls label:nth-of-type(1),.uml-zoom input:nth-of-type(2):checked~.uml-zoom-controls label:nth-of-type(2),.uml-zoom input:nth-of-type(3):checked~.uml-zoom-controls label:nth-of-type(3),.uml-zoom input:nth-of-type(4):checked~.uml-zoom-controls label:nth-of-type(4){background:#111827;color:#fff}.uml-zoom input:nth-of-type(2):checked~.uml-zoom-frame .uml-zoom-canvas{transform:scale(1)}.uml-zoom input:nth-of-type(3):checked~.uml-zoom-frame .uml-zoom-canvas{transform:scale(1.5);padding-right:50%;padding-bottom:28%}.uml-zoom input:nth-of-type(4):checked~.uml-zoom-frame .uml-zoom-canvas{transform:scale(2);padding-right:100%;padding-bottom:55%}.tool-card,.chart-panel{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px}.chart-panel.uml-model-panel{border:1px solid #111827;border-radius:0;background:#fff;padding:14px}.tool-card strong,.tool-card span,.tool-card em{display:block}.tool-card span{color:var(--muted);font-size:13px}.tool-card em{margin-top:6px;color:#334155;font-size:12px;font-style:normal}.chart-head{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}.tool-badge{display:inline-flex;border:1px solid #b9c7dc;background:#f4f7fb;border-radius:999px;padding:2px 8px;color:#334155;font-size:12px;font-weight:700;white-space:nowrap}.infographic-chart{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff;margin-top:8px}.graphviz-render .edge polygon{fill:#fff;stroke:#111827}.graphviz-render text{font-family:"Segoe UI",Arial,sans-serif}.graphviz-render .cluster text{font-weight:600}.graphviz-render .node>polygon:last-child{stroke:#111827}figure{margin:0;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}figure img{display:block;width:100%;height:auto}figcaption{padding:9px 10px;color:var(--muted);font-size:13px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid var(--line);text-align:left;vertical-align:top;padding:9px}th{background:#f7f9fc}pre{white-space:pre-wrap;overflow:auto;background:#101828;color:#e5edf7;padding:14px;border-radius:8px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#eef2f6;border:1px solid #dae2ec;border-radius:4px;padding:1px 4px}ul,ol{margin:8px 0 0 20px;padding:0}li{margin:4px 0}.callout{border-left:5px solid var(--teal);background:#effaf8;padding:12px 14px;border-radius:7px;margin:12px 0}@media(max-width:920px){.grid,.metrics{grid-template-columns:1fr}main{padding:12px}.bar-row{grid-template-columns:1fr}.chart-head{display:block}.tool-badge{margin-bottom:8px}}\n</style>\n</head>\n<body>\n' + body + '\n</body>\n</html>\n';
+function htmlPage(title, body, options = {}) {
+  const scripts = options.enableSvgPanZoom && svgPanZoomRuntime
+    ? '<script>' + svgPanZoomRuntime + '</script>\n<script>document.querySelectorAll("[data-svg-pan-zoom=true] svg").forEach(function(svg){svgPanZoom(svg,{controlIconsEnabled:true,fit:true,center:true,minZoom:.1,maxZoom:20,zoomScaleSensitivity:.25});});</script>\n'
+    : '';
+  const csp = options.enableSvgPanZoom ? "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" : requiredCsp;
+  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="' + escapeAttribute(csp) + '">\n<title>' + escapeHtml(title) + '</title>\n<style>\n:root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;--bg:#eef2f6;--panel:#fff;--text:#1f2937;--muted:#5b6472;--line:#d8dee8;--navy:#172033;--teal:#0f766e;--blue:#2457c5;--amber:#a15c07;--green:#16794b;--red:#b42318;--violet:#6546a3}*{box-sizing:border-box}body{margin:0;color:var(--text);background:var(--bg)}a{color:#174ea6}header{background:var(--navy);color:#fff;padding:28px;border-bottom:6px solid var(--teal)}header h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:0}header p{max-width:1040px;margin:0;color:#dce6f1}main{max-width:1240px;margin:0 auto;padding:18px}h2,h3{margin:0 0 10px;line-height:1.2;letter-spacing:0}p{margin:0 0 12px}.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{border:1px solid var(--line);border-top:5px solid var(--teal);border-radius:8px;padding:12px;background:#fff;min-height:104px}.metric strong{display:block;font-size:28px;line-height:1;margin-bottom:6px}.metric span{color:var(--muted);font-size:13px}.blue{border-top-color:var(--blue)}.amber{border-top-color:var(--amber)}.green{border-top-color:var(--green)}.violet{border-top-color:var(--violet)}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:650}.tab-panel{display:none;margin-top:14px}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4){display:block}.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.step{border:1px solid var(--line);border-radius:8px;background:#f9fbfd;padding:12px;min-height:96px}.step strong{display:block;margin-bottom:5px}.step span,.muted{color:var(--muted)}.bar-row{display:grid;grid-template-columns:172px minmax(0,1fr) 52px;gap:10px;align-items:center;margin:10px 0}.bar-track{height:18px;background:#e8edf4;border-radius:999px;overflow:hidden}.bar{display:block;height:100%;border-radius:999px;background:var(--teal)}.w100{width:100%}.w80{width:80%}.w60{width:60%}.w40{width:40%}.w20{width:20%}.toolkit-grid,.chart-grid,.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.uml-review-section{background:#fdfdfb;border-color:#111827}.uml-review-section>h2{font-size:18px;text-transform:uppercase;letter-spacing:.04em;color:#111827}.uml-model-panel{grid-column:1/-1;border:1px solid #111827;border-radius:0;background:#fff;padding:14px}.uml-model-panel .chart-head{border-bottom:1px solid #111827;margin:-14px -14px 12px;padding:10px 12px;background:#f3f4f6}.uml-model-panel .tool-badge{border-color:#111827;border-radius:0;background:#fff;color:#111827}.uml-model-panel p{max-width:980px;color:#374151}.uml-model-panel .graphviz-render{border:0;border-radius:0;background:#fff;padding:0;margin:0}.uml-zoom{border:1px solid #111827;background:#fff;margin-top:10px}.uml-zoom>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.uml-zoom-controls{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-bottom:1px solid #111827;background:#f3f4f6;padding:8px 10px}.uml-zoom-controls span{font-size:12px;font-weight:800;text-transform:uppercase;color:#111827}.uml-zoom-controls label{cursor:pointer;border:1px solid #111827;background:#fff;color:#111827;padding:4px 8px;font-size:12px;font-weight:700}.viewer-badge{text-transform:none!important;font-weight:700!important;color:#374151!important;margin-left:auto}.uml-zoom-frame{height:min(72vh,760px);overflow:auto;background:#fff}.uml-zoom-canvas{transform-origin:0 0;transition:transform .12s ease;width:max-content;min-width:100%}.uml-zoom input:nth-of-type(1):checked~.uml-zoom-controls label:nth-of-type(1),.uml-zoom input:nth-of-type(2):checked~.uml-zoom-controls label:nth-of-type(2),.uml-zoom input:nth-of-type(3):checked~.uml-zoom-controls label:nth-of-type(3),.uml-zoom input:nth-of-type(4):checked~.uml-zoom-controls label:nth-of-type(4){background:#111827;color:#fff}.uml-zoom input:nth-of-type(2):checked~.uml-zoom-frame .uml-zoom-canvas{transform:scale(1)}.uml-zoom input:nth-of-type(3):checked~.uml-zoom-frame .uml-zoom-canvas{transform:scale(1.5);padding-right:50%;padding-bottom:28%}.uml-zoom input:nth-of-type(4):checked~.uml-zoom-frame .uml-zoom-canvas{transform:scale(2);padding-right:100%;padding-bottom:55%}.tool-card,.chart-panel{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px}.chart-panel.uml-model-panel{border:1px solid #111827;border-radius:0;background:#fff;padding:14px}.tool-card strong,.tool-card span,.tool-card em{display:block}.tool-card span{color:var(--muted);font-size:13px}.tool-card em{margin-top:6px;color:#334155;font-size:12px;font-style:normal}.chart-head{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}.tool-badge{display:inline-flex;border:1px solid #b9c7dc;background:#f4f7fb;border-radius:999px;padding:2px 8px;color:#334155;font-size:12px;font-weight:700;white-space:nowrap}.infographic-chart{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff;margin-top:8px}.graphviz-render .edge polygon{fill:#fff;stroke:#111827}.graphviz-render text{font-family:"Segoe UI",Arial,sans-serif}.graphviz-render .cluster text{font-weight:600}.graphviz-render .node>polygon:last-child{stroke:#111827}figure{margin:0;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}figure img{display:block;width:100%;height:auto}figcaption{padding:9px 10px;color:var(--muted);font-size:13px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid var(--line);text-align:left;vertical-align:top;padding:9px}th{background:#f7f9fc}pre{white-space:pre-wrap;overflow:auto;background:#101828;color:#e5edf7;padding:14px;border-radius:8px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#eef2f6;border:1px solid #dae2ec;border-radius:4px;padding:1px 4px}ul,ol{margin:8px 0 0 20px;padding:0}li{margin:4px 0}.callout{border-left:5px solid var(--teal);background:#effaf8;padding:12px 14px;border-radius:7px;margin:12px 0}@media(max-width:920px){.grid,.metrics{grid-template-columns:1fr}main{padding:12px}.bar-row{grid-template-columns:1fr}.chart-head{display:block}.tool-badge{margin-bottom:8px}.viewer-badge{margin-left:0}}\n</style>\n' + scripts + '</head>\n<body>\n' + body + '\n</body>\n</html>\n';
 }
 
 async function renderArtifact(artifact, outPath) {
@@ -5089,7 +5103,7 @@ async function renderArtifact(artifact, outPath) {
     '<div class="tab-panel"><h2>Canonical Source</h2><p>' + linkFor(outPath, artifact.source, artifact.source || 'source') + '</p><pre>' + escapeHtml(source || 'Source not found or not readable.') + '</pre></div>' +
     '<div class="tab-panel"><h2>Metadata</h2><table><tbody><tr><th>ID</th><td>' + escapeHtml(artifact.id) + '</td></tr><tr><th>Type</th><td>' + escapeHtml(artifact.type) + '</td></tr><tr><th>Owner</th><td>' + escapeHtml(artifact.owner) + '</td></tr><tr><th>Renderer</th><td>' + escapeHtml(artifact.renderer || rendererName) + '</td></tr><tr><th>Source hash</th><td>' + escapeHtml(artifact.sourceHash || '') + '</td></tr></tbody></table></div>' +
     '</div></section></main>';
-  return htmlPage(String(title || 'Artifact Review'), body);
+  return htmlPage(String(title || 'Artifact Review'), body, { enableSvgPanZoom: artifact.htmlInteractionLane === 'reviewed-svg-pan-zoom' });
 }
 
 function renderIndex(artifacts, outPath, hasModelArtifacts) {
@@ -5837,14 +5851,18 @@ func developerArtifactPolicyScript() string {
 import path from 'node:path';
 
 const root = process.cwd();
-const configPath = path.join(root, '.skill-harness', 'project.json');
-const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+const config = JSON.parse(fs.readFileSync(path.join(root, '.skill-harness', 'project.json'), 'utf8'));
 const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
 const requiredCsp = developerArtifacts.htmlPolicy?.requiredCSP ?? '';
+const reviewedSvgPanZoomCsp = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
 const reviewRoot = path.join(root, developerArtifacts.reviewSurface?.outDir ?? 'generated/review');
+const manifestPath = path.join(root, developerArtifacts.manifest?.path ?? 'docs/artifacts/artifacts.manifest.json');
+const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) : {};
+const reviewedSvgPanZoomSurfaces = new Set((manifest.artifacts ?? [])
+  .filter((artifact) => artifact.htmlInteractionLane === 'reviewed-svg-pan-zoom' && typeof artifact.reviewSurface === 'string')
+  .map((artifact) => path.normalize(path.resolve(root, artifact.reviewSurface))));
 
 const blockedTagPatterns = [
-  /<script\b/i,
   /<iframe\b/i,
   /<object\b/i,
   /<embed\b/i,
@@ -5852,7 +5870,6 @@ const blockedTagPatterns = [
   /<meta\b[^>]*http-equiv=["']?refresh/i,
   /<link\b[^>]*rel=["']?(?:preload|prefetch|preconnect)/i
 ];
-
 const blockedApiPatterns = [
   /\bfetch\s*\(/,
   /\bXMLHttpRequest\b/,
@@ -5864,25 +5881,23 @@ const blockedApiPatterns = [
   /\blocalStorage\b/,
   /\bsessionStorage\b/
 ];
-
 const blockedAttributePatterns = [
   /\son[a-z]+\s*=/i,
   /\b(?:href|src|action)\s*=\s*["']\s*javascript:/i
 ];
-
 const externalReferencePattern = /\b(?:src|href|action)=["'](?:https?:|\/\/)/i;
+const allowedSvgPanZoomRuntime = fs.existsSync(path.join(root, 'node_modules', 'svg-pan-zoom', 'dist', 'svg-pan-zoom.min.js'))
+  ? fs.readFileSync(path.join(root, 'node_modules', 'svg-pan-zoom', 'dist', 'svg-pan-zoom.min.js'), 'utf8')
+  : '';
+const allowedSvgPanZoomInitializer = 'document.querySelectorAll("[data-svg-pan-zoom=true] svg").forEach(function(svg){svgPanZoom(svg,{controlIconsEnabled:true,fit:true,center:true,minZoom:.1,maxZoom:20,zoomScaleSensitivity:.25});});';
 
 function walk(dir) {
   if (!fs.existsSync(dir)) return [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
   const files = [];
-  for (const entry of entries) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...walk(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.html')) {
-      files.push(fullPath);
-    }
+    if (entry.isDirectory()) files.push(...walk(fullPath));
+    if (entry.isFile() && entry.name.endsWith('.html')) files.push(fullPath);
   }
   return files;
 }
@@ -5890,30 +5905,26 @@ function walk(dir) {
 function checkFile(filePath) {
   const html = fs.readFileSync(filePath, 'utf8');
   const failures = [];
-  if (!html.includes('Content-Security-Policy') || !html.includes(requiredCsp)) {
-    failures.push('missing required CSP meta tag');
+  const reviewedSvgPanZoom = reviewedSvgPanZoomSurfaces.has(path.normalize(path.resolve(filePath)));
+  const expectedCsp = reviewedSvgPanZoom ? reviewedSvgPanZoomCsp : requiredCsp;
+  if (!html.includes('Content-Security-Policy') || !html.includes(expectedCsp)) failures.push('missing required CSP meta tag');
+  const scriptMatches = [...html.matchAll(/<script>([\s\S]*?)<\/script>/gi)].map((match) => match[1]);
+  if (!reviewedSvgPanZoom && scriptMatches.length > 0) failures.push('blocked script tag');
+  if (reviewedSvgPanZoom) {
+    if (scriptMatches.length !== 2) failures.push('reviewed-svg-pan-zoom requires exactly two inline scripts');
+    if (scriptMatches[0] !== allowedSvgPanZoomRuntime) failures.push('reviewed-svg-pan-zoom runtime does not match bundled svg-pan-zoom');
+    if (scriptMatches[1] !== allowedSvgPanZoomInitializer) failures.push('reviewed-svg-pan-zoom initializer is not the approved static initializer');
   }
-  for (const pattern of blockedTagPatterns) {
-    if (pattern.test(html)) failures.push('blocked tag or preload pattern: ' + pattern);
-  }
-  for (const pattern of blockedApiPatterns) {
-    if (pattern.test(html)) failures.push('blocked browser API: ' + pattern);
-  }
-  for (const pattern of blockedAttributePatterns) {
-    if (pattern.test(html)) failures.push('blocked inline event or javascript URL pattern: ' + pattern);
-  }
-  if (externalReferencePattern.test(html)) {
-    failures.push('external src/href/action reference');
-  }
+  for (const pattern of blockedTagPatterns) if (pattern.test(html)) failures.push('blocked tag or preload pattern: ' + pattern);
+  for (const pattern of blockedApiPatterns) if (pattern.test(html)) failures.push('blocked browser API: ' + pattern);
+  for (const pattern of blockedAttributePatterns) if (pattern.test(html)) failures.push('blocked inline event or javascript URL pattern: ' + pattern);
+  if (externalReferencePattern.test(html)) failures.push('external src/href/action reference');
   return failures;
 }
 
 const failures = [];
 for (const filePath of walk(reviewRoot)) {
-  const fileFailures = checkFile(filePath);
-  for (const failure of fileFailures) {
-    failures.push(path.relative(root, filePath) + ': ' + failure);
-  }
+  for (const failure of checkFile(filePath)) failures.push(path.relative(root, filePath).replaceAll(path.sep, '/') + ': ' + failure);
 }
 
 if (failures.length > 0) {

@@ -5,10 +5,15 @@ const root = process.cwd();
 const config = JSON.parse(fs.readFileSync(path.join(root, '.skill-harness', 'project.json'), 'utf8'));
 const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
 const requiredCsp = developerArtifacts.htmlPolicy?.requiredCSP ?? '';
+const reviewedSvgPanZoomCsp = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
 const reviewRoot = path.join(root, developerArtifacts.reviewSurface?.outDir ?? 'generated/review');
+const manifestPath = path.join(root, developerArtifacts.manifest?.path ?? 'docs/artifacts/artifacts.manifest.json');
+const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) : {};
+const reviewedSvgPanZoomSurfaces = new Set((manifest.artifacts ?? [])
+  .filter((artifact) => artifact.htmlInteractionLane === 'reviewed-svg-pan-zoom' && typeof artifact.reviewSurface === 'string')
+  .map((artifact) => path.normalize(path.resolve(root, artifact.reviewSurface))));
 
 const blockedTagPatterns = [
-  /<script\b/i,
   /<iframe\b/i,
   /<object\b/i,
   /<embed\b/i,
@@ -32,6 +37,10 @@ const blockedAttributePatterns = [
   /\b(?:href|src|action)\s*=\s*["']\s*javascript:/i
 ];
 const externalReferencePattern = /\b(?:src|href|action)=["'](?:https?:|\/\/)/i;
+const allowedSvgPanZoomRuntime = fs.existsSync(path.join(root, 'node_modules', 'svg-pan-zoom', 'dist', 'svg-pan-zoom.min.js'))
+  ? fs.readFileSync(path.join(root, 'node_modules', 'svg-pan-zoom', 'dist', 'svg-pan-zoom.min.js'), 'utf8')
+  : '';
+const allowedSvgPanZoomInitializer = 'document.querySelectorAll("[data-svg-pan-zoom=true] svg").forEach(function(svg){svgPanZoom(svg,{controlIconsEnabled:true,fit:true,center:true,minZoom:.1,maxZoom:20,zoomScaleSensitivity:.25});});';
 
 function walk(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -47,7 +56,16 @@ function walk(dir) {
 function checkFile(filePath) {
   const html = fs.readFileSync(filePath, 'utf8');
   const failures = [];
-  if (!html.includes('Content-Security-Policy') || !html.includes(requiredCsp)) failures.push('missing required CSP meta tag');
+  const reviewedSvgPanZoom = reviewedSvgPanZoomSurfaces.has(path.normalize(path.resolve(filePath)));
+  const expectedCsp = reviewedSvgPanZoom ? reviewedSvgPanZoomCsp : requiredCsp;
+  if (!html.includes('Content-Security-Policy') || !html.includes(expectedCsp)) failures.push('missing required CSP meta tag');
+  const scriptMatches = [...html.matchAll(/<script>([\s\S]*?)<\/script>/gi)].map((match) => match[1]);
+  if (!reviewedSvgPanZoom && scriptMatches.length > 0) failures.push('blocked script tag');
+  if (reviewedSvgPanZoom) {
+    if (scriptMatches.length !== 2) failures.push('reviewed-svg-pan-zoom requires exactly two inline scripts');
+    if (scriptMatches[0] !== allowedSvgPanZoomRuntime) failures.push('reviewed-svg-pan-zoom runtime does not match bundled svg-pan-zoom');
+    if (scriptMatches[1] !== allowedSvgPanZoomInitializer) failures.push('reviewed-svg-pan-zoom initializer is not the approved static initializer');
+  }
   for (const pattern of blockedTagPatterns) if (pattern.test(html)) failures.push('blocked tag or preload pattern: ' + pattern);
   for (const pattern of blockedApiPatterns) if (pattern.test(html)) failures.push('blocked browser API: ' + pattern);
   for (const pattern of blockedAttributePatterns) if (pattern.test(html)) failures.push('blocked inline event or javascript URL pattern: ' + pattern);

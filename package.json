@@ -24,6 +24,7 @@
     "suite:graph": "python scripts/suite_graph.py --format json"
   },
   "devDependencies": {
-    "@viz-js/viz": "3.27.0"
+    "@viz-js/viz": "3.27.0",
+    "svg-pan-zoom": "^3.6.2"
   }
 }
