@@ -15,8 +15,8 @@ Clone third-party repos into a sibling workspace, not inside this repo and not i
 
 Suggested sibling workspace:
 
-```powershell
-D:\Visual Studio Projects\skill-intake
+```bash
+../skill-intake
 ```
 
 Current high-signal shortlist:
@@ -137,10 +137,12 @@ Or point it at explicit repos:
 
 ```powershell
 python scripts/external_skill_intake.py `
-  "D:\Visual Studio Projects\skill-intake\openai-skills" `
-  "D:\Visual Studio Projects\skill-intake\anthropics-skills" `
-  "D:\Visual Studio Projects\skill-intake\troykelly-codex-skills"
+  "..\skill-intake\openai-skills" `
+  "..\skill-intake\anthropics-skills" `
+  "..\skill-intake\troykelly-codex-skills"
 ```
+
+On Unix-like shells, pass the same sibling paths with `/` separators.
 
 The script only inventories repo structure and skill names. Adoption decisions still need human review.
 
@@ -171,7 +173,7 @@ Use the blocking mode in CI or before proposing a new dependency:
 
 ```powershell
 python scripts/external_skill_intake.py `
-  "D:\Visual Studio Projects\skill-intake\some-public-skill-repo" `
+  "..\skill-intake\some-public-skill-repo" `
   --fail-on-blocked
 ```
 
