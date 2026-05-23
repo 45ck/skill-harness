@@ -18,6 +18,7 @@ INCLUDE_PATHS = [
     Path(".agents"),
     Path("cmd"),
     Path("docs"),
+    Path("packs"),
     Path("plugins"),
     Path("scripts"),
     Path("README.md"),

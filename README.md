@@ -41,15 +41,15 @@ go build -o skill-harness ./cmd/skill-harness
 Then return to this target repo and run the safe, repo-local bootstrap flow first:
 
 ```sh
-../.skill-harness-upstream/skill-harness audit-project --dir .
-../.skill-harness-upstream/skill-harness bootstrap --dir . --agent-native
-../.skill-harness-upstream/skill-harness resolve --dir .
+./.skill-harness-upstream/skill-harness audit-project --dir .
+./.skill-harness-upstream/skill-harness bootstrap --dir . --agent-native
+./.skill-harness-upstream/skill-harness resolve --dir .
 ```
 
 Do not run `setup-project`, install packages, write global agent files, change hooks, change Claude permissions, initialize Beads, or change CI until approval is given. After approval, apply the selected setup, run available checks, and leave `.skill-harness/agent-stack.json`, `.skill-harness/agent-stack.lock.json`, and `.skill-harness/setup-proof.json` as evidence for future agents.
 ````
 
-PowerShell agents should build `skill-harness.exe` and use `..\.skill-harness-upstream\skill-harness.exe` for the same commands.
+PowerShell agents should build `skill-harness.exe` and use `.\.skill-harness-upstream\skill-harness.exe` for the same commands.
 
 This prompt is the preferred installer surface for downstream repos: the agent chooses a lean profile, the CLI gives deterministic resolution, and repo-local overlays preserve future updates.
 
