@@ -2348,7 +2348,7 @@ function escapeAttribute(value) {
 }
 
 function htmlPage(title, body) {
-  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="' + escapeAttribute(requiredCsp) + '">\n<title>' + escapeHtml(title) + '</title>\n<style>\n:root{color-scheme:light dark;font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.5}body{margin:0;color:#1f2933;background:#f6f8fb}main{max-width:1100px;margin:0 auto;padding:32px 20px}section{margin:20px 0;padding:18px;background:#fff;border:1px solid #d9e2ec;border-radius:8px}h1,h2{line-height:1.2}table{width:100%;border-collapse:collapse;background:#fff}th,td{text-align:left;vertical-align:top;border-bottom:1px solid #d9e2ec;padding:10px}code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow:auto;background:#102a43;color:#f0f4f8;padding:16px;border-radius:6px}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.meta div{padding:10px;background:#f0f4f8;border-radius:6px}@media (prefers-color-scheme:dark){body{color:#d9e2ec;background:#102a43}section,table{background:#1f2933;border-color:#334e68}.meta div{background:#243b53}}\n</style>\n</head>\n<body>\n<main>\n' + body + '\n</main>\n</body>\n</html>\n';
+  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="' + escapeAttribute(requiredCsp) + '">\n<title>' + escapeHtml(title) + '</title>\n<style>\n:root{color-scheme:light dark;font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.5;--bg:#f6f8fb;--panel:#fff;--text:#1f2933;--muted:#52616b;--line:#d9e2ec;--accent:#0f766e;--code:#102a43;--codeText:#f0f4f8}body{margin:0;color:var(--text);background:var(--bg)}main{max-width:1180px;margin:0 auto;padding:28px 18px 44px}.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr);gap:18px;align-items:start}.panel,section{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:8px}h1,h2,h3{line-height:1.2;margin:0 0 10px}p{margin:0 0 12px}.muted{color:var(--muted)}table{width:100%;border-collapse:collapse;background:var(--panel)}th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:10px}code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow:auto;background:var(--code);color:var(--codeText);padding:16px;border-radius:6px}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.meta div,.pill{padding:9px 10px;background:#eef6f6;border:1px solid #c8e7e3;border-radius:6px}.tabs{margin-top:18px}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-weight:600}.tab-panel{display:none}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4),.tabs input:nth-of-type(5):checked~.tab-panels .tab-panel:nth-of-type(5){display:block}.diagram-card{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fbfdff}.diagram-header{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;background:#eef2f7;border-bottom:1px solid var(--line)}.diagram-body{padding:14px}.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.node{padding:10px 12px;border:1px solid #9fb3c8;border-radius:6px;background:#fff;min-width:88px;text-align:center}.arrow{color:var(--accent);font-weight:700}.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.gallery figure{margin:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}.gallery img{display:block;width:100%;height:auto}.gallery figcaption{padding:9px 10px;color:var(--muted)}.compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}@media (max-width:760px){.hero{grid-template-columns:1fr}.tab-labels label{flex:1 1 auto;text-align:center}}@media (prefers-color-scheme:dark){:root{--bg:#102a43;--panel:#1f2933;--text:#d9e2ec;--muted:#bcccdc;--line:#334e68;--accent:#5eead4}.meta div,.pill{background:#243b53;border-color:#486581}.diagram-header{background:#243b53}.diagram-card,.gallery figure,.node{background:#1f2933}}\n</style>\n</head>\n<body>\n<main>\n' + body + '\n</main>\n</body>\n</html>\n';
 }
 
 function readSource(artifact) {
@@ -2364,8 +2364,102 @@ function artifactPath(artifact) {
   return path.join(modelReviewDir, fileName);
 }
 
+function firstParagraph(markdown) {
+  const fence = String.fromCharCode(96).repeat(3);
+  const withoutFences = String(markdown || '').replace(new RegExp(fence + '[\\s\\S]*?' + fence, 'g'), '');
+  const lines = withoutFences.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  for (const line of lines) {
+    if (!line.startsWith('#') && !line.startsWith(fence)) return line;
+  }
+  return '';
+}
+
+function fencedBlocks(markdown) {
+  const blocks = [];
+  const fence = String.fromCharCode(96).repeat(3);
+  const pattern = new RegExp(fence + '([a-zA-Z0-9_-]*)\\r?\\n([\\s\\S]*?)' + fence, 'g');
+  let match;
+  while ((match = pattern.exec(markdown)) !== null) {
+    blocks.push({ language: match[1] || 'text', body: match[2].trim() });
+  }
+  return blocks;
+}
+
+function compactDiagramMarkup(source) {
+  const lines = String(source || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const edges = [];
+  for (const line of lines) {
+    const arrow = line.match(/^"?([^"-]+?)"?\s*(?:-->|->>|--|-\)|-\])\s*"?([^":]+?)"?(?::.*)?$/);
+    if (arrow) edges.push([arrow[1].trim(), arrow[2].trim()]);
+  }
+  if (edges.length === 0) {
+    return '<pre>' + escapeHtml(source || 'No diagram source found.') + '</pre>';
+  }
+  let html = '<div class="flow">';
+  for (const [index, edge] of edges.entries()) {
+    if (index > 0) html += '<span class="arrow">/</span>';
+    html += '<span class="node">' + escapeHtml(edge[0]) + '</span><span class="arrow">-></span><span class="node">' + escapeHtml(edge[1]) + '</span>';
+  }
+  return html + '</div>';
+}
+
+function diagramSection(source, artifact) {
+  const blocks = fencedBlocks(source);
+  const preferred = blocks.find((block) => ['mermaid', 'plantuml', 'puml', 'structurizr'].includes(block.language.toLowerCase())) ?? blocks[0];
+  const diagramSource = preferred?.body || source;
+  return '<div class="diagram-card"><div class="diagram-header"><strong>' + escapeHtml(artifact.notation || 'model') + ' ' + escapeHtml(artifact.modelKind || 'view') + '</strong><span class="muted">static preview, source-backed</span></div><div class="diagram-body">' + compactDiagramMarkup(diagramSource) + '</div></div>';
+}
+
+function imageMime(filePath) {
+  switch (path.extname(filePath).toLowerCase()) {
+    case '.png': return 'image/png';
+    case '.jpg':
+    case '.jpeg': return 'image/jpeg';
+    case '.gif': return 'image/gif';
+    case '.webp': return 'image/webp';
+    case '.svg': return 'image/svg+xml';
+    default: return '';
+  }
+}
+
+function imageDataUrl(relativePath) {
+  if (typeof relativePath !== 'string' || relativePath.trim() === '') return null;
+  const fullPath = path.resolve(root, relativePath);
+  if ((!fullPath.startsWith(root + path.sep) && fullPath !== root) || !fs.existsSync(fullPath) || !fs.statSync(fullPath).isFile()) return null;
+  const mime = imageMime(fullPath);
+  if (!mime) return null;
+  const maxBytes = 2 * 1024 * 1024;
+  if (fs.statSync(fullPath).size > maxBytes) return null;
+  return 'data:' + mime + ';base64,' + fs.readFileSync(fullPath).toString('base64');
+}
+
+function artifactImages(artifact) {
+  const values = [];
+  for (const key of ['screenshots', 'images', 'visualEvidence']) {
+    if (Array.isArray(artifact[key])) values.push(...artifact[key]);
+  }
+  return values.map((entry) => typeof entry === 'string' ? { path: entry, alt: entry } : entry).filter((entry) => entry && typeof entry.path === 'string');
+}
+
+function gallerySection(artifact) {
+  const figures = [];
+  for (const image of artifactImages(artifact)) {
+    const dataUrl = imageDataUrl(image.path);
+    if (!dataUrl) continue;
+    figures.push('<figure><img src="' + escapeAttribute(dataUrl) + '" alt="' + escapeAttribute(image.alt || image.caption || image.path) + '"><figcaption>' + escapeHtml(image.caption || image.path) + '</figcaption></figure>');
+  }
+  if (figures.length === 0) return '<p class="muted">No screenshot or image evidence is listed for this artifact.</p>';
+  return '<div class="gallery">' + figures.join('\n') + '</div>';
+}
+
+function listItems(values, emptyText) {
+  if (!Array.isArray(values) || values.length === 0) return '<p class="muted">' + escapeHtml(emptyText) + '</p>';
+  return '<ul>' + values.map((value) => '<li>' + escapeHtml(typeof value === 'string' ? value : JSON.stringify(value)) + '</li>').join('') + '</ul>';
+}
+
 function renderArtifact(artifact, byId) {
   const source = readSource(artifact);
+  const summary = artifact.summary || artifact.purpose || firstParagraph(source) || 'Source-backed model review artifact.';
   const rows = [
     ['ID', artifact.id],
     ['Type', artifact.type],
@@ -2377,21 +2471,24 @@ function renderArtifact(artifact, byId) {
     ['Source', artifact.source],
     ['Owner', artifact.owner],
   ];
-  let body = '<h1>' + escapeHtml(artifact.modelId || artifact.id || 'Model Review') + '</h1>\n<section class="meta">';
+  let body = '<div class="hero"><section><h1>' + escapeHtml(artifact.title || artifact.modelId || artifact.id || 'Model Review') + '</h1><p>' + escapeHtml(summary) + '</p></section><section><h2>Review Focus</h2><div class="meta">';
+  body += '<div><strong>Status</strong><br>' + escapeHtml(artifact.status) + '</div><div><strong>Kind</strong><br>' + escapeHtml(artifact.modelKind) + '</div><div><strong>Method</strong><br>' + escapeHtml(artifact.method) + '</div><div><strong>Owner</strong><br>' + escapeHtml(artifact.owner) + '</div>';
+  body += '</div></section></div>\n<section class="meta">';
   for (const [label, value] of rows) body += '<div><strong>' + escapeHtml(label) + '</strong><br>' + escapeHtml(value) + '</div>';
-  body += '</section>\n<section><h2>Canonical Source</h2><pre>' + escapeHtml(source || 'Source not found or not readable.') + '</pre></section>';
+  body += '</section>\n<div class="tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-visual" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-evidence" name="tabs" type="radio"><input id="tab-diff" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-visual">Visuals</label><label for="tab-source">Source</label><label for="tab-evidence">Evidence</label><label for="tab-diff">Diff</label></div><div class="tab-panels">';
+  body += '<section class="tab-panel"><h2>Overview</h2><p>' + escapeHtml(summary) + '</p><div class="meta"><div><strong>Abstraction</strong><br>' + escapeHtml(artifact.abstractionLevel) + '</div><div><strong>Notation</strong><br>' + escapeHtml(artifact.notation) + '</div><div><strong>Canonical Source</strong><br>' + escapeHtml(artifact.source) + '</div><div><strong>Review Surface</strong><br>' + escapeHtml(artifact.reviewSurface || '') + '</div></div></section>';
+  body += '<section class="tab-panel"><h2>Visuals</h2>' + diagramSection(source, artifact) + '<h3>Screenshots And Evidence Images</h3>' + gallerySection(artifact) + '</section>';
+  body += '<section class="tab-panel"><h2>Canonical Source</h2><pre>' + escapeHtml(source || 'Source not found or not readable.') + '</pre></section>';
+  body += '<section class="tab-panel"><h2>Evidence</h2>' + listItems(artifact.evidenceLinks, 'No evidence links are listed yet.') + '<h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>' + escapeHtml(artifact.sourceHash || '') + '</div><div><strong>Renderer</strong><br>' + escapeHtml(artifact.renderer || 'skill-harness model review generator') + '</div><div><strong>Generated</strong><br>' + escapeHtml(new Date().toISOString()) + '</div></div></section>';
   if (artifact.type === 'model-diff') {
     const diff = artifact.diff ?? {};
     const before = byId.get(diff.beforeArtifactId);
     const after = byId.get(diff.afterArtifactId);
-    body += '<section><h2>Before And After</h2><table><thead><tr><th>Side</th><th>Artifact</th><th>Source</th></tr></thead><tbody>';
-    body += '<tr><td>Before</td><td>' + escapeHtml(diff.beforeArtifactId) + '</td><td>' + escapeHtml(before?.source ?? '') + '</td></tr>';
-    body += '<tr><td>After</td><td>' + escapeHtml(diff.afterArtifactId) + '</td><td>' + escapeHtml(after?.source ?? '') + '</td></tr>';
-    body += '</tbody></table></section>';
+    body += '<section class="tab-panel"><h2>Before And After</h2><div class="compare"><div class="panel"><h3>Before</h3><p><strong>' + escapeHtml(diff.beforeArtifactId) + '</strong></p><p class="muted">' + escapeHtml(before?.source ?? '') + '</p><pre>' + escapeHtml(before ? readSource(before) : 'Missing before artifact.') + '</pre></div><div class="panel"><h3>After</h3><p><strong>' + escapeHtml(diff.afterArtifactId) + '</strong></p><p class="muted">' + escapeHtml(after?.source ?? '') + '</p><pre>' + escapeHtml(after ? readSource(after) : 'Missing after artifact.') + '</pre></div></div></section>';
+  } else {
+    body += '<section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to show before/after model changes.</p></section>';
   }
-  body += '<section><h2>Evidence</h2><ul>';
-  for (const link of Array.isArray(artifact.evidenceLinks) ? artifact.evidenceLinks : []) body += '<li>' + escapeHtml(link) + '</li>';
-  body += '</ul></section>';
+  body += '</div></div>';
   return htmlPage('Model Review: ' + (artifact.modelId || artifact.id || 'model'), body);
 }
 
@@ -2420,10 +2517,10 @@ for (const artifact of artifacts) {
     artifact.diff = artifact.diff ?? {};
     artifact.diff.reviewSurface = reviewSurface;
   }
-  indexRows.push('<tr><td>' + escapeHtml(artifact.id) + '</td><td>' + escapeHtml(artifact.modelKind) + '</td><td>' + escapeHtml(artifact.method) + '</td><td>' + escapeHtml(artifact.source) + '</td><td>' + escapeHtml(reviewSurface) + '</td></tr>');
+  indexRows.push('<tr><td>' + escapeHtml(artifact.id) + '</td><td>' + escapeHtml(artifact.modelKind) + '</td><td>' + escapeHtml(artifact.method) + '</td><td>' + escapeHtml(artifact.status) + '</td><td>' + escapeHtml(artifact.source) + '</td><td>' + escapeHtml(reviewSurface) + '</td></tr>');
 }
 
-const indexBody = '<h1>Model Review Index</h1><section><table><thead><tr><th>ID</th><th>Kind</th><th>Method</th><th>Source</th><th>HTML Review</th></tr></thead><tbody>' + indexRows.join('\n') + '</tbody></table></section>';
+const indexBody = '<section><h1>Model Review Index</h1><p>Static human review surfaces generated from canonical model sources. Edit source first, then regenerate these pages.</p></section><section><table><thead><tr><th>ID</th><th>Kind</th><th>Method</th><th>Status</th><th>Source</th><th>HTML Review</th></tr></thead><tbody>' + indexRows.join('\n') + '</tbody></table></section>';
 fs.writeFileSync(path.join(modelReviewDir, 'index.html'), htmlPage('Model Review Index', indexBody));
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
 console.log('Generated ' + artifacts.length + ' model review artifact(s) in ' + repoPath(modelReviewDir));

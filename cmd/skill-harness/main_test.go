@@ -474,9 +474,11 @@ func TestModelReviewGeneratorCreatesHumanHTML(t *testing.T) {
 	sourcePath := filepath.Join(root, "docs", "artifacts", "source", "models", "architecture.md")
 	source := "# Architecture\n\n```mermaid\nflowchart LR\n  Web --> API\n```\n"
 	mustWriteFile(t, sourcePath, source)
+	mustWriteFile(t, filepath.Join(root, "docs", "artifacts", "source", "models", "architecture-screen.svg"), `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="80"><rect width="160" height="80" fill="#eef6f6"/><text x="16" y="44" font-size="18">Review</text></svg>`)
 	writeManifest(t, root, []map[string]any{
 		{
 			"id":               "model-architecture",
+			"title":            "Architecture Review",
 			"type":             "model-view",
 			"source":           "docs/artifacts/source/models/architecture.md",
 			"status":           "ready",
@@ -488,12 +490,25 @@ func TestModelReviewGeneratorCreatesHumanHTML(t *testing.T) {
 			"owner":            "system-modeler",
 			"sourceHash":       sha256Hex(source),
 			"evidenceLinks":    []string{"docs/architecture.md"},
+			"screenshots": []map[string]any{
+				{
+					"path":    "docs/artifacts/source/models/architecture-screen.svg",
+					"caption": "Generated review screenshot",
+				},
+			},
 		},
 	})
 
 	runNodeScript(t, root, "scripts/generate-model-review.mjs", true)
-	if !fileExists(filepath.Join(root, "generated", "review", "models", "model-architecture.html")) {
+	htmlPath := filepath.Join(root, "generated", "review", "models", "model-architecture.html")
+	if !fileExists(htmlPath) {
 		t.Fatal("expected generated model review HTML")
+	}
+	html := mustReadText(t, htmlPath)
+	for _, want := range []string{"Overview", "Visuals", "Source", "Evidence", "Diff", "diagram-card", "data:image/svg+xml;base64"} {
+		if !strings.Contains(html, want) {
+			t.Fatalf("expected generated human HTML to contain %q", want)
+		}
 	}
 	runNodeScript(t, root, "scripts/check-model-artifact-policy.mjs", true)
 	runNodeScript(t, root, "scripts/check-artifact-html-policy.mjs", true)

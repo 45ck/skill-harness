@@ -86,6 +86,9 @@ Opt out entirely:
 
 Generated HTML review artifacts must be static and self-contained by default:
 
+- clear human review structure with overview, visuals, source, evidence, and diff/comparison sections when relevant
+- tabs or equivalent navigation for dense artifacts, implemented without external runtimes
+- screenshots or evidence images embedded as data URLs when they are listed in the manifest and safe to include
 - no external scripts
 - no external assets
 - no network calls
@@ -108,7 +111,7 @@ Mermaid, C4, UML-style, UWE-inspired, dependency, and architecture-space views f
 
 - auto-detect model impact for every engineering change; if code, API, workflow, dependency, deployment, UI structure, or agent behavior changes, update the relevant model source or record why no model change is needed
 - keep canonical model source in Markdown, TOON, specgraph, Mermaid text, PlantUML text, or existing project docs
-- generate static human HTML review surfaces from that source under `generated/review/models/`
+- generate static human HTML review surfaces from that source under `generated/review/models/`, with tabs for overview, visuals, source, evidence, and before/after diff context
 - pre-render diagrams as inline SVG or static markup; do not load a browser Mermaid runtime by default
 - record model kind, notation, abstraction level, source path, generated review path, owner, evidence links, renderer, and source hash in the manifest
 - keep `docs/artifacts/source/models/model-inventory.md` current as the canonical index of model ids, owners, sources, review paths, and implementation touchpoints
