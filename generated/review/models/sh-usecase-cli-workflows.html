@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<title>Model Review: sh-usecase-cli-workflows</title>
+<style>
+:root{color-scheme:light dark;font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.5;--bg:#f7f8fa;--panel:#fff;--text:#17202a;--muted:#52616b;--line:#d9e2ec;--accent:#0f766e;--code:#102a43;--codeText:#f0f4f8}body{margin:0;color:var(--text);background:var(--bg)}main{max-width:1180px;margin:0 auto;padding:28px 18px 44px}.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr);gap:18px;align-items:start}.panel,section{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:8px}h1,h2,h3{line-height:1.2;margin:0 0 10px;letter-spacing:0}p{margin:0 0 12px}.muted{color:var(--muted)}table{width:100%;border-collapse:collapse;background:var(--panel)}th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:10px}code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow:auto;background:var(--code);color:var(--codeText);padding:16px;border-radius:6px}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.meta div{padding:9px 10px;background:#eef6f6;border:1px solid #c8e7e3;border-radius:6px}.tabs{margin-top:18px}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-weight:600}.tab-panel{display:none}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4),.tabs input:nth-of-type(5):checked~.tab-panels .tab-panel:nth-of-type(5){display:block}.diagram-card{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fbfdff}.diagram-header{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;background:#eef2f7;border-bottom:1px solid var(--line)}.diagram-body{padding:14px}.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.node{padding:10px 12px;border:1px solid #9fb3c8;border-radius:6px;background:#fff;min-width:88px;text-align:center}.arrow{color:var(--accent);font-weight:700}.compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}@media (max-width:760px){.hero{grid-template-columns:1fr}.tab-labels label{flex:1 1 auto;text-align:center}}@media (prefers-color-scheme:dark){:root{--bg:#102a43;--panel:#1f2933;--text:#d9e2ec;--muted:#bcccdc;--line:#334e68;--accent:#5eead4}.meta div{background:#243b53;border-color:#486581}.diagram-header{background:#243b53}.diagram-card,.node{background:#1f2933}}
+</style>
+</head>
+<body>
+<main>
+<div class="hero"><section><h1>CLI Workflow Use Cases</h1><p>The CLI supports maintainers and agents that need to inspect, install, render, check, and scaffold project capabilities.</p></section><section><h2>Review Focus</h2><div class="meta"><div><strong>Status</strong><br>ready</div><div><strong>Kind</strong><br>use-case</div><div><strong>Drift</strong><br>aligned</div><div><strong>Owner</strong><br>system-modeler</div></div></section></div><section class="meta"><div><strong>ID</strong><br>sh-usecase-cli-workflows</div><div><strong>Status</strong><br>ready</div><div><strong>Model ID</strong><br>sh-usecase-cli-workflows</div><div><strong>Kind</strong><br>use-case</div><div><strong>Method</strong><br>uml</div><div><strong>Notation</strong><br>mermaid</div><div><strong>Source</strong><br>docs/artifacts/source/models/sh-usecase-cli-workflows.md</div><div><strong>Owner</strong><br>system-modeler</div></section><div class="tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-visual" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-evidence" name="tabs" type="radio"><input id="tab-diff" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-visual">Visuals</label><label for="tab-source">Source</label><label for="tab-evidence">Evidence</label><label for="tab-diff">Diff</label></div><div class="tab-panels"><section class="tab-panel"><h2>Overview</h2><p>The CLI supports maintainers and agents that need to inspect, install, render, check, and scaffold project capabilities.</p><div class="meta"><div><strong>Abstraction</strong><br>domain</div><div><strong>Review Surface</strong><br><a href="sh-usecase-cli-workflows.html">generated/review/models/sh-usecase-cli-workflows.html</a></div><div><strong>Implementation Touchpoints</strong><br><a href="../../../cmd/skill-harness/main.go">cmd/skill-harness/main.go</a>, <a href="../../../README.md">README.md</a></div><div><strong>Doc Touchpoints</strong><br><a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a>, <a href="../../../AGENT_INSTRUCTIONS.md">AGENT_INSTRUCTIONS.md</a></div></div></section><section class="tab-panel"><h2>Visuals</h2><div class="diagram-card"><div class="diagram-header"><strong>mermaid use-case</strong><span class="muted">static preview, source-backed</span></div><div class="diagram-body"><pre>flowchart TD
+  Maintainer[&quot;Maintainer or agent&quot;] --&gt; Install[&quot;Install suite&quot;]
+  Maintainer --&gt; Render[&quot;Render agents&quot;]
+  Maintainer --&gt; Check[&quot;Check installed skills and templates&quot;]
+  Maintainer --&gt; List[&quot;List agents and packs&quot;]
+  Maintainer --&gt; Setup[&quot;Setup project&quot;]
+  Setup --&gt; Artifacts[&quot;Scaffold developer artifacts&quot;]
+  Setup --&gt; Models[&quot;Scaffold model review policy&quot;]
+  Setup --&gt; Beads[&quot;Initialize or respect Beads&quot;]</pre></div></div></section><section class="tab-panel"><h2>Canonical Source</h2><p><a href="../../../docs/artifacts/source/models/sh-usecase-cli-workflows.md">docs/artifacts/source/models/sh-usecase-cli-workflows.md</a></p><pre>---
+artifactType: model-view
+modelId: sh-usecase-cli-workflows
+modelKind: use-case
+method: uml
+notation: mermaid
+abstractionLevel: domain
+owner: system-modeler
+implementationTouchpoints:
+  - cmd/skill-harness/main.go
+  - README.md
+docTouchpoints:
+  - docs/developer-artifacts.md
+  - AGENT_INSTRUCTIONS.md
+evidenceLinks:
+  - cmd/skill-harness/main_test.go
+  - docs/developer-artifacts.md
+reviewRequired: true
+updateTriggers:
+  - new CLI command or flag
+  - setup-project behavior change
+  - render or install behavior change
+driftVerdict: aligned
+---
+
+# CLI Workflow Use Cases
+
+The CLI supports maintainers and agents that need to inspect, install, render, check, and scaffold project capabilities.
+
+## Purpose
+
+Show the user goals that the CLI exposes to repo maintainers and agent operators.
+
+## Scope
+
+Top-level use cases are install full suite, install selected packs, install selected agents, run interactive install, set up a project, validate dependencies, render agents, install Beads worktrees, uninstall agents, and open artifact review. Flag variants are extensions unless they materially change behavior.
+
+## Source Model
+
+```mermaid
+flowchart TD
+  Maintainer[&quot;Maintainer or agent&quot;] --&gt; Install[&quot;Install suite&quot;]
+  Maintainer --&gt; Render[&quot;Render agents&quot;]
+  Maintainer --&gt; Check[&quot;Check installed skills and templates&quot;]
+  Maintainer --&gt; List[&quot;List agents and packs&quot;]
+  Maintainer --&gt; Setup[&quot;Setup project&quot;]
+  Setup --&gt; Artifacts[&quot;Scaffold developer artifacts&quot;]
+  Setup --&gt; Models[&quot;Scaffold model review policy&quot;]
+  Setup --&gt; Beads[&quot;Initialize or respect Beads&quot;]
+```
+
+## Use-Case Notes
+
+`setup-project` is the workflow most tightly coupled to developer artifacts. It creates repo-local policy, scripts, proof files, source directories, and review surfaces while respecting flags that skip Beads, agent-docs, Claude settings, or modeling.
+
+## Evidence
+
+Evidence comes from `cmd/skill-harness/main.go`, CLI tests, `README.md`, and `docs/developer-artifacts.md`.
+
+## Freshness
+
+Update this model when commands, setup flags, package scripts, or artifact-opening behavior change.
+</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../cmd/skill-harness/main_test.go">cmd/skill-harness/main_test.go</a></li><li><a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a></li></ul><h3>Update Triggers</h3><ul><li>new CLI command or flag</li><li>setup-project behavior change</li><li>render or install behavior change</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>ff8fddbad2b5468b87fdf6f8a1397a63f79c7bf25158da8451ba9eca22630512</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-23</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
+</main>
+</body>
+</html>

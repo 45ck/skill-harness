@@ -1328,15 +1328,17 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile arti
 		defaultScripts["agent-loop:review"] = "node scripts/check-agent-loop-policy.mjs && node scripts/check-artifact-manifest.mjs"
 	}
 	if mode != modelingModeOff {
-		defaultScripts["artifacts:check"] = "node scripts/check-artifact-manifest.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-html-policy.mjs"
+		defaultScripts["artifacts:check"] = "node scripts/check-artifact-manifest.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check && node scripts/check-artifact-html-policy.mjs"
 		defaultScripts["artifacts:model:generate"] = "node scripts/generate-model-review.mjs"
-		defaultScripts["artifacts:model:check"] = "node scripts/check-model-artifact-policy.mjs"
+		defaultScripts["artifacts:model:check"] = "node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check"
+		defaultScripts["artifacts:model:drift"] = "node scripts/generate-model-review.mjs --check"
 		defaultScripts["artifacts:model:review"] = "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-html-policy.mjs"
 		defaultScripts["models:generate"] = "node scripts/generate-model-review.mjs"
-		defaultScripts["models:check"] = "node scripts/check-model-artifact-policy.mjs"
+		defaultScripts["models:check"] = "node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check"
+		defaultScripts["models:drift"] = "node scripts/generate-model-review.mjs --check"
 		defaultScripts["models:diff:check"] = "node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-html-policy.mjs"
 		defaultScripts["models:open"] = "node scripts/open-artifact-review.mjs generated/review/models/index.html"
-		defaultScripts["models:review"] = "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs"
+		defaultScripts["models:review"] = "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs"
 	}
 	for name, command := range defaultScripts {
 		if _, exists := scripts[name]; !exists {
@@ -1585,6 +1587,12 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 		modelCheckerPath := filepath.Join(projectDir, "scripts", "check-model-artifact-policy.mjs")
 		if !fileExists(modelCheckerPath) {
 			if err := os.WriteFile(modelCheckerPath, []byte(developerModelArtifactPolicyScript()), 0o644); err != nil {
+				return err
+			}
+		}
+		modelInventoryCheckerPath := filepath.Join(projectDir, "scripts", "check-model-inventory.mjs")
+		if !fileExists(modelInventoryCheckerPath) {
+			if err := os.WriteFile(modelInventoryCheckerPath, []byte(developerModelInventoryPolicyScript()), 0o644); err != nil {
 				return err
 			}
 		}
@@ -2337,6 +2345,8 @@ func developerModelReviewGeneratorScript() string {
 import path from 'node:path';
 
 const root = process.cwd();
+const args = process.argv.slice(2);
+const checkOnly = args.includes('--check');
 const configPath = path.join(root, '.skill-harness', 'project.json');
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 const developerArtifacts = config.capabilities?.developerArtifacts ?? {};
@@ -2365,6 +2375,19 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
   return String(value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;');
+}
+
+function hrefBetween(fromFile, targetPath) {
+  if (typeof targetPath !== 'string' || targetPath.trim() === '') return '';
+  const resolved = path.resolve(root, targetPath);
+  if (!resolved.startsWith(root + path.sep) && resolved !== root) return '';
+  return encodeURI(path.relative(path.dirname(fromFile), resolved).replaceAll(path.sep, '/'));
+}
+
+function linkFor(fromFile, targetPath, label) {
+  const href = hrefBetween(fromFile, targetPath);
+  if (!href) return escapeHtml(label ?? targetPath ?? '');
+  return '<a href="' + escapeAttribute(href) + '">' + escapeHtml(label ?? targetPath) + '</a>';
 }
 
 function htmlPage(title, body) {
@@ -2409,18 +2432,29 @@ function compactDiagramMarkup(source) {
   const lines = String(source || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
   const edges = [];
   for (const line of lines) {
-    const arrow = line.match(/^"?([^"-]+?)"?\s*(?:-->|->>|--|-\)|-\])\s*"?([^":]+?)"?(?::.*)?$/);
-    if (arrow) edges.push([arrow[1].trim(), arrow[2].trim()]);
+    const arrow = line.match(/^"?([^"\[\](){}:;-][^":;-]*?)"?\s*(?:-->|->>|--|-\)|-\])\s*"?([^":;]+?)"?(?::.*)?$/);
+    if (arrow) edges.push([arrow[1].replace(/\[.*$/, '').trim(), arrow[2].replace(/\[.*$/, '').trim()]);
   }
   if (edges.length === 0) {
     return '<pre>' + escapeHtml(source || 'No diagram source found.') + '</pre>';
   }
-  let html = '<div class="flow">';
-  for (const [index, edge] of edges.entries()) {
-    if (index > 0) html += '<span class="arrow">/</span>';
-    html += '<span class="node">' + escapeHtml(edge[0]) + '</span><span class="arrow">-></span><span class="node">' + escapeHtml(edge[1]) + '</span>';
+  const nodes = [...new Set(edges.flat())].filter(Boolean).slice(0, 12);
+  const width = Math.max(480, nodes.length * 150);
+  const height = 190;
+  const nodeByName = new Map(nodes.map((node, index) => [node, { x: 34 + index * 145, y: 72 }]));
+  let svg = '<svg role="img" aria-label="Static model diagram preview" viewBox="0 0 ' + width + ' ' + height + '" xmlns="http://www.w3.org/2000/svg">';
+  svg += '<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0f766e"/></marker></defs>';
+  for (const [from, to] of edges) {
+    const a = nodeByName.get(from);
+    const b = nodeByName.get(to);
+    if (!a || !b) continue;
+    svg += '<line x1="' + (a.x + 112) + '" y1="' + (a.y + 25) + '" x2="' + b.x + '" y2="' + (b.y + 25) + '" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/>';
   }
-  return html + '</div>';
+  for (const [name, point] of nodeByName.entries()) {
+    svg += '<rect x="' + point.x + '" y="' + point.y + '" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/>';
+    svg += '<text x="' + (point.x + 56) + '" y="' + (point.y + 30) + '" text-anchor="middle" font-size="12" fill="#17202a">' + escapeHtml(name.slice(0, 22)) + '</text>';
+  }
+  return svg + '</svg>';
 }
 
 function diagramSection(source, artifact) {
@@ -2472,12 +2506,16 @@ function gallerySection(artifact) {
   return '<div class="gallery">' + figures.join('\n') + '</div>';
 }
 
-function listItems(values, emptyText) {
+function listItems(values, emptyText, currentFile) {
   if (!Array.isArray(values) || values.length === 0) return '<p class="muted">' + escapeHtml(emptyText) + '</p>';
-  return '<ul>' + values.map((value) => '<li>' + escapeHtml(typeof value === 'string' ? value : JSON.stringify(value)) + '</li>').join('') + '</ul>';
+  return '<ul>' + values.map((value) => {
+    const text = typeof value === 'string' ? value : JSON.stringify(value);
+    if (currentFile && typeof value === 'string') return '<li>' + linkFor(currentFile, value, value) + '</li>';
+    return '<li>' + escapeHtml(text) + '</li>';
+  }).join('') + '</ul>';
 }
 
-function renderArtifact(artifact, byId) {
+function renderArtifact(artifact, byId, outPath) {
   const source = readSource(artifact);
   const summary = artifact.summary || artifact.purpose || firstParagraph(source) || 'Source-backed model review artifact.';
   const rows = [
@@ -2496,10 +2534,10 @@ function renderArtifact(artifact, byId) {
   body += '</div></section></div>\n<section class="meta">';
   for (const [label, value] of rows) body += '<div><strong>' + escapeHtml(label) + '</strong><br>' + escapeHtml(value) + '</div>';
   body += '</section>\n<div class="tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-visual" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-evidence" name="tabs" type="radio"><input id="tab-diff" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-visual">Visuals</label><label for="tab-source">Source</label><label for="tab-evidence">Evidence</label><label for="tab-diff">Diff</label></div><div class="tab-panels">';
-  body += '<section class="tab-panel"><h2>Overview</h2><p>' + escapeHtml(summary) + '</p><div class="meta"><div><strong>Abstraction</strong><br>' + escapeHtml(artifact.abstractionLevel) + '</div><div><strong>Notation</strong><br>' + escapeHtml(artifact.notation) + '</div><div><strong>Canonical Source</strong><br>' + escapeHtml(artifact.source) + '</div><div><strong>Review Surface</strong><br>' + escapeHtml(artifact.reviewSurface || '') + '</div></div></section>';
+  body += '<section class="tab-panel"><h2>Overview</h2><p>' + escapeHtml(summary) + '</p><div class="meta"><div><strong>Abstraction</strong><br>' + escapeHtml(artifact.abstractionLevel) + '</div><div><strong>Notation</strong><br>' + escapeHtml(artifact.notation) + '</div><div><strong>Canonical Source</strong><br>' + linkFor(outPath, artifact.source, artifact.source || 'source') + '</div><div><strong>Review Surface</strong><br>' + linkFor(outPath, artifact.reviewSurface, artifact.reviewSurface || '') + '</div><div><strong>Implementation Touchpoints</strong><br>' + (artifact.implementationTouchpoints || []).map((item) => linkFor(outPath, item, item)).join(', ') + '</div><div><strong>Doc Touchpoints</strong><br>' + (artifact.docTouchpoints || []).map((item) => linkFor(outPath, item, item)).join(', ') + '</div></div></section>';
   body += '<section class="tab-panel"><h2>Visuals</h2>' + diagramSection(source, artifact) + '<h3>Screenshots And Evidence Images</h3>' + gallerySection(artifact) + '</section>';
-  body += '<section class="tab-panel"><h2>Canonical Source</h2><pre>' + escapeHtml(source || 'Source not found or not readable.') + '</pre></section>';
-  body += '<section class="tab-panel"><h2>Evidence</h2>' + listItems(artifact.evidenceLinks, 'No evidence links are listed yet.') + '<h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>' + escapeHtml(artifact.sourceHash || '') + '</div><div><strong>Renderer</strong><br>' + escapeHtml(artifact.renderer || 'skill-harness model review generator') + '</div><div><strong>Generated</strong><br>' + escapeHtml(new Date().toISOString()) + '</div></div></section>';
+  body += '<section class="tab-panel"><h2>Canonical Source</h2><p>' + linkFor(outPath, artifact.source, artifact.source || 'source') + '</p><pre>' + escapeHtml(source || 'Source not found or not readable.') + '</pre></section>';
+  body += '<section class="tab-panel"><h2>Evidence</h2>' + listItems(artifact.evidenceLinks, 'No evidence links are listed yet.', outPath) + '<h3>Update Triggers</h3>' + listItems(artifact.updateTriggers, 'No update triggers are listed yet.') + '<h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>' + escapeHtml(artifact.sourceHash || '') + '</div><div><strong>Renderer</strong><br>' + escapeHtml(artifact.renderer || 'skill-harness model review generator') + '</div><div><strong>Generated</strong><br>' + escapeHtml(artifact.generatedAt || artifact.freshness?.generatedAt || 'not-recorded') + '</div></div></section>';
   if (artifact.type === 'model-diff') {
     const diff = artifact.diff ?? {};
     const before = byId.get(diff.beforeArtifactId);
@@ -2528,22 +2566,48 @@ const byId = new Map();
 for (const artifact of artifacts) if (artifact?.id) byId.set(artifact.id, artifact);
 
 const indexRows = [];
+const expectedFiles = new Map();
 for (const artifact of artifacts) {
   const outPath = artifactPath(artifact);
-  fs.writeFileSync(outPath, renderArtifact(artifact, byId));
   const reviewSurface = repoPath(outPath);
   artifact.reviewSurface = reviewSurface;
   if (artifact.type === 'model-diff') {
     artifact.diff = artifact.diff ?? {};
     artifact.diff.reviewSurface = reviewSurface;
   }
-  indexRows.push('<tr><td>' + escapeHtml(artifact.id) + '</td><td>' + escapeHtml(artifact.modelKind) + '</td><td>' + escapeHtml(artifact.method) + '</td><td>' + escapeHtml(artifact.status) + '</td><td>' + escapeHtml(artifact.source) + '</td><td>' + escapeHtml(reviewSurface) + '</td></tr>');
+  expectedFiles.set(outPath, renderArtifact(artifact, byId, outPath));
+  const indexPath = path.join(modelReviewDir, 'index.html');
+  indexRows.push('<tr><td>' + escapeHtml(artifact.id) + '</td><td>' + escapeHtml(artifact.modelKind) + '</td><td>' + escapeHtml(artifact.method) + '</td><td>' + escapeHtml(artifact.status) + '</td><td>' + linkFor(indexPath, artifact.source, artifact.source) + '</td><td>' + linkFor(indexPath, reviewSurface, reviewSurface) + '</td></tr>');
 }
 
 const indexBody = '<section><h1>Model Review Index</h1><p>Static human review surfaces generated from canonical model sources. Edit source first, then regenerate these pages.</p></section><section><table><thead><tr><th>ID</th><th>Kind</th><th>Method</th><th>Status</th><th>Source</th><th>HTML Review</th></tr></thead><tbody>' + indexRows.join('\n') + '</tbody></table></section>';
-fs.writeFileSync(path.join(modelReviewDir, 'index.html'), htmlPage('Model Review Index', indexBody));
-fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
-console.log('Generated ' + artifacts.length + ' model review artifact(s) in ' + repoPath(modelReviewDir));
+expectedFiles.set(path.join(modelReviewDir, 'index.html'), htmlPage('Model Review Index', indexBody));
+
+if (checkOnly) {
+  const failures = [];
+  for (const [filePath, expected] of expectedFiles) {
+    if (!fs.existsSync(filePath)) {
+      failures.push('missing generated model review: ' + repoPath(filePath));
+      continue;
+    }
+    const actual = fs.readFileSync(filePath, 'utf8');
+    if (actual !== expected) failures.push('stale generated model review: ' + repoPath(filePath));
+  }
+  const currentManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  if (JSON.stringify(currentManifest, null, 2) + '\n' !== JSON.stringify(manifest, null, 2) + '\n') {
+    failures.push('manifest reviewSurface entries are stale; run node scripts/generate-model-review.mjs');
+  }
+  if (failures.length > 0) {
+    console.error('Model review drift check failed:');
+    for (const failure of failures) console.error('- ' + failure);
+    process.exit(1);
+  }
+  console.log('Model review drift check passed');
+} else {
+  for (const [filePath, html] of expectedFiles) fs.writeFileSync(filePath, html);
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+  console.log('Generated ' + artifacts.length + ' model review artifact(s) in ' + repoPath(modelReviewDir));
+}
 `
 }
 
@@ -2555,6 +2619,7 @@ import { pathToFileURL } from 'node:url';
 
 const root = process.cwd();
 const args = process.argv.slice(2);
+const jsonMode = args.includes('--json');
 const printOnly = args.includes('--print') || args.includes('--dry-run') || process.env.CI === 'true';
 const explicitTarget = args.find((arg) => !arg.startsWith('--'));
 
@@ -2629,6 +2694,14 @@ function hostHint() {
   return '';
 }
 
+function hostAction() {
+  const originator = process.env.CODEX_INTERNAL_ORIGINATOR_OVERRIDE ?? '';
+  if (process.env.CODEX_THREAD_ID || /codex/i.test(originator)) return 'codex-browser-plugin';
+  if (process.env.CLAUDE_DESKTOP || /claude/i.test(originator)) return 'claude-desktop-preview';
+  if (printOnly) return 'print-file-url';
+  return 'system-default-browser';
+}
+
 function openSystemDefault(filePath) {
   const url = pathToFileURL(filePath).href;
   let command;
@@ -2652,6 +2725,17 @@ try {
   const target = discoverTarget();
   const url = pathToFileURL(target).href;
   const hint = hostHint();
+  if (jsonMode) {
+    console.log(JSON.stringify({
+      path: target,
+      repoPath: repoPath(target),
+      url,
+      hostAction: hostAction(),
+      openMode: printOnly ? 'print' : 'open',
+      hint
+    }, null, 2));
+    process.exit(0);
+  }
   if (hint) console.log(hint);
   if (printOnly) {
     console.log(url);
@@ -2849,6 +2933,83 @@ if (failures.length > 0) {
 }
 
 console.log('Model artifact policy passed');
+`
+}
+
+func developerModelInventoryPolicyScript() string {
+	return `import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const configPath = path.join(root, '.skill-harness', 'project.json');
+const config = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+const manifestPath = path.join(root, config.capabilities?.developerArtifacts?.manifest?.path ?? 'docs/artifacts/artifacts.manifest.json');
+const inventoryPath = path.join(root, 'docs/artifacts/source/models/model-inventory.md');
+const failures = [];
+const tick = String.fromCharCode(96);
+
+function read(filePath) {
+  return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
+}
+
+function tableRows(markdown) {
+  return markdown
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('| ' + tick))
+    .map((line) => line.split('|').slice(1, -1).map((cell) => cell.trim()));
+}
+
+function stripCode(value) {
+  const text = String(value ?? '');
+  return text.startsWith(tick) && text.endsWith(tick) ? text.slice(1, -1) : text;
+}
+
+if (!fs.existsSync(manifestPath)) failures.push('missing artifact manifest');
+if (!fs.existsSync(inventoryPath)) failures.push('missing model inventory');
+
+const manifest = fs.existsSync(manifestPath) ? JSON.parse(read(manifestPath)) : { artifacts: [] };
+const inventory = read(inventoryPath);
+const modelArtifacts = (manifest.artifacts ?? []).filter((artifact) => artifact.type === 'model-view' || artifact.type === 'model-diff');
+const rows = tableRows(inventory);
+const byModelId = new Map(rows.map((row) => [stripCode(row[0]), row]));
+
+for (const artifact of modelArtifacts) {
+  const row = byModelId.get(artifact.modelId);
+  if (!row) {
+    failures.push('inventory missing modelId: ' + artifact.modelId);
+    continue;
+  }
+  if (row.length >= 8) {
+    const [modelId, kind, method, owner, source, touchpoints, evidence, reviewSurface] = row;
+    if (stripCode(modelId) !== artifact.modelId) failures.push(artifact.modelId + ' inventory modelId mismatch');
+    if (kind !== artifact.modelKind) failures.push(artifact.modelId + ' inventory kind mismatch: ' + kind + ' != ' + artifact.modelKind);
+    if (method !== artifact.method) failures.push(artifact.modelId + ' inventory method mismatch: ' + method + ' != ' + artifact.method);
+    if (owner !== artifact.owner) failures.push(artifact.modelId + ' inventory owner mismatch: ' + owner + ' != ' + artifact.owner);
+    if (stripCode(source) !== artifact.source) failures.push(artifact.modelId + ' inventory source mismatch: ' + source + ' != ' + artifact.source);
+    if (artifact.reviewSurface && stripCode(reviewSurface) !== artifact.reviewSurface) failures.push(artifact.modelId + ' inventory review surface mismatch: ' + reviewSurface + ' != ' + artifact.reviewSurface);
+    if (Array.isArray(artifact.implementationTouchpoints) && artifact.implementationTouchpoints.length > 0) {
+      const hasPrimaryTouchpoint = artifact.implementationTouchpoints.some((touchpoint) => touchpoints.includes(touchpoint));
+      if (!hasPrimaryTouchpoint) failures.push(artifact.modelId + ' inventory touchpoints do not include any manifest implementation touchpoint');
+    }
+    if (Array.isArray(artifact.evidenceLinks) && artifact.evidenceLinks.length > 0) {
+      const hasEvidence = artifact.evidenceLinks.some((link) => evidence.includes(link));
+      if (!hasEvidence) failures.push(artifact.modelId + ' inventory evidence does not include any manifest evidence link');
+    }
+  }
+}
+
+for (const modelId of byModelId.keys()) {
+  if (!modelArtifacts.some((artifact) => artifact.modelId === modelId)) failures.push('manifest missing inventory modelId: ' + modelId);
+}
+
+if (failures.length > 0) {
+  console.error('Model inventory check failed:');
+  for (const failure of failures) console.error('- ' + failure);
+  process.exit(1);
+}
+
+console.log('Model inventory check passed');
 `
 }
 

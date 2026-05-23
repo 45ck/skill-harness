@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "capabilities": {
+    "developerArtifacts": {
+      "enabled": true,
+      "requestedProfile": "dual",
+      "profile": "dual",
+      "specialization": "source-backed-model-review",
+      "canonical": {
+        "formats": [
+          "markdown",
+          "toon"
+        ],
+        "tooling": [
+          "specgraph",
+          "agent-docs"
+        ],
+        "paths": [
+          "docs",
+          "docs/artifacts/source"
+        ]
+      },
+      "artifactTypes": [
+        "planning-artifact",
+        "decision-record",
+        "implementation-plan",
+        "review-artifact",
+        "model-view",
+        "model-diff"
+      ],
+      "manifest": {
+        "path": "docs/artifacts/artifacts.manifest.json",
+        "schemaVersion": 1,
+        "requireSource": true,
+        "requireEvidence": true,
+        "freshness": {
+          "trackSourceHash": true,
+          "hashAlgorithm": "sha256"
+        }
+      },
+      "modeling": {
+        "enabled": true,
+        "mode": "uml-first",
+        "reviewDir": "generated/review/models"
+      },
+      "modelPolicy": {
+        "defaultReviewEmbedding": "inline-svg",
+        "allowedModelKinds": [
+          "activity",
+          "architecture-space",
+          "class",
+          "component",
+          "context",
+          "dependency",
+          "domain",
+          "state",
+          "use-case"
+        ],
+        "allowedNotations": [
+          "markdown",
+          "mermaid",
+          "plantuml",
+          "structurizr",
+          "toon"
+        ],
+        "uml": {
+          "enabled": true,
+          "mode": "uml-first",
+          "sourceDir": "docs/artifacts/source/models",
+          "reviewDir": "generated/review/models",
+          "generatedReviewRequired": true,
+          "methods": [
+            "uml",
+            "uwe",
+            "c4",
+            "evidence"
+          ],
+          "allowedSourceExtensions": [
+            ".md",
+            ".toon",
+            ".mmd",
+            ".puml",
+            ".plantuml",
+            ".dsl",
+            ".json",
+            ".yaml",
+            ".yml"
+          ],
+          "methodModelKinds": {
+            "uml": [
+              "activity",
+              "class",
+              "component",
+              "domain",
+              "state",
+              "use-case"
+            ],
+            "uwe": [
+              "activity",
+              "class",
+              "component",
+              "domain",
+              "state",
+              "use-case"
+            ],
+            "c4": [
+              "architecture-space",
+              "component",
+              "context"
+            ],
+            "evidence": [
+              "architecture-space",
+              "dependency"
+            ]
+          },
+          "allowedFacets": {
+            "uwe": [
+              "content",
+              "navigation",
+              "presentation",
+              "process",
+              "access",
+              "adaptation"
+            ]
+          },
+          "evidenceDefaultKinds": [
+            "dependency"
+          ],
+          "authoredOrEvidenceKinds": [
+            "architecture-space"
+          ]
+        }
+      },
+      "reviewSurface": {
+        "format": "html",
+        "outDir": "generated/review",
+        "commitGenerated": true,
+        "openMode": "file-preview",
+        "openPolicy": {
+          "preferHostBrowserTool": true,
+          "codexApp": "use Browser plugin when available",
+          "claudeDesktop": "use built-in browser or preview tool when available",
+          "cliFallback": "system-default-browser",
+          "headlessFallback": "print-file-url"
+        }
+      },
+      "htmlPolicy": {
+        "role": "generated-review-surface",
+        "selfContained": true,
+        "allowInlineJavaScript": false,
+        "allowExternalScripts": false,
+        "allowExternalAssets": false,
+        "allowNetworkCalls": false,
+        "requireSemanticHTML": true,
+        "requiredCSP": "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+      }
+    }
+  }
+}

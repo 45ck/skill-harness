@@ -1,5 +1,10 @@
 {
   "version": 1,
+  "rules": {
+    "editSourceFirst": true,
+    "generatedReviewIsCanonical": false,
+    "hashAlgorithm": "sha256"
+  },
   "artifacts": [
     {
       "id": "model-to-code-human-artifacts-plan-2026-05-23",
@@ -8,6 +13,7 @@
       "status": "ready",
       "owner": "codex",
       "reviewSurface": "generated/review/model-to-code-human-artifacts-plan-2026-05-23.html",
+      "sourceHash": "98edbdc5d89ceb08c835b666bb463ff2c2ed222937d0736917febc3da56746d3",
       "evidenceLinks": [
         "docs/developer-artifacts.md",
         "docs/artifacts/source/uml-model-driven-artifacts-research-2026-05-23.md",
@@ -20,6 +26,235 @@
         "generatedAt": "2026-05-23",
         "sourceFirst": true
       }
+    },
+    {
+      "id": "sh-system-context",
+      "title": "Skill Harness System Context",
+      "type": "model-view",
+      "source": "docs/artifacts/source/models/sh-system-context.md",
+      "status": "ready",
+      "modelId": "sh-system-context",
+      "modelKind": "context",
+      "method": "c4",
+      "notation": "mermaid",
+      "abstractionLevel": "runtime",
+      "owner": "system-modeler",
+      "reviewSurface": "generated/review/models/sh-system-context.html",
+      "sourceHash": "6432603165c08e4024162168571b696f5e5edc6caa5aa1f7ecbdc652a7a89595",
+      "renderer": "skill-harness model review generator",
+      "generatedAt": "2026-05-23",
+      "implementationTouchpoints": [
+        "cmd/skill-harness/main.go",
+        "scripts/dependencies.json",
+        "scripts/agent_loadouts.json",
+        "packs/"
+      ],
+      "docTouchpoints": [
+        "README.md",
+        "docs/developer-artifacts.md"
+      ],
+      "evidenceLinks": [
+        "AGENTS.md",
+        "scripts/dependencies.json",
+        "scripts/agent_loadouts.json"
+      ],
+      "reviewRequired": true,
+      "updateTriggers": [
+        "CLI command surface changes",
+        "agent loadout or pack boundary changes",
+        "developer artifact capability changes"
+      ],
+      "driftVerdict": "aligned"
+    },
+    {
+      "id": "sh-domain-artifact-governance",
+      "title": "Artifact Governance Domain Model",
+      "type": "model-view",
+      "source": "docs/artifacts/source/models/sh-domain-artifact-governance.md",
+      "status": "ready",
+      "modelId": "sh-domain-artifact-governance",
+      "modelKind": "domain",
+      "method": "uml",
+      "notation": "mermaid",
+      "abstractionLevel": "domain",
+      "owner": "system-modeler",
+      "reviewSurface": "generated/review/models/sh-domain-artifact-governance.html",
+      "sourceHash": "2a8fe81a0dd5d0ce71ac846c2f3bcb788d45ac71ebf5d32db91b49ef58306fdf",
+      "renderer": "skill-harness model review generator",
+      "generatedAt": "2026-05-23",
+      "implementationTouchpoints": [
+        ".skill-harness/project.json",
+        "docs/artifacts/artifacts.manifest.json",
+        "scripts/check-artifact-manifest.mjs",
+        "scripts/check-model-artifact-policy.mjs",
+        "scripts/generate-model-review.mjs"
+      ],
+      "docTouchpoints": [
+        "docs/developer-artifacts.md",
+        "docs/artifacts/source/models/model-inventory.md"
+      ],
+      "evidenceLinks": [
+        "docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md",
+        "docs/developer-artifacts.md"
+      ],
+      "reviewRequired": true,
+      "updateTriggers": [
+        "artifact manifest schema changes",
+        "HTML policy changes",
+        "model metadata contract changes"
+      ],
+      "driftVerdict": "aligned"
+    },
+    {
+      "id": "sh-usecase-cli-workflows",
+      "title": "CLI Workflow Use Cases",
+      "type": "model-view",
+      "source": "docs/artifacts/source/models/sh-usecase-cli-workflows.md",
+      "status": "ready",
+      "modelId": "sh-usecase-cli-workflows",
+      "modelKind": "use-case",
+      "method": "uml",
+      "notation": "mermaid",
+      "abstractionLevel": "domain",
+      "owner": "system-modeler",
+      "reviewSurface": "generated/review/models/sh-usecase-cli-workflows.html",
+      "sourceHash": "ff8fddbad2b5468b87fdf6f8a1397a63f79c7bf25158da8451ba9eca22630512",
+      "renderer": "skill-harness model review generator",
+      "generatedAt": "2026-05-23",
+      "implementationTouchpoints": [
+        "cmd/skill-harness/main.go",
+        "README.md"
+      ],
+      "docTouchpoints": [
+        "docs/developer-artifacts.md",
+        "AGENT_INSTRUCTIONS.md"
+      ],
+      "evidenceLinks": [
+        "cmd/skill-harness/main_test.go",
+        "docs/developer-artifacts.md"
+      ],
+      "reviewRequired": true,
+      "updateTriggers": [
+        "new CLI command or flag",
+        "setup-project behavior change",
+        "render or install behavior change"
+      ],
+      "driftVerdict": "aligned"
+    },
+    {
+      "id": "sh-activity-setup-project",
+      "title": "Setup Project Activity",
+      "type": "model-view",
+      "source": "docs/artifacts/source/models/sh-activity-setup-project.md",
+      "status": "ready",
+      "modelId": "sh-activity-setup-project",
+      "modelKind": "activity",
+      "method": "uml",
+      "notation": "mermaid",
+      "abstractionLevel": "runtime",
+      "owner": "system-modeler",
+      "reviewSurface": "generated/review/models/sh-activity-setup-project.html",
+      "sourceHash": "57391b23ccf9fefc1bb829025a8edd885df0ed7aac8fb09f7e761e8538e4c1f0",
+      "renderer": "skill-harness model review generator",
+      "generatedAt": "2026-05-23",
+      "implementationTouchpoints": [
+        "cmd/skill-harness/main.go",
+        "cmd/skill-harness/main_test.go"
+      ],
+      "docTouchpoints": [
+        "docs/developer-artifacts.md"
+      ],
+      "evidenceLinks": [
+        "cmd/skill-harness/main_test.go",
+        ".skill-harness/setup-proof.json"
+      ],
+      "reviewRequired": true,
+      "updateTriggers": [
+        "setup-project flag behavior changes",
+        "generated scaffold file changes",
+        "setup proof schema changes"
+      ],
+      "driftVerdict": "aligned"
+    },
+    {
+      "id": "sh-component-scaffold-engine",
+      "title": "Scaffold Engine Component View",
+      "type": "model-view",
+      "source": "docs/artifacts/source/models/sh-component-scaffold-engine.md",
+      "status": "ready",
+      "modelId": "sh-component-scaffold-engine",
+      "modelKind": "component",
+      "method": "c4",
+      "notation": "mermaid",
+      "abstractionLevel": "design",
+      "owner": "system-modeler",
+      "reviewSurface": "generated/review/models/sh-component-scaffold-engine.html",
+      "sourceHash": "40298667adcac8fba1f48954c1b410a20d01e9b6aab31e19ab51e258aeef915c",
+      "renderer": "skill-harness model review generator",
+      "generatedAt": "2026-05-23",
+      "implementationTouchpoints": [
+        "cmd/skill-harness/main.go",
+        "scripts/suite_graph.py",
+        "scripts/render_suite_docs.py",
+        "scripts/check_suite_drift.py",
+        "scripts/check-artifact-manifest.mjs",
+        "scripts/check-model-artifact-policy.mjs",
+        "scripts/generate-model-review.mjs"
+      ],
+      "docTouchpoints": [
+        "docs/agent-loadouts.md",
+        "docs/developer-artifacts.md"
+      ],
+      "evidenceLinks": [
+        "cmd/skill-harness/main_test.go",
+        "scripts/dependencies.json",
+        "scripts/agent_loadouts.json"
+      ],
+      "reviewRequired": true,
+      "updateTriggers": [
+        "scaffold script changes",
+        "suite graph schema changes",
+        "agent template rendering changes"
+      ],
+      "driftVerdict": "aligned"
+    },
+    {
+      "id": "sh-state-artifact-freshness",
+      "title": "Artifact Freshness State Model",
+      "type": "model-view",
+      "source": "docs/artifacts/source/models/sh-state-artifact-freshness.md",
+      "status": "ready",
+      "modelId": "sh-state-artifact-freshness",
+      "modelKind": "state",
+      "method": "uml",
+      "notation": "mermaid",
+      "abstractionLevel": "decision",
+      "owner": "system-modeler",
+      "reviewSurface": "generated/review/models/sh-state-artifact-freshness.html",
+      "sourceHash": "776b1c88f9b270b43ee3240d743b251be344056053422e051496075acce4fb44",
+      "renderer": "skill-harness model review generator",
+      "generatedAt": "2026-05-23",
+      "implementationTouchpoints": [
+        "docs/artifacts/artifacts.manifest.json",
+        "scripts/check-artifact-manifest.mjs",
+        "scripts/generate-model-review.mjs",
+        ".github/workflows/quality.yml"
+      ],
+      "docTouchpoints": [
+        "docs/developer-artifacts.md",
+        "docs/artifacts/source/models/model-inventory.md"
+      ],
+      "evidenceLinks": [
+        "docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md",
+        ".skill-harness/setup-proof.json"
+      ],
+      "reviewRequired": true,
+      "updateTriggers": [
+        "sourceHash policy changes",
+        "generated HTML review changes",
+        "CI quality gate changes"
+      ],
+      "driftVerdict": "aligned"
     }
   ]
 }

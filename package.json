@@ -1,0 +1,24 @@
+{
+  "name": "skill-harness",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "artifacts:check": "node scripts/check-artifact-manifest.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check && node scripts/check-artifact-html-policy.mjs",
+    "artifacts:html:check": "node scripts/check-artifact-html-policy.mjs",
+    "artifacts:manifest:check": "node scripts/check-artifact-manifest.mjs",
+    "artifacts:model:check": "node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check",
+    "artifacts:model:drift": "node scripts/generate-model-review.mjs --check",
+    "artifacts:model:generate": "node scripts/generate-model-review.mjs",
+    "artifacts:model:review": "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
+    "artifacts:open": "node scripts/open-artifact-review.mjs",
+    "models:check": "node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check",
+    "models:drift": "node scripts/generate-model-review.mjs --check",
+    "models:generate": "node scripts/generate-model-review.mjs",
+    "models:impact": "node scripts/model-impact.mjs",
+    "models:open": "node scripts/open-artifact-review.mjs generated/review/models/index.html",
+    "models:review": "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
+    "suite:docs": "python scripts/render_suite_docs.py",
+    "suite:drift:check": "python scripts/check_suite_drift.py --check",
+    "suite:graph": "python scripts/suite_graph.py --format json"
+  }
+}

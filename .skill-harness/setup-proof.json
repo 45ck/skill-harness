@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-23",
+  "targetDir": ".",
+  "operationDir": ".",
+  "developerArtifactsProfile": "dual",
+  "modelingMode": "uml-first",
+  "generatedPaths": [
+    ".skill-harness/project.json",
+    "docs/artifacts/artifacts.manifest.json",
+    "docs/artifacts/source/models",
+    "generated/review/models",
+    "scripts/check-artifact-manifest.mjs",
+    "scripts/check-artifact-html-policy.mjs",
+    "scripts/check-model-artifact-policy.mjs",
+    "scripts/check-model-inventory.mjs",
+    "scripts/generate-model-review.mjs",
+    "scripts/open-artifact-review.mjs"
+  ],
+  "checks": {
+    "artifactManifest": {
+      "status": "available",
+      "command": "node scripts/check-artifact-manifest.mjs",
+      "path": "scripts/check-artifact-manifest.mjs"
+    },
+    "modelArtifacts": {
+      "status": "available",
+      "command": "node scripts/check-model-artifact-policy.mjs",
+      "path": "scripts/check-model-artifact-policy.mjs"
+    },
+    "modelInventory": {
+      "status": "available",
+      "command": "node scripts/check-model-inventory.mjs",
+      "path": "scripts/check-model-inventory.mjs"
+    },
+    "modelReviewDrift": {
+      "status": "available",
+      "command": "node scripts/generate-model-review.mjs --check",
+      "path": "scripts/generate-model-review.mjs"
+    },
+    "htmlPolicy": {
+      "status": "available",
+      "command": "node scripts/check-artifact-html-policy.mjs",
+      "path": "scripts/check-artifact-html-policy.mjs"
+    },
+    "suiteDrift": {
+      "status": "available",
+      "command": "python scripts/check_suite_drift.py --check",
+      "path": "scripts/check_suite_drift.py"
+    }
+  }
+}

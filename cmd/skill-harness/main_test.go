@@ -404,6 +404,7 @@ func TestWriteDeveloperArtifactScaffoldModeling(t *testing.T) {
 		filepath.Join(root, "generated", "review", "models"),
 		filepath.Join(root, "docs", "artifacts", "templates", "model-diff-artifact.md"),
 		filepath.Join(root, "scripts", "check-model-artifact-policy.mjs"),
+		filepath.Join(root, "scripts", "check-model-inventory.mjs"),
 	} {
 		if !fileExists(path) && !dirExists(path) {
 			t.Fatalf("expected modeling scaffold path %s", path)
@@ -438,10 +439,16 @@ func TestWriteDeveloperArtifactScaffoldModeling(t *testing.T) {
 	if !strings.Contains(fmt.Sprint(scripts["artifacts:check"]), "check-model-artifact-policy.mjs") {
 		t.Fatalf("expected artifacts:check to include model policy, got %#v", scripts["artifacts:check"])
 	}
-	if scripts["artifacts:model:check"] != "node scripts/check-model-artifact-policy.mjs" {
+	if scripts["artifacts:model:check"] != "node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check" {
 		t.Fatalf("expected model check script, got %#v", scripts["artifacts:model:check"])
 	}
-	if scripts["models:review"] != "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs" {
+	if scripts["models:check"] != "node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check" {
+		t.Fatalf("expected models check script, got %#v", scripts["models:check"])
+	}
+	if scripts["models:drift"] != "node scripts/generate-model-review.mjs --check" {
+		t.Fatalf("expected model drift script, got %#v", scripts["models:drift"])
+	}
+	if scripts["models:review"] != "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs" {
 		t.Fatalf("expected model review script, got %#v", scripts["models:review"])
 	}
 	if scripts["models:open"] != "node scripts/open-artifact-review.mjs generated/review/models/index.html" {
@@ -517,6 +524,7 @@ func TestModelReviewGeneratorCreatesHumanHTML(t *testing.T) {
 	})
 
 	runNodeScript(t, root, "scripts/generate-model-review.mjs", true)
+	runNodeScript(t, root, "scripts/generate-model-review.mjs", true, "--check")
 	htmlPath := filepath.Join(root, "generated", "review", "models", "model-architecture.html")
 	if !fileExists(htmlPath) {
 		t.Fatal("expected generated model review HTML")
@@ -529,6 +537,9 @@ func TestModelReviewGeneratorCreatesHumanHTML(t *testing.T) {
 	}
 	runNodeScript(t, root, "scripts/check-model-artifact-policy.mjs", true)
 	runNodeScript(t, root, "scripts/check-artifact-html-policy.mjs", true)
+
+	mustWriteFile(t, sourcePath, source+"\nChanged without regeneration.\n")
+	runNodeScript(t, root, "scripts/generate-model-review.mjs", false, "--check")
 }
 
 func TestArtifactReviewOpenScriptPrintsDiscoveredTarget(t *testing.T) {

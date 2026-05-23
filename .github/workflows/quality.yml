@@ -1,0 +1,74 @@
+name: quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Go tests
+        run: go test ./...
+
+      - name: Build CLI
+        run: go build -o skill-harness ./cmd/skill-harness
+
+      - name: JSON integrity
+        run: node -e "JSON.parse(require('fs').readFileSync('scripts/dependencies.json','utf8')); JSON.parse(require('fs').readFileSync('scripts/agent_loadouts.json','utf8')); JSON.parse(require('fs').readFileSync('docs/artifacts/artifacts.manifest.json','utf8'));"
+
+      - name: Python syntax
+        run: python -m py_compile $(git ls-files 'scripts/*.py')
+
+      - name: Suite drift
+        run: python scripts/check_suite_drift.py --check
+
+      - name: Model review and artifact policy
+        run: npm run artifacts:check
+
+      - name: Hermetic setup-project smoke
+        run: |
+          tmp_home="$(mktemp -d)"
+          tmp_repo="$(mktemp -d)"
+          mkdir -p "$tmp_home/localappdata"
+          printf '{\n  "name": "smoke-repo",\n  "private": true\n}\n' > "$tmp_repo/package.json"
+
+          HOME="$tmp_home" USERPROFILE="$tmp_home" LOCALAPPDATA="$tmp_home/localappdata" \
+            ./skill-harness setup-project \
+              --dir "$tmp_repo" \
+              --package-manager npm \
+              --skip-noslop \
+              --skip-agent-docs \
+              --skip-beads \
+              --skip-claude-settings \
+              --developer-artifacts-profile cli \
+              --modeling-mode uml-first
+
+          test -f "$tmp_repo/.skill-harness/setup-proof.json"
+          test -f "$tmp_repo/scripts/generate-model-review.mjs"
+          (cd "$tmp_repo" && node scripts/generate-model-review.mjs)
+          (cd "$tmp_repo" && node scripts/generate-model-review.mjs --check)
+          (cd "$tmp_repo" && node scripts/check-artifact-manifest.mjs)
+          (cd "$tmp_repo" && node scripts/check-model-artifact-policy.mjs)
+          (cd "$tmp_repo" && node scripts/check-model-inventory.mjs)
+          (cd "$tmp_repo" && node scripts/check-artifact-html-policy.mjs)
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: model-review-html
+          path: generated/review/models/

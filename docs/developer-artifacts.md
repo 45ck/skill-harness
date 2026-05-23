@@ -149,8 +149,11 @@ Run:
 ```bash
 node scripts/check-model-artifact-policy.mjs
 node scripts/generate-model-review.mjs
+node scripts/generate-model-review.mjs --check
 node scripts/check-artifact-html-policy.mjs
 ```
+
+Use `models:review` as the write path and `models:drift` or `artifacts:model:drift` as the read-only generated HTML drift gate.
 
 ## Media And Demo Artifacts
 

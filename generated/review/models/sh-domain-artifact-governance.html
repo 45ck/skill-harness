@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<title>Model Review: sh-domain-artifact-governance</title>
+<style>
+:root{color-scheme:light dark;font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.5;--bg:#f7f8fa;--panel:#fff;--text:#17202a;--muted:#52616b;--line:#d9e2ec;--accent:#0f766e;--code:#102a43;--codeText:#f0f4f8}body{margin:0;color:var(--text);background:var(--bg)}main{max-width:1180px;margin:0 auto;padding:28px 18px 44px}.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr);gap:18px;align-items:start}.panel,section{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:8px}h1,h2,h3{line-height:1.2;margin:0 0 10px;letter-spacing:0}p{margin:0 0 12px}.muted{color:var(--muted)}table{width:100%;border-collapse:collapse;background:var(--panel)}th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:10px}code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow:auto;background:var(--code);color:var(--codeText);padding:16px;border-radius:6px}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.meta div{padding:9px 10px;background:#eef6f6;border:1px solid #c8e7e3;border-radius:6px}.tabs{margin-top:18px}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-weight:600}.tab-panel{display:none}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4),.tabs input:nth-of-type(5):checked~.tab-panels .tab-panel:nth-of-type(5){display:block}.diagram-card{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fbfdff}.diagram-header{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;background:#eef2f7;border-bottom:1px solid var(--line)}.diagram-body{padding:14px}.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.node{padding:10px 12px;border:1px solid #9fb3c8;border-radius:6px;background:#fff;min-width:88px;text-align:center}.arrow{color:var(--accent);font-weight:700}.compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}@media (max-width:760px){.hero{grid-template-columns:1fr}.tab-labels label{flex:1 1 auto;text-align:center}}@media (prefers-color-scheme:dark){:root{--bg:#102a43;--panel:#1f2933;--text:#d9e2ec;--muted:#bcccdc;--line:#334e68;--accent:#5eead4}.meta div{background:#243b53;border-color:#486581}.diagram-header{background:#243b53}.diagram-card,.node{background:#1f2933}}
+</style>
+</head>
+<body>
+<main>
+<div class="hero"><section><h1>Artifact Governance Domain Model</h1><p>The artifact domain keeps canonical source, generated review surfaces, and evidence separate so humans can review rich material without losing diffable source control.</p></section><section><h2>Review Focus</h2><div class="meta"><div><strong>Status</strong><br>ready</div><div><strong>Kind</strong><br>domain</div><div><strong>Drift</strong><br>aligned</div><div><strong>Owner</strong><br>system-modeler</div></div></section></div><section class="meta"><div><strong>ID</strong><br>sh-domain-artifact-governance</div><div><strong>Status</strong><br>ready</div><div><strong>Model ID</strong><br>sh-domain-artifact-governance</div><div><strong>Kind</strong><br>domain</div><div><strong>Method</strong><br>uml</div><div><strong>Notation</strong><br>mermaid</div><div><strong>Source</strong><br>docs/artifacts/source/models/sh-domain-artifact-governance.md</div><div><strong>Owner</strong><br>system-modeler</div></section><div class="tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-visual" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-evidence" name="tabs" type="radio"><input id="tab-diff" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-visual">Visuals</label><label for="tab-source">Source</label><label for="tab-evidence">Evidence</label><label for="tab-diff">Diff</label></div><div class="tab-panels"><section class="tab-panel"><h2>Overview</h2><p>The artifact domain keeps canonical source, generated review surfaces, and evidence separate so humans can review rich material without losing diffable source control.</p><div class="meta"><div><strong>Abstraction</strong><br>domain</div><div><strong>Review Surface</strong><br><a href="sh-domain-artifact-governance.html">generated/review/models/sh-domain-artifact-governance.html</a></div><div><strong>Implementation Touchpoints</strong><br><a href="../../../.skill-harness/project.json">.skill-harness/project.json</a>, <a href="../../../docs/artifacts/artifacts.manifest.json">docs/artifacts/artifacts.manifest.json</a>, <a href="../../../scripts/check-artifact-manifest.mjs">scripts/check-artifact-manifest.mjs</a>, <a href="../../../scripts/check-model-artifact-policy.mjs">scripts/check-model-artifact-policy.mjs</a>, <a href="../../../scripts/generate-model-review.mjs">scripts/generate-model-review.mjs</a></div><div><strong>Doc Touchpoints</strong><br><a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a>, <a href="../../../docs/artifacts/source/models/model-inventory.md">docs/artifacts/source/models/model-inventory.md</a></div></div></section><section class="tab-panel"><h2>Visuals</h2><div class="diagram-card"><div class="diagram-header"><strong>mermaid domain</strong><span class="muted">static preview, source-backed</span></div><div class="diagram-body"><svg role="img" aria-label="Static model diagram preview" viewBox="0 0 900 190" xmlns="http://www.w3.org/2000/svg"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0f766e"/></marker></defs><line x1="146" y1="97" x2="179" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="436" y1="97" x2="469" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="436" y1="97" x2="614" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><line x1="436" y1="97" x2="759" y2="97" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/><rect x="34" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="90" y="102" text-anchor="middle" font-size="12" fill="#17202a">Artifact &lt;|</text><rect x="179" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="235" y="102" text-anchor="middle" font-size="12" fill="#17202a">ModelView</text><rect x="324" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="380" y="102" text-anchor="middle" font-size="12" fill="#17202a">Artifact</text><rect x="469" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="525" y="102" text-anchor="middle" font-size="12" fill="#17202a">SourceFile</text><rect x="614" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="670" y="102" text-anchor="middle" font-size="12" fill="#17202a">EvidenceLink</text><rect x="759" y="72" width="112" height="50" rx="7" fill="#ffffff" stroke="#9fb3c8"/><text x="815" y="102" text-anchor="middle" font-size="12" fill="#17202a">ReviewSurface</text></svg></div></div></section><section class="tab-panel"><h2>Canonical Source</h2><p><a href="../../../docs/artifacts/source/models/sh-domain-artifact-governance.md">docs/artifacts/source/models/sh-domain-artifact-governance.md</a></p><pre>---
+artifactType: model-view
+modelId: sh-domain-artifact-governance
+modelKind: domain
+method: uml
+notation: mermaid
+abstractionLevel: domain
+owner: system-modeler
+implementationTouchpoints:
+  - .skill-harness/project.json
+  - docs/artifacts/artifacts.manifest.json
+  - scripts/check-artifact-manifest.mjs
+  - scripts/check-model-artifact-policy.mjs
+  - scripts/generate-model-review.mjs
+docTouchpoints:
+  - docs/developer-artifacts.md
+  - docs/artifacts/source/models/model-inventory.md
+evidenceLinks:
+  - docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md
+  - docs/developer-artifacts.md
+reviewRequired: true
+updateTriggers:
+  - artifact manifest schema changes
+  - HTML policy changes
+  - model metadata contract changes
+driftVerdict: aligned
+---
+
+# Artifact Governance Domain Model
+
+The artifact domain keeps canonical source, generated review surfaces, and evidence separate so humans can review rich material without losing diffable source control.
+
+## Purpose
+
+Define the vocabulary and invariants for source-backed developer artifacts and model views.
+
+## Scope
+
+This is a governance/domain model, not a Go type map. It covers artifact profile, modeling mode, model inventory, manifest artifacts, review surfaces, setup proof, evidence links, update triggers, and ownership.
+
+## Source Model
+
+```mermaid
+classDiagram
+  class Artifact {
+    id
+    type
+    status
+    source
+    reviewSurface
+  }
+  class ModelView {
+    modelId
+    modelKind
+    method
+    notation
+    abstractionLevel
+  }
+  class SourceFile {
+    path
+    sourceHash
+  }
+  class EvidenceLink {
+    pathOrIssue
+  }
+  class ReviewSurface {
+    htmlPath
+    generated
+  }
+  Artifact &lt;|-- ModelView
+  Artifact --&gt; SourceFile
+  Artifact --&gt; EvidenceLink
+  Artifact --&gt; ReviewSurface
+```
+
+## Invariants
+
+- Every ready artifact names a canonical source.
+- Every ready artifact has concrete evidence.
+- Every model view records method, notation, owner, touchpoints, and freshness.
+- HTML review files are generated from source and checked for drift.
+
+## Evidence
+
+Evidence comes from `docs/developer-artifacts.md`, `.skill-harness/project.json`, the manifest, and the model-to-code planning artifact.
+
+## Freshness
+
+Update this model when artifact manifest schema, model metadata requirements, HTML safety policy, or generated review semantics change.
+</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md">docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md</a></li><li><a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a></li></ul><h3>Update Triggers</h3><ul><li>artifact manifest schema changes</li><li>HTML policy changes</li><li>model metadata contract changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>2a8fe81a0dd5d0ce71ac846c2f3bcb788d45ac71ebf5d32db91b49ef58306fdf</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-23</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
+</main>
+</body>
+</html>

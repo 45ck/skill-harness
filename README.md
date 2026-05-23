@@ -208,6 +208,8 @@ Modeling mode defaults to `auto`. Fresh developer-artifact setups resolve `auto`
 
 UML-first mode keeps modeling inside the normal artifact system and adds `docs/artifacts/source/models/`, `docs/artifacts/source/models/model-inventory.md`, `generated/review/models/`, `docs/artifacts/templates/model-diff-artifact.md`, `scripts/generate-model-review.mjs`, `scripts/open-artifact-review.mjs`, `scripts/check-model-artifact-policy.mjs`, model-aware package scripts, and setup-proof check entries. `model-view` still exists in the base scaffold; UML-first adds stricter UML/UWE/C4/evidence policy, `model-diff` support, and generated human HTML review expectations. `--enable-modeling` remains as a legacy alias for `--modeling-mode uml-first`.
 
+Use `npm run models:review` to regenerate model review HTML and `npm run models:drift` to fail on stale generated review files. CI should use the drift check after generation has been committed or uploaded as an artifact.
+
 Every `setup-project` run writes `.skill-harness/setup-proof.json`. Treat it as machine-readable install evidence: it records the resolved setup directory, monorepo lift, package manager, requested/effective artifact profile, initialized tools, available check commands, generated paths, and skipped capabilities. It is intentionally descriptive; run the recorded check commands for live conformance.
 
 ### Validate installed agent dependencies

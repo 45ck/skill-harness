@@ -1,10 +1,16 @@
 .DS_Store
 Thumbs.db
+__pycache__/
+*.pyc
 /skill-harness
 /skill-harness.exe
 social-preview.png
 dist/
-generated/review/
+generated/review/*
+!generated/review/model-to-code-human-artifacts-plan-2026-05-23.html
+!generated/review/models/
+!generated/review/models/*.html
+generated/review/models/*.png
 generated/media/
 generated/agent-runs/
 
