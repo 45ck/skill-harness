@@ -10,6 +10,7 @@ Use the narrowest specialist agent that can own the work end to end. Treat this 
 - Keep `docs/artifacts/source/models/model-inventory.md` and `docs/artifacts/artifacts.manifest.json` current with model ids, owners, methods, source paths, evidence, and generated review surfaces.
 - Human model artifacts belong in static HTML under `generated/review/models/`. Generate them with `node scripts/generate-model-review.mjs`; validate with `node scripts/check-model-artifact-policy.mjs` and `node scripts/check-artifact-html-policy.mjs`.
 - Open generated HTML in the best available human review surface. In Codex app, prefer the Browser plugin for local HTML. In Claude desktop, prefer the built-in browser or preview. In CLI-only contexts, use `node scripts/open-artifact-review.mjs` to open the system default browser or print the file URL in headless/CI contexts.
+- Use `node scripts/open-artifact-review.mjs --json --print` when a host workflow needs the resolved review target and preferred open action before choosing a browser, preview, or local HTTP fallback.
 - Treat generated HTML, SVG, PNG, screenshots, and comparison pages as review surfaces only. Canonical truth stays in source artifacts and model diffs.
 
 ## Session Rules

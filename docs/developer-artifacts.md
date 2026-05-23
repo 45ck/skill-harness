@@ -105,12 +105,15 @@ Open generated HTML with the best available human surface:
 - Claude desktop: use the built-in browser or preview when available.
 - CLI-only: use `node scripts/open-artifact-review.mjs` to open the system default browser.
 - Headless or CI: use `node scripts/open-artifact-review.mjs --print` and pass the printed file URL to the human or host UI.
+- Host integrations: use `node scripts/open-artifact-review.mjs --json --print` when an agent or app needs a machine-readable target path, file URL, and preferred host action.
+- In-app browsers that block `file://` URLs should serve the generated review directory with a local static server and open the resulting `http://127.0.0.1:<port>/...` URL in the browser surface. The generated HTML remains static and source-backed; the server is only a preview transport.
 
 Run:
 
 ```bash
 node scripts/check-artifact-html-policy.mjs
 node scripts/open-artifact-review.mjs --print
+node scripts/open-artifact-review.mjs --json --print
 ```
 
 The checker rejects common unsafe constructs including `<script>`, iframes, object/embed/form tags, meta refresh, external `src` / `href` / `action` references, and browser APIs such as `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, `sendBeacon`, `serviceWorker`, `document.cookie`, `localStorage`, and `sessionStorage`.
@@ -154,6 +157,8 @@ node scripts/check-artifact-html-policy.mjs
 ```
 
 Use `models:review` as the write path and `models:drift` or `artifacts:model:drift` as the read-only generated HTML drift gate.
+
+For local human review, use `npm run models:open` when a system browser is appropriate. In Codex or another app-hosted workflow, resolve the artifact with `node scripts/open-artifact-review.mjs --json --print`, then open the URL through the host browser. If the host blocks file URLs, serve `generated/review/` locally and open `/models/index.html`.
 
 ## Media And Demo Artifacts
 

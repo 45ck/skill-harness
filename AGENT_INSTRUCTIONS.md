@@ -146,6 +146,7 @@ For the fully automated equivalent of the above, use the `setup-project` command
 - Keep canonical decisions, specs, handoffs, and model sources in Markdown, TOON, specgraph-compatible sources, or existing project docs.
 - Treat generated HTML under `generated/review/` as a human review surface only.
 - Open generated HTML with the best available human surface. In Codex app, use the Browser plugin for local HTML when available. In Claude desktop, use the built-in browser or preview when available. In CLI-only contexts, use `node scripts/open-artifact-review.mjs` to open the system default browser or print the file URL in headless/CI contexts.
+- Use `node scripts/open-artifact-review.mjs --json --print` when an app or agent needs a machine-readable target path, URL, and preferred host action before opening the review surface.
 - Record generated review surfaces in `docs/artifacts/artifacts.manifest.json` with source path, artifact type, evidence links, and freshness data when available.
 - For Mermaid, C4, UML-style, UWE-inspired, dependency, and architecture-space views, keep the diagram/model source durable and pre-render diagrams into HTML as inline SVG or static markup.
 - Auto-detect model impact for every engineering change. If code, API, workflow, dependency, deployment, UI structure, or agent behavior changes, update the relevant canonical model source or record why no model change is needed.

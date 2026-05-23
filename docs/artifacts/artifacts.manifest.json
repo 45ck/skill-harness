@@ -79,7 +79,7 @@
       "abstractionLevel": "domain",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-domain-artifact-governance.html",
-      "sourceHash": "416f8fdc43dbb51cb8f7729a335ad2fc8d11afbaa0f3d98893c2617f83df07c0",
+      "sourceHash": "e9edfeb8b8babc65ed5f0cf7e2d360f0817b8f3fdd4f3536f3bb376f8dcaded5",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [

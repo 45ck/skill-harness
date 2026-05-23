@@ -210,6 +210,14 @@ UML-first mode keeps modeling inside the normal artifact system and adds `docs/a
 
 Use `npm run models:review` to regenerate model review HTML and `npm run models:drift` to fail on stale generated review files. CI should use the drift check after generation has been committed or uploaded as an artifact.
 
+Use `npm run models:open` to open the generated model index through the default local surface. Agents and host apps can resolve the same target without launching a browser by running:
+
+```bash
+node scripts/open-artifact-review.mjs --json --print
+```
+
+In Codex app or Claude desktop, open the resolved artifact with the built-in browser/preview surface when available. If that surface blocks `file://` URLs, serve `generated/review/` through a local static server and open `/models/index.html` from `http://127.0.0.1:<port>/`.
+
 Every `setup-project` run writes `.skill-harness/setup-proof.json`. Treat it as machine-readable install evidence: it records the resolved setup directory, monorepo lift, package manager, requested/effective artifact profile, initialized tools, available check commands, generated paths, and skipped capabilities. It is intentionally descriptive; run the recorded check commands for live conformance.
 
 ### Validate installed agent dependencies

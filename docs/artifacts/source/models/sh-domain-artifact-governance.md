@@ -79,6 +79,7 @@ classDiagram
 - Every ready artifact has concrete evidence.
 - Every model view records method, notation, owner, touchpoints, and freshness.
 - HTML review files are generated from source and checked for drift.
+- Host-specific opening is transport only: `open-artifact-review.mjs` resolves the review target, while Codex Browser, Claude preview, system browser, or a local HTTP server provides the human viewing surface.
 
 ## Evidence
 
