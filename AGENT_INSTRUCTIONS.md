@@ -52,12 +52,14 @@ Default behavior:
 - auto-detect `npm`, `pnpm`, `yarn`, or `bun` from lockfiles or `packageManager`
 - create `package.json` in the resolved setup directory if missing
 - install `@45ck/noslop`
-- install `45ck/agent-docs`
+- install `github:45ck/agent-docs`
 - install the Beads CLI by default if it is not already available
 - run `agent-docs init`
 - run `noslop init`
 - run `bd init`
 - run `agent-docs install-gates --quality`
+- write `.claude/settings.json` to allow Claude agent-team use unless `--skip-claude-settings` is passed
+- install the repo-local Beads worktree wrapper unless `--beads-worktrees=false` is passed
 - scaffold developer artifact guidance by default; `auto` resolves to a dual profile with canonical Markdown/TOON/specgraph sources, generated HTML human review surfaces, and an artifact provenance manifest
 - scaffold visual-source-first artifact guidance for product, business, data, research, UX, and mockup work, with agent-readable sources and generated visual human review surfaces
 - use `--developer-artifacts-profile agent-loop` for governed self-improving agent workflows with a loop playbook, trace/eval receipt directory, and policy checker
@@ -75,6 +77,8 @@ Useful variants:
 ./skill-harness setup-project --dir path/to/project --skip-agent-docs
 ./skill-harness setup-project --dir path/to/project --skip-noslop
 ./skill-harness setup-project --dir path/to/project --skip-beads
+./skill-harness setup-project --dir path/to/project --skip-claude-settings
+./skill-harness setup-project --dir path/to/project --beads-worktrees=false
 ./skill-harness setup-project --dir path/to/project --skip-artifacts
 ./skill-harness setup-project --dir path/to/project --skip-developer-artifacts
 ./skill-harness setup-project --dir path/to/project --developer-artifacts-profile codex-app
@@ -116,11 +120,11 @@ Use the embedded `agent-operating-skills` pack when frontier doctrine needs to b
 
 When bootstrapping a new project manually (without the `setup-project` command), install the complete toolkit in this order:
 
-### 1. Install specgraph (agent-docs)
+### 1. Install agent-docs
 
 ```bash
-npm install --save-dev @45ck/agent-docs
-npx specgraph init
+npm install --save-dev github:45ck/agent-docs
+npx agent-docs init
 ```
 
 ### 2. Install noslop
@@ -133,12 +137,12 @@ noslop init
 ### 3. Install skill packs
 
 ```bash
-./skill-harness install --packs specgraph-skills,noslop-skills --packs-only
+./skill-harness install --packs=specgraph-skills,noslop-skills --packs-only
 ```
 
 ### What you get
 
-- **specgraph**: spec verification engine, evidence tracking, gap analysis
+- **agent-docs/specgraph**: spec verification engine, evidence tracking, gap analysis
 - **noslop**: quality gates (pre-commit + pre-PR), content-aware config protection
 - **Skills**: 5 specgraph workflow skills + 3 noslop quality gate skills
 

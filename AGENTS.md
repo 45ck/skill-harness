@@ -2,6 +2,10 @@
 
 This repository provides the umbrella install and setup layer for the 45ck stack.
 
+Audience note:
+- This file is maintainer and agent operating guidance. Public contributors should start with `CONTRIBUTING.md`, `SUPPORT.md`, and `SECURITY.md`.
+- Direct push and Beads closeout rules apply to trusted maintainer/agent sessions on repository branches. Fork-based contributors should use pull requests and do not need Beads locally.
+
 Guidelines:
 - Use the narrowest agent that can own the task end to end.
 - Escalate to another specialist when the work crosses a real boundary, not just for vocabulary changes.

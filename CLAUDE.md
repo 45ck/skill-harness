@@ -2,6 +2,8 @@
 
 Use the narrowest specialist agent that can own the work end to end. Treat this repo as the suite entrypoint and project setup repo for the 45ck stack, including embedded packs under `packs/`.
 
+This is maintainer and agent operating guidance. Public contributors should start with `CONTRIBUTING.md`, `SUPPORT.md`, and `SECURITY.md`; fork-based contributors do not need Beads locally and should use pull requests instead of direct pushes.
+
 ## UML-First Developer Artifacts
 
 - Auto-detect model impact for every engineering change. When code, API, workflow, dependency, deployment, UI structure, or agent behavior changes, update the relevant model source or record why no model change is needed.
