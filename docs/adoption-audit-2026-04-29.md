@@ -8,13 +8,13 @@ This audit checked active 45ck repositories for actual `skill-harness` usage.
 
 `skill-harness` is not generally consumed as an imported package. It is used as a setup repo and generator. Downstream repos usually have copied `.claude/agents` and `.codex/agents` files or their own repo-local harness scripts.
 
-That means a repo can contain skill-harness output without having a live `skill-harness` runtime. Treat those as generated assets unless the repo also runs `skill-harness check`, `skill-harness render`, or a documented setup-project flow.
+That means a repo can contain skill-harness output without having a live `skill-harness` runtime. Treat those as generated assets unless the repo also runs `skill-harness check`, `skill-harness install`, or a documented setup-project flow.
 
 ## Active or partial users
 
 | Repo | Observed usage | Status |
 | --- | --- | --- |
-| skill-harness | Go CLI owns `install`, `setup-project`, `check`, `render`, and `uninstall`. | Active source repo. |
+| skill-harness | Go CLI owns `install`, `setup-project`, `check`, `beads-worktrees`, and `uninstall`. | Active source repo. |
 | hydra-reach | Copied Claude and Codex agent definitions matching skill-harness output. | Generated-output-only. |
 | content-machine | Has its own `scripts/harness` and JSON-stdio runtime. | Active repo-local harness, not this package. |
 | video-evaluator | Has its own `agent/run-tool.mjs`, skills, and harness scripts. | Active repo-local harness, not this package. |
@@ -22,8 +22,8 @@ That means a repo can contain skill-harness output without having a live `skill-
 
 ## Weak spots found
 
-- Generated Codex agent source files are not always the rendered files Codex actually loads. Rendering into the user Codex agent directory is a separate step.
-- Existing Go tests mainly cover setup context and package-manager detection. They do not yet prove install, render, check, and dependency-copy behavior end to end.
+- Generated Codex agent source files are not always the installed files Codex actually loads. Installing into the user Codex agent directory is a separate step.
+- Existing Go tests mainly cover setup context, package-manager detection, scaffold generation, artifact checks, and hermetic setup behavior. They do not yet prove every install, check, and dependency-copy path end to end.
 - Content-machine has a separate harness/catalog mismatch: at least one runnable skill documents an entrypoint in body text but not in frontmatter, so catalog output reports `entrypoint: null`.
 
 ## Adoption checks
@@ -32,7 +32,7 @@ For a repo claiming active skill-harness adoption, require one of these:
 
 ```sh
 skill-harness check --all
-skill-harness render --all
+skill-harness install --all
 ```
 
 or a documented setup-project run:
@@ -45,6 +45,6 @@ If a repo only commits copied agent definitions, describe that state as "generat
 
 ## Follow-up
 
-1. Add integration tests around `install`, `render`, `check`, and dependency copying against temporary home directories.
-2. Document the difference between source agent templates and rendered Codex agent configs.
+1. Add integration tests around `install`, `check`, and dependency copying against temporary home directories.
+2. Document the difference between source agent templates and installed Codex agent configs.
 3. Keep benchmark claims tied to controlled experiments, not broad downstream enforcement, unless consumer repos prove active wiring.
