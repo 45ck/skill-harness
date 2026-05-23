@@ -5001,14 +5001,14 @@ function renderUweWorkspace(spec, graph, index) {
   }).join('');
   const edgeData = graph.edges.map((edge) => '<span data-uwe-edge data-uwe-from="' + escapeAttribute(edge.from) + '" data-uwe-to="' + escapeAttribute(edge.to) + '" data-uwe-label="' + escapeAttribute(edge.label || '«navigationLink»') + '"></span>').join('');
   const firstImage = imageDataUrl(first.screenshot) || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
-  return '<style>.uwe-engine-workspace{border:1px solid #111827;background:#fff;margin:12px 0 18px}.uwe-engine-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #111827;background:#f3f4f6;padding:10px 12px}.uwe-engine-head h4{margin:0;font-size:15px;line-height:1.2}.uwe-engine-toolbar,.uwe-node-map{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 12px;border-bottom:1px solid #d8dee8}.uwe-node-map{background:#fbfdff}.uwe-engine-toolbar button,.uwe-node-map button{cursor:pointer;border:1px solid #111827;background:#fff;color:#111827;padding:5px 9px;font-size:12px;font-weight:700}.uwe-engine-toolbar button:hover,.uwe-node-map button:hover{background:#111827;color:#fff}.uwe-runtime-badge{margin-left:auto;color:#374151;font-size:12px;font-weight:800}.uwe-engine-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;min-height:620px}.uwe-cy-graph{min-height:620px;background:linear-gradient(#f8fafc,#fff);position:relative}.uwe-cy-placeholder{position:absolute;inset:0;display:grid;place-items:center;color:#64748b;font-weight:800}.uwe-engine-inspector{border-left:1px solid #111827;background:#fbfdff;padding:12px}.uwe-engine-inspector img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border:1px solid #111827;background:#fff;margin:8px 0}.uwe-inspector-kicker{display:block;color:#0f766e;font-size:12px;font-weight:900;text-transform:uppercase}.uwe-inspector-title{margin:2px 0 0;font-size:18px}.uwe-inspector-block{border-top:1px solid #d8dee8;padding:8px 0}.uwe-inspector-block strong{display:block;font-size:11px;text-transform:uppercase;color:#5b6472}.uwe-engine-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:9px 12px;border-top:1px solid #d8dee8}.uwe-engine-stats div{border:1px solid #d8dee8;background:#f8fafc;padding:8px}.uwe-engine-stats strong{display:block;font-size:20px}@media(max-width:920px){.uwe-engine-grid{grid-template-columns:1fr}.uwe-engine-inspector{border-left:0;border-top:1px solid #111827}.uwe-runtime-badge{margin-left:0}}</style>' +
+  return '<style>html.uwe-focus-active body{overflow:hidden}.uwe-engine-workspace{border:1px solid #111827;background:#fff;margin:12px 0 18px}.uwe-engine-workspace.uwe-focus-mode{position:fixed;inset:14px;z-index:40;margin:0;display:flex;flex-direction:column;box-shadow:0 18px 60px rgba(15,23,42,.28)}.uwe-engine-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #111827;background:#f3f4f6;padding:10px 12px}.uwe-engine-head h4{margin:0;font-size:15px;line-height:1.2}.uwe-engine-toolbar,.uwe-node-map{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 12px;border-bottom:1px solid #d8dee8}.uwe-node-map{background:#fbfdff}.uwe-engine-toolbar button,.uwe-node-map button,.uwe-inspector-button{cursor:pointer;border:1px solid #111827;background:#fff;color:#111827;padding:5px 9px;font-size:12px;font-weight:700}.uwe-engine-toolbar button:hover,.uwe-node-map button:hover,.uwe-inspector-button:hover{background:#111827;color:#fff}.uwe-runtime-badge{margin-left:auto;color:#374151;font-size:12px;font-weight:800}.uwe-engine-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;min-height:620px}.uwe-focus-mode .uwe-engine-grid{min-height:0;height:calc(100vh - 236px);flex:1}.uwe-cy-graph{min-height:620px;background:linear-gradient(#f8fafc,#fff);position:relative}.uwe-focus-mode .uwe-cy-graph{min-height:0}.uwe-cy-placeholder{position:absolute;inset:0;display:grid;place-items:center;color:#64748b;font-weight:800}.uwe-engine-inspector{border-left:1px solid #111827;background:#fbfdff;padding:12px;overflow:auto}.uwe-engine-inspector img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border:1px solid #111827;background:#fff;margin:8px 0;cursor:zoom-in}.uwe-inspector-kicker{display:block;color:#0f766e;font-size:12px;font-weight:900;text-transform:uppercase}.uwe-inspector-title{margin:2px 0 0;font-size:18px}.uwe-inspector-block{border-top:1px solid #d8dee8;padding:8px 0}.uwe-inspector-block strong{display:block;font-size:11px;text-transform:uppercase;color:#5b6472}.uwe-engine-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:9px 12px;border-top:1px solid #d8dee8}.uwe-engine-stats div{border:1px solid #d8dee8;background:#f8fafc;padding:8px}.uwe-engine-stats strong{display:block;font-size:20px}.uwe-lightbox{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.78);padding:22px}.uwe-lightbox.active{display:flex}.uwe-lightbox-panel{max-width:min(1180px,96vw);max-height:94vh}.uwe-lightbox-panel img{display:block;max-width:100%;max-height:82vh;background:#fff;border:1px solid #fff}.uwe-lightbox-caption{color:#fff;margin-top:8px;font-size:14px}.uwe-lightbox-close{cursor:pointer;margin-bottom:8px;border:1px solid #fff;background:#fff;color:#111827;padding:6px 10px;font-weight:800}@media(max-width:920px){.uwe-engine-grid{grid-template-columns:1fr}.uwe-focus-mode .uwe-engine-grid{height:calc(100vh - 290px)}.uwe-engine-inspector{border-left:0;border-top:1px solid #111827}.uwe-runtime-badge{margin-left:0}}</style>' +
     '<div id="' + workspaceId + '" class="uwe-engine-workspace" role="group" aria-label="Engine-backed UWE navigation workspace">' +
     '<div class="uwe-engine-head"><div><h4>Engine-Backed UWE Navigation Workspace</h4><p class="muted">Primary view rendered from structured source data with Cytoscape.js and dagre. Screenshots are node backgrounds; click nodes to inspect actions and effects.</p></div><span class="tool-badge">Cytoscape + dagre</span></div>' +
-    '<div class="uwe-engine-toolbar"><button type="button" data-uwe-action="fit">Fit graph</button><button type="button" data-uwe-action="layout">Re-run layout</button>' + packageButtons + '<span class="uwe-runtime-badge" data-uwe-runtime-badge>Workspace runtime pending</span></div><div class="uwe-node-map" aria-label="UWE node focus map">' + nodeButtons + '</div>' +
+    '<div class="uwe-engine-toolbar"><button type="button" data-uwe-action="fit">Fit graph</button><button type="button" data-uwe-action="layout">Re-run layout</button><button type="button" data-uwe-action="workspace-focus">Focus workspace</button>' + packageButtons + '<span class="uwe-runtime-badge" data-uwe-runtime-badge>Workspace runtime pending</span></div><div class="uwe-node-map" aria-label="UWE node focus map">' + nodeButtons + '</div>' +
     '<div class="uwe-engine-grid"><div class="uwe-cy-graph" data-uwe-cy><div class="uwe-cy-placeholder">Rendering UWE graph workspace...</div></div>' +
-    '<aside class="uwe-engine-inspector" aria-label="Selected UWE node inspector"><span class="uwe-inspector-kicker" data-uwe-inspector-stereo>' + escapeHtml(uweStereotype(first)) + '</span><h4 class="uwe-inspector-title" data-uwe-inspector-title>' + escapeHtml(first.label || first.id || 'UWE node') + '</h4><img data-uwe-inspector-image src="' + escapeAttribute(firstImage) + '" alt="Selected UWE node screenshot"><div class="uwe-inspector-block"><strong>Package</strong><span data-uwe-inspector-package>' + escapeHtml(first.navigationClass || 'Navigation') + '</span></div><div class="uwe-inspector-block"><strong>Route or state</strong><span data-uwe-inspector-route>' + escapeHtml(first.route || 'state') + '</span></div><div class="uwe-inspector-block"><strong>Role</strong><span data-uwe-inspector-role>' + escapeHtml(first.role || 'all roles') + '</span></div><div class="uwe-inspector-block"><strong>Available user action</strong><span data-uwe-inspector-actions>' + escapeHtml(first.actions || 'Inspect this node and outgoing UWE links.') + '</span></div><div class="uwe-inspector-block"><strong>System effect</strong><span data-uwe-inspector-effect>' + escapeHtml(first.effect || 'Effect not recorded.') + '</span></div></aside></div>' +
+    '<aside class="uwe-engine-inspector" aria-label="Selected UWE node inspector"><span class="uwe-inspector-kicker" data-uwe-inspector-stereo>' + escapeHtml(uweStereotype(first)) + '</span><h4 class="uwe-inspector-title" data-uwe-inspector-title>' + escapeHtml(first.label || first.id || 'UWE node') + '</h4><img data-uwe-inspector-image src="' + escapeAttribute(firstImage) + '" alt="Selected UWE node screenshot"><button type="button" class="uwe-inspector-button" data-uwe-open-screenshot>Open screenshot</button><div class="uwe-inspector-block"><strong>Package</strong><span data-uwe-inspector-package>' + escapeHtml(first.navigationClass || 'Navigation') + '</span></div><div class="uwe-inspector-block"><strong>Route or state</strong><span data-uwe-inspector-route>' + escapeHtml(first.route || 'state') + '</span></div><div class="uwe-inspector-block"><strong>Role</strong><span data-uwe-inspector-role>' + escapeHtml(first.role || 'all roles') + '</span></div><div class="uwe-inspector-block"><strong>Available user action</strong><span data-uwe-inspector-actions>' + escapeHtml(first.actions || 'Inspect this node and outgoing UWE links.') + '</span></div><div class="uwe-inspector-block"><strong>System effect</strong><span data-uwe-inspector-effect>' + escapeHtml(first.effect || 'Effect not recorded.') + '</span></div></aside></div>' +
     '<div class="uwe-engine-stats"><div><strong data-uwe-stat="nodes">' + graph.nodes.length + '</strong>UWE nodes</div><div><strong data-uwe-stat="edges">' + graph.edges.length + '</strong>typed links</div><div><strong data-uwe-stat="packages">' + packages.length + '</strong>packages</div></div>' +
-    '<div hidden>' + nodeData + edgeData + '</div></div>';
+    '<div hidden>' + nodeData + edgeData + '</div><div class="uwe-lightbox" data-uwe-lightbox role="dialog" aria-modal="true" aria-label="UWE screenshot preview"><div class="uwe-lightbox-panel"><button type="button" class="uwe-lightbox-close" data-uwe-lightbox-close>Close</button><img data-uwe-lightbox-image alt="Selected UWE screenshot"><div class="uwe-lightbox-caption" data-uwe-lightbox-caption></div></div></div></div>';
 }
 
 function renderUweNavigationSvg(spec, graph) {
@@ -5987,7 +5987,38 @@ func developerArtifactUweWorkspaceRuntimeScript() string {
     if (img && data.screenshot) {
       img.src = data.screenshot;
       img.alt = (data.name || data.id) + " screenshot";
+      img.dataset.uweCaption = (data.stereo || "UWE node") + " " + (data.name || data.id) + ": " + (data.effect || "");
     }
+  }
+
+  function openLightbox(workspace) {
+    var img = workspace.querySelector("[data-uwe-inspector-image]");
+    var lightbox = workspace.querySelector("[data-uwe-lightbox]");
+    var lightboxImg = workspace.querySelector("[data-uwe-lightbox-image]");
+    var caption = workspace.querySelector("[data-uwe-lightbox-caption]");
+    if (!img || !lightbox || !lightboxImg || !img.src) return;
+    lightboxImg.src = img.src;
+    lightboxImg.alt = img.alt || "Selected UWE screenshot";
+    if (caption) caption.textContent = img.dataset.uweCaption || img.alt || "Selected UWE screenshot";
+    lightbox.classList.add("active");
+  }
+
+  function closeLightbox(workspace) {
+    var lightbox = workspace.querySelector("[data-uwe-lightbox]");
+    if (lightbox) lightbox.classList.remove("active");
+  }
+
+  function setFocusMode(workspace, enabled, cy) {
+    workspace.classList.toggle("uwe-focus-mode", enabled);
+    document.documentElement.classList.toggle("uwe-focus-active", enabled);
+    var button = workspace.querySelector("[data-uwe-action=workspace-focus]");
+    if (button) button.textContent = enabled ? "Exit focus" : "Focus workspace";
+    setTimeout(function () {
+      if (cy) {
+        cy.resize();
+        cy.fit(undefined, 42);
+      }
+    }, 80);
   }
 
   function initPanZoom() {
@@ -6104,6 +6135,7 @@ func developerArtifactUweWorkspaceRuntimeScript() string {
         var action = button.dataset.uweAction;
         if (action === "fit") cy.fit(undefined, 36);
         if (action === "layout") cy.layout({ name: window.cytoscapeDagre ? "dagre" : "grid", rankDir: "LR", nodeSep: 70, edgeSep: 24, rankSep: 132, fit: true, padding: 36 }).run();
+        if (action === "workspace-focus") setFocusMode(workspace, !workspace.classList.contains("uwe-focus-mode"), cy);
         if (action && action.indexOf("package:") === 0) {
           var packageName = action.slice("package:".length);
           var collection = cy.nodes().filter(function (node) { return node.data("packageName") === packageName; });
@@ -6124,6 +6156,25 @@ func developerArtifactUweWorkspaceRuntimeScript() string {
           cy.fit(cyNode.union(cyNode.connectedEdges()), 72);
         }
       });
+    });
+    var inspectorImage = workspace.querySelector("[data-uwe-inspector-image]");
+    if (inspectorImage) inspectorImage.addEventListener("click", function () { openLightbox(workspace); });
+    var openScreenshotButton = workspace.querySelector("[data-uwe-open-screenshot]");
+    if (openScreenshotButton) openScreenshotButton.addEventListener("click", function () { openLightbox(workspace); });
+    workspace.querySelectorAll("[data-uwe-lightbox-close]").forEach(function (button) {
+      button.addEventListener("click", function () { closeLightbox(workspace); });
+    });
+    var lightbox = workspace.querySelector("[data-uwe-lightbox]");
+    if (lightbox) {
+      lightbox.addEventListener("click", function (event) {
+        if (event.target === lightbox) closeLightbox(workspace);
+      });
+    }
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeLightbox(workspace);
+        if (workspace.classList.contains("uwe-focus-mode")) setFocusMode(workspace, false, cy);
+      }
     });
   }
 

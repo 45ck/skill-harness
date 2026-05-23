@@ -47,7 +47,38 @@
     if (img && data.screenshot) {
       img.src = data.screenshot;
       img.alt = (data.name || data.id) + " screenshot";
+      img.dataset.uweCaption = (data.stereo || "UWE node") + " " + (data.name || data.id) + ": " + (data.effect || "");
     }
+  }
+
+  function openLightbox(workspace) {
+    var img = workspace.querySelector("[data-uwe-inspector-image]");
+    var lightbox = workspace.querySelector("[data-uwe-lightbox]");
+    var lightboxImg = workspace.querySelector("[data-uwe-lightbox-image]");
+    var caption = workspace.querySelector("[data-uwe-lightbox-caption]");
+    if (!img || !lightbox || !lightboxImg || !img.src) return;
+    lightboxImg.src = img.src;
+    lightboxImg.alt = img.alt || "Selected UWE screenshot";
+    if (caption) caption.textContent = img.dataset.uweCaption || img.alt || "Selected UWE screenshot";
+    lightbox.classList.add("active");
+  }
+
+  function closeLightbox(workspace) {
+    var lightbox = workspace.querySelector("[data-uwe-lightbox]");
+    if (lightbox) lightbox.classList.remove("active");
+  }
+
+  function setFocusMode(workspace, enabled, cy) {
+    workspace.classList.toggle("uwe-focus-mode", enabled);
+    document.documentElement.classList.toggle("uwe-focus-active", enabled);
+    var button = workspace.querySelector("[data-uwe-action=workspace-focus]");
+    if (button) button.textContent = enabled ? "Exit focus" : "Focus workspace";
+    setTimeout(function () {
+      if (cy) {
+        cy.resize();
+        cy.fit(undefined, 42);
+      }
+    }, 80);
   }
 
   function initPanZoom() {
@@ -164,6 +195,7 @@
         var action = button.dataset.uweAction;
         if (action === "fit") cy.fit(undefined, 36);
         if (action === "layout") cy.layout({ name: window.cytoscapeDagre ? "dagre" : "grid", rankDir: "LR", nodeSep: 70, edgeSep: 24, rankSep: 132, fit: true, padding: 36 }).run();
+        if (action === "workspace-focus") setFocusMode(workspace, !workspace.classList.contains("uwe-focus-mode"), cy);
         if (action && action.indexOf("package:") === 0) {
           var packageName = action.slice("package:".length);
           var collection = cy.nodes().filter(function (node) { return node.data("packageName") === packageName; });
@@ -184,6 +216,25 @@
           cy.fit(cyNode.union(cyNode.connectedEdges()), 72);
         }
       });
+    });
+    var inspectorImage = workspace.querySelector("[data-uwe-inspector-image]");
+    if (inspectorImage) inspectorImage.addEventListener("click", function () { openLightbox(workspace); });
+    var openScreenshotButton = workspace.querySelector("[data-uwe-open-screenshot]");
+    if (openScreenshotButton) openScreenshotButton.addEventListener("click", function () { openLightbox(workspace); });
+    workspace.querySelectorAll("[data-uwe-lightbox-close]").forEach(function (button) {
+      button.addEventListener("click", function () { closeLightbox(workspace); });
+    });
+    var lightbox = workspace.querySelector("[data-uwe-lightbox]");
+    if (lightbox) {
+      lightbox.addEventListener("click", function (event) {
+        if (event.target === lightbox) closeLightbox(workspace);
+      });
+    }
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeLightbox(workspace);
+        if (workspace.classList.contains("uwe-focus-mode")) setFocusMode(workspace, false, cy);
+      }
     });
   }
 
