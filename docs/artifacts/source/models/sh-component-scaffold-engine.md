@@ -47,10 +47,13 @@ Included components are the CLI command router, dependency/loadout readers, inst
 flowchart LR
   CLI["cmd/skill-harness"] --> Scaffold["Developer artifact scaffold"]
   Scaffold --> ProjectConfig[".skill-harness/project.json"]
+  Scaffold --> SourceDirs["docs/artifacts/source/*"]
   Scaffold --> PackageScripts["package.json scripts"]
-  Scaffold --> PolicyScripts["artifact and model policy scripts"]
+  Scaffold --> Templates["artifact templates"]
+  Scaffold --> ReviewDirs["generated/review/*"]
+  Scaffold --> PolicyScripts["artifact, visual, and model policy scripts"]
   PolicyScripts --> Manifest["docs/artifacts/artifacts.manifest.json"]
-  PolicyScripts --> ReviewHTML["generated/review/models/*.html"]
+  PolicyScripts --> ReviewHTML["generated/review/**/*.html"]
   SuiteScripts["suite graph scripts"] --> LoadoutDocs["docs/agent-loadouts.md"]
 ```
 

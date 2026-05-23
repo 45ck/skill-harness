@@ -28,7 +28,7 @@ driftVerdict: aligned
 
 # Skill Harness System Context
 
-`skill-harness` is the suite entrypoint for installing and rendering the 45ck agent and skill stack into target environments. It coordinates local pack metadata, external dependency references, Codex and Claude agent templates, Beads-aware project setup, and source-backed developer artifacts.
+`skill-harness` is the suite entrypoint for installing and rendering the 45ck agent and skill stack into target environments. It coordinates local pack metadata, external dependency references, Codex and Claude agent templates, Beads-aware project setup, and source-backed developer artifacts, including visual-source-first product, business, data, research, UX, and model review surfaces.
 
 ## Purpose
 
@@ -53,7 +53,7 @@ flowchart LR
 
 ## Boundary
 
-The harness owns suite setup, rendering, and repo-local artifact policy. Target projects own their canonical product specifications and generated evidence. Generated HTML is review material, not canonical source.
+The harness owns suite setup, rendering, and repo-local artifact policy. Target projects own their canonical product, business, data, research, UX, model, and generated evidence sources. Generated HTML is review material, not canonical source.
 
 ## Evidence
 

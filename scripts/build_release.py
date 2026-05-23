@@ -23,6 +23,8 @@ INCLUDE_PATHS = [
     Path("README.md"),
     Path("AGENT_INSTRUCTIONS.md"),
     Path("AGENTS.md"),
+    Path("CLAUDE.md"),
+    Path("llms.txt"),
     Path("LICENSE"),
     Path("install.sh"),
     Path("install.ps1"),

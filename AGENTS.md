@@ -20,6 +20,13 @@ UML-first artifacts:
 - Use `node scripts/open-artifact-review.mjs --json --print` when an agent or host app needs to auto-detect the artifact target and choose between Codex Browser, Claude preview, system browser, or a local HTTP preview fallback.
 - Treat HTML, SVG, PNG, screenshots, and generated comparison pages as review surfaces only. Source files and model diffs remain canonical.
 
+Visual source-first artifacts:
+- Use the same source-first split for product, business, data, research, UX, and mockup work: canonical agent-readable source first, generated visual human review surface second.
+- Prefer `docs/artifacts/source/product/`, `business/`, `data/`, `research/`, and `ux/` for canonical sources when no domain-specific docs path is better; place generated human surfaces under matching `generated/review/` subfolders.
+- High-fidelity HTML/prototype review is the default for UI, product, customer-facing workflow, and mockup artifacts. Low-fidelity sketches are scratch only unless captured as explicit research evidence.
+- Record generated visual artifacts in `docs/artifacts/artifacts.manifest.json` with source, review surface, owner, evidence links, status, and freshness. Label synthetic user or agent-simulation evidence separately from real user/customer evidence.
+- Use a team of agents when ownership crosses boundaries: requirements for product intent, delivery for business constraints, backend for data shape, research for evidence, UX for high-fidelity review, system-modeler for structural impact, and quality-reviewer for readiness gates.
+
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
 ## Beads Issue Tracker
 

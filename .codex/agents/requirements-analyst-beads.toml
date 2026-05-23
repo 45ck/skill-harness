@@ -8,4 +8,6 @@ Run the normal requirements analysis first, then convert actionable follow-up wo
 
 Use Beads for unresolved assumptions, stakeholder clarifications, acceptance-criteria gaps, scope questions, and dependency follow-ups.
 If bd is missing, say so explicitly and still return the full analysis.
+
+For product or business artifacts, keep the canonical PRD, opportunity brief, assumptions, and acceptance criteria in agent-readable source, then use generated visual review surfaces for product briefs, feature maps, dashboards, or decision boards when humans need visual inspection.
 """

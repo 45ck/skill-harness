@@ -11,6 +11,8 @@ implementationTouchpoints:
   - docs/artifacts/artifacts.manifest.json
   - scripts/check-artifact-manifest.mjs
   - scripts/check-model-artifact-policy.mjs
+  - scripts/check-artifact-html-policy.mjs
+  - scripts/open-artifact-review.mjs
   - scripts/generate-model-review.mjs
 docTouchpoints:
   - docs/developer-artifacts.md
@@ -32,11 +34,11 @@ The artifact domain keeps canonical source, generated review surfaces, and evide
 
 ## Purpose
 
-Define the vocabulary and invariants for source-backed developer artifacts and model views.
+Define the vocabulary and invariants for source-backed developer artifacts, visual review surfaces, and model views.
 
 ## Scope
 
-This is a governance/domain model, not a Go type map. It covers artifact profile, modeling mode, model inventory, manifest artifacts, review surfaces, setup proof, evidence links, update triggers, and ownership.
+This is a governance/domain model, not a Go type map. It covers artifact profile, visual-source-first policy, modeling mode, model inventory, manifest artifacts, review surfaces, setup proof, evidence links, update triggers, and ownership.
 
 ## Source Model
 
@@ -49,6 +51,11 @@ classDiagram
     source
     reviewSurface
   }
+  class VisualArtifact {
+    family
+    fidelity
+    generatedReviewOnly
+  }
   class ModelView {
     modelId
     modelKind
@@ -59,32 +66,46 @@ classDiagram
   class SourceFile {
     path
     sourceHash
+    format
+  }
+  class VisualDerivative {
+    path
+    family
+    highFidelity
   }
   class EvidenceLink {
     pathOrIssue
+    evidenceKind
   }
   class ReviewSurface {
-    htmlPath
+    path
+    surfaceKind
     generated
+    canonical
   }
+  Artifact <|-- VisualArtifact
   Artifact <|-- ModelView
   Artifact --> SourceFile
   Artifact --> EvidenceLink
   Artifact --> ReviewSurface
+  ReviewSurface --> VisualDerivative
 ```
 
 ## Invariants
 
 - Every ready artifact names a canonical source.
 - Every ready artifact has concrete evidence.
+- Product, business, data, research, UX, and mockup review artifacts keep agent-readable source separate from generated visual derivatives.
+- High-fidelity review is required for UI and customer-facing workflow approval surfaces; low-fidelity sketches are scratch unless recorded as evidence.
 - Every model view records method, notation, owner, touchpoints, and freshness.
 - HTML review files are generated from source and checked for drift.
+- Synthetic user or agent-simulation evidence is labelled separately from real user/customer evidence.
 - Host-specific opening is transport only: `open-artifact-review.mjs` resolves the review target, while Codex Browser, Claude preview, system browser, or a local HTTP server provides the human viewing surface.
 
 ## Evidence
 
-Evidence comes from `docs/developer-artifacts.md`, `.skill-harness/project.json`, the manifest, and the model-to-code planning artifact.
+Evidence comes from `docs/developer-artifacts.md`, `.skill-harness/project.json`, the manifest, the visual-source scaffold implementation, and the model-to-code planning artifact.
 
 ## Freshness
 
-Update this model when artifact manifest schema, model metadata requirements, HTML safety policy, or generated review semantics change.
+Update this model when artifact manifest schema, visual-source-first policy, model metadata requirements, HTML safety policy, or generated review semantics change.

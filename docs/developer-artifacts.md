@@ -6,7 +6,7 @@
 
 Developer artifacts use this source-of-truth split:
 
-- canonical source: Markdown, TOON, specgraph / `agent-docs`, or existing project docs
+- canonical source: Markdown, TOON, JSON/YAML, specgraph / `agent-docs`, model text, structured data, or existing project docs
 - generated review surface: static HTML under `generated/review/`
 - handoff evidence: linked files, issue tracker entries, tests, reports, logs, screenshots, or runtime proof
 - artifact provenance: `docs/artifacts/artifacts.manifest.json`
@@ -27,8 +27,18 @@ This creates:
 - `.skill-harness/setup-proof.json`
 - `docs/artifacts/artifacts.manifest.json`
 - `docs/artifacts/source/`
+- `docs/artifacts/source/product/`
+- `docs/artifacts/source/business/`
+- `docs/artifacts/source/data/`
+- `docs/artifacts/source/research/`
+- `docs/artifacts/source/ux/`
 - `docs/artifacts/templates/`
 - `generated/review/`
+- `generated/review/product/`
+- `generated/review/business/`
+- `generated/review/data/`
+- `generated/review/research/`
+- `generated/review/ux/`
 - `scripts/check-artifact-manifest.mjs`
 - `scripts/check-artifact-html-policy.mjs`
 - `scripts/open-artifact-review.mjs`
@@ -118,6 +128,28 @@ node scripts/open-artifact-review.mjs --json --print
 
 The checker rejects common unsafe constructs including `<script>`, iframes, object/embed/form tags, meta refresh, external `src` / `href` / `action` references, and browser APIs such as `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, `sendBeacon`, `serviceWorker`, `document.cookie`, `localStorage`, and `sessionStorage`.
 
+## Visual Source-First Artifacts
+
+Use visual-source-first artifacts when product, business, data, research, UX, or mockup work needs human visual inspection and agent-readable continuity.
+
+| Family | Canonical Sources | Human Review Surfaces | Primary Agents |
+|---|---|---|---|
+| Product | PRD, opportunity brief, feature map, roadmap, acceptance criteria | product brief, feature map, decision dashboard | requirements-analyst, delivery-manager |
+| Business | business model, pricing assumptions, stakeholder map, risk register | strategy review, assumption dashboard, stakeholder map | delivery-manager, requirements-analyst |
+| Data | schema, data dictionary, metric definition, lineage, quality rules | schema map, metric dashboard, data quality review | backend-engineer, test-designer |
+| Research | claim-evidence matrix, literature theme map, interview synthesis, assumption register | research board, evidence map, confidence dashboard | research-writer, ux-researcher |
+| UX | design brief, component state spec, interaction flow, prototype source | high-fidelity prototype, state board, journey map, accessibility review | ux-researcher, web-engineer |
+
+Rules:
+
+- Keep source artifacts under `docs/artifacts/source/<family>/` unless a domain-specific docs path is better.
+- Put generated visual review surfaces under `generated/review/<family>/`.
+- High-fidelity HTML/prototype review is the default for UI, product, customer-facing workflow, and mockup artifacts. Low-fidelity sketches are scratch unless explicitly captured as research evidence.
+- Visual review surfaces should expose realistic states, data density, error paths, assumptions, evidence strength, source links, and freshness metadata.
+- Label synthetic user, simulated customer, or agent-generated evidence separately from real user/customer evidence.
+- Record durable generated visual artifacts in `docs/artifacts/artifacts.manifest.json` with source, reviewSurface, owner, evidenceLinks, status, and freshness.
+- Use a team of agents when boundaries cross: requirements for product intent, delivery for business constraints, backend for data shape, research for evidence, UX for high-fidelity review, system-modeler for structure/workflow impact, and quality-reviewer for readiness gates.
+
 ## Model And Diagram Artifacts
 
 Mermaid, C4, UML-style, UWE-inspired, dependency, and architecture-space views fit the developer artifact model when they stay source-backed:
@@ -196,6 +228,7 @@ Generated traces and eval summaries stay out of git by default. Promote only red
 The embedded `developer-artifact-skills` pack provides:
 
 - `developer-artifact-shaper`: choose artifact type, canonical source, and review surface
+- `visual-source-artifact`: shape product, business, data, research, UX, and mockup artifacts as source-backed visual review surfaces
 - `html-review-artifact`: create safe generated HTML review artifacts
 - `model-review-artifact`: shape source-backed Mermaid, C4, UML-style, dependency, and architecture-space model views
 - `artifact-evidence-gate`: check source links, evidence, freshness, and safety

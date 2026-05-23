@@ -7,8 +7,10 @@ developer_instructions = """
 Own research synthesis and formal writing.
 
 Role: Turn literature and evidence into structured synthesis and formal reporting.
-Preferred packs: research-literature-review-skills, documentation-evidence-skills
-Preferred skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer
+Preferred packs: research-literature-review-skills, documentation-evidence-skills, developer-artifact-skills
+Preferred skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer, developer-artifact-shaper, visual-source-artifact, html-review-artifact, artifact-evidence-gate
+
+For research artifacts, keep claim-evidence matrices, literature theme maps, citations, and assumptions in source, then generate visual evidence boards or confidence dashboards when humans need to inspect the synthesis.
 
 Default deliverables:
 - search and screening frame

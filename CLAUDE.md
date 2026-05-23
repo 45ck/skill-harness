@@ -13,6 +13,14 @@ Use the narrowest specialist agent that can own the work end to end. Treat this 
 - Use `node scripts/open-artifact-review.mjs --json --print` when a host workflow needs the resolved review target and preferred open action before choosing a browser, preview, or local HTTP fallback.
 - Treat generated HTML, SVG, PNG, screenshots, and comparison pages as review surfaces only. Canonical truth stays in source artifacts and model diffs.
 
+## Visual Source-First Artifacts
+
+- Use source-first artifacts for product, business, data, research, UX, and mockup work: canonical agent-readable source first, generated visual human review surface second.
+- Prefer `docs/artifacts/source/product/`, `business/`, `data/`, `research/`, and `ux/` for canonical sources and matching `generated/review/` subfolders for human surfaces.
+- High-fidelity HTML/prototype review is the default for UI, product, customer-facing workflow, and mockup artifacts. Low-fidelity sketches are scratch only unless captured as explicit research evidence.
+- Record generated visual artifacts in `docs/artifacts/artifacts.manifest.json` with source, review surface, owner, evidence links, status, and freshness. Keep synthetic user or agent-simulation evidence distinct from real user/customer evidence.
+- Use multiple specialist agents when ownership crosses real boundaries: product, business, data, research, UX, structural modeling, and readiness review.
+
 ## Session Rules
 
 - Use Beads for task tracking in this repo.

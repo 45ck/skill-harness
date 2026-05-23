@@ -118,6 +118,7 @@
         "business-analysis-skills",
         "documentation-evidence-skills",
         "frontier-agent-playbook",
+        "developer-artifact-skills",
         "agent-operating-skills"
       ]
     },
@@ -126,6 +127,7 @@
         "business-analysis-skills",
         "documentation-evidence-skills",
         "frontier-agent-playbook",
+        "developer-artifact-skills",
         "agent-operating-skills"
       ]
     },
@@ -135,6 +137,7 @@
         "business-analysis-skills",
         "documentation-evidence-skills",
         "frontier-agent-playbook",
+        "developer-artifact-skills",
         "demo-production-skills"
       ]
     },
@@ -188,7 +191,8 @@
         "backend-persistence-skills",
         "oop-code-structure-skills",
         "frontier-agent-playbook",
-        "design-tooling-skills"
+        "design-tooling-skills",
+        "developer-artifact-skills"
       ]
     },
     "backend-engineer": {
@@ -196,7 +200,8 @@
         "backend-persistence-skills",
         "oop-code-structure-skills",
         "frontier-agent-playbook",
-        "data-structures-algorithmic-reasoning-skills"
+        "data-structures-algorithmic-reasoning-skills",
+        "developer-artifact-skills"
       ]
     },
     "test-designer": {

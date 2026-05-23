@@ -12,6 +12,8 @@ Checklist:
 - note any missing tokens, variant gaps, or component API mismatches
 - keep the recommendation biased toward reuse before extension
 - produce a concise token and component mapping table
+- keep token decisions and component-state mappings in a durable source artifact
+- generate a visual review surface when humans need to compare token impact, states, or before/after UI behavior
 
 Good output:
 
@@ -19,6 +21,7 @@ Good output:
 - missing tokens called out explicitly
 - API gaps separated from pure styling gaps
 - implementation guidance that preserves the current design system shape
+- source-backed review path when a generated visual comparison is needed
 
 Avoid:
 

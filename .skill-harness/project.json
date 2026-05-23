@@ -9,7 +9,9 @@
       "canonical": {
         "formats": [
           "markdown",
-          "toon"
+          "toon",
+          "json",
+          "yaml"
         ],
         "tooling": [
           "specgraph",
@@ -25,6 +27,19 @@
         "decision-record",
         "implementation-plan",
         "review-artifact",
+        "product-brief",
+        "opportunity-brief",
+        "business-case",
+        "stakeholder-map",
+        "data-dictionary",
+        "metric-definition",
+        "lineage-map",
+        "research-synthesis",
+        "claim-evidence-matrix",
+        "high-fidelity-prototype",
+        "interaction-state-board",
+        "journey-map",
+        "visual-review",
         "model-view",
         "model-diff"
       ],
@@ -130,6 +145,35 @@
             "architecture-space"
           ]
         }
+      },
+      "visualArtifactPolicy": {
+        "enabled": true,
+        "doctrine": "visual-source-first",
+        "canonicalFirst": true,
+        "generatedReviewOnly": true,
+        "defaultHumanSurface": "high-fidelity-html",
+        "lowFidelityPolicy": "scratch-only-not-canonical",
+        "sourceDirs": [
+          "docs/artifacts/source/product",
+          "docs/artifacts/source/business",
+          "docs/artifacts/source/data",
+          "docs/artifacts/source/research",
+          "docs/artifacts/source/ux"
+        ],
+        "reviewDirs": [
+          "generated/review/product",
+          "generated/review/business",
+          "generated/review/data",
+          "generated/review/research",
+          "generated/review/ux"
+        ],
+        "readinessGates": [
+          "canonical source exists before generated review",
+          "manifest entry links source, review surface, owner, evidence, and freshness",
+          "high-fidelity is required for UI and customer-facing workflow review",
+          "synthetic user or agent simulation evidence is labelled separately from real user evidence",
+          "HTML policy passes before handoff"
+        ]
       },
       "reviewSurface": {
         "format": "html",

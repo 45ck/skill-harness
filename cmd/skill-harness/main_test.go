@@ -154,8 +154,18 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 
 	for _, path := range []string{
 		filepath.Join(root, "docs", "artifacts", "source"),
+		filepath.Join(root, "docs", "artifacts", "source", "product"),
+		filepath.Join(root, "docs", "artifacts", "source", "business"),
+		filepath.Join(root, "docs", "artifacts", "source", "data"),
+		filepath.Join(root, "docs", "artifacts", "source", "research"),
+		filepath.Join(root, "docs", "artifacts", "source", "ux"),
 		filepath.Join(root, "docs", "artifacts", "templates"),
 		filepath.Join(root, "generated", "review"),
+		filepath.Join(root, "generated", "review", "product"),
+		filepath.Join(root, "generated", "review", "business"),
+		filepath.Join(root, "generated", "review", "data"),
+		filepath.Join(root, "generated", "review", "research"),
+		filepath.Join(root, "generated", "review", "ux"),
 		filepath.Join(root, ".skill-harness"),
 		filepath.Join(root, "scripts"),
 	} {
@@ -195,6 +205,9 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	if !fileExists(filepath.Join(root, "docs", "artifacts", "templates", "model-artifact.md")) {
 		t.Fatal("expected model artifact template")
 	}
+	if !fileExists(filepath.Join(root, "docs", "artifacts", "templates", "visual-source-artifact.md")) {
+		t.Fatal("expected visual source artifact template")
+	}
 	if !gitignoreHasLine(mustReadText(t, filepath.Join(root, ".gitignore")), "generated/review/") {
 		t.Fatal("expected generated review output to be gitignored")
 	}
@@ -215,6 +228,27 @@ func TestWriteDeveloperArtifactScaffold(t *testing.T) {
 	notations, ok := modelPolicy["allowedNotations"].([]any)
 	if !ok || !containsJSONValue(notations, "mermaid") {
 		t.Fatalf("expected mermaid notation in model policy, got %#v", modelPolicy["allowedNotations"])
+	}
+	visualPolicy, ok := artifacts["visualArtifactPolicy"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected visual artifact policy config, got %#v", artifacts["visualArtifactPolicy"])
+	}
+	if visualPolicy["doctrine"] != "visual-source-first" {
+		t.Fatalf("expected visual-source-first doctrine, got %#v", visualPolicy["doctrine"])
+	}
+	if visualPolicy["defaultHumanSurface"] != "high-fidelity-html" {
+		t.Fatalf("expected high-fidelity default surface, got %#v", visualPolicy["defaultHumanSurface"])
+	}
+	if visualPolicy["lowFidelityPolicy"] != "scratch-only-not-canonical" {
+		t.Fatalf("expected low-fi scratch policy, got %#v", visualPolicy["lowFidelityPolicy"])
+	}
+	families, ok := visualPolicy["families"].([]any)
+	if !ok || len(families) != 5 {
+		t.Fatalf("expected five visual artifact families, got %#v", visualPolicy["families"])
+	}
+	artifactTypes, ok := artifacts["artifactTypes"].([]any)
+	if !ok || !containsJSONValue(artifactTypes, "high-fidelity-prototype") || !containsJSONValue(artifactTypes, "claim-evidence-matrix") {
+		t.Fatalf("expected visual artifact types, got %#v", artifacts["artifactTypes"])
 	}
 	scripts := packageScripts(t, filepath.Join(root, "package.json"))
 	if scripts["artifacts:manifest:check"] != "node scripts/check-artifact-manifest.mjs" {

@@ -12,6 +12,10 @@ skills:
   - requirements-prioritizer
   - stakeholder-analysis
   - spec-writer
+  - developer-artifact-shaper
+  - visual-source-artifact
+  - html-review-artifact
+  - artifact-evidence-gate
 ---
 You are the requirements analyst with Beads integration.
 
@@ -22,3 +26,5 @@ Workflow:
 - If `bd` exists, create one parent issue and child issues for actionable follow-ups.
 
 Use Beads only for trackable work such as unresolved assumptions, stakeholder clarifications, scope questions, acceptance-criteria gaps, and dependency follow-ups.
+
+Keep product and business artifacts source-first: canonical PRDs, opportunity briefs, assumptions, and acceptance criteria in source; generated visual surfaces for feature maps, dashboards, and decision boards when humans need visual inspection.

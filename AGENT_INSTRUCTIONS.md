@@ -57,6 +57,7 @@ Default behavior:
 - run `bd init`
 - run `agent-docs install-gates --quality`
 - scaffold developer artifact guidance by default; `auto` resolves to a dual profile with canonical Markdown/TOON/specgraph sources, generated HTML human review surfaces, and an artifact provenance manifest
+- scaffold visual-source-first artifact guidance for product, business, data, research, UX, and mockup work, with agent-readable sources and generated visual human review surfaces
 - use `--developer-artifacts-profile agent-loop` for governed self-improving agent workflows with a loop playbook, trace/eval receipt directory, and policy checker
 - use `--modeling-mode auto` by default; it preserves legacy repos and resolves fresh developer-artifact setups to UML-first modeling with `docs/artifacts/source/models/`, `generated/review/models/`, `model-diff` manifest entries, HTML model review generation, and model policy checks
 - use `--modeling-mode off|baseline|uml-first`, `--skip-modeling`, or legacy alias `--enable-modeling` only when the target mode is intentional
@@ -144,10 +145,14 @@ For the fully automated equivalent of the above, use the `setup-project` command
 ## Developer Artifact Rules
 
 - Keep canonical decisions, specs, handoffs, and model sources in Markdown, TOON, specgraph-compatible sources, or existing project docs.
+- For product, business, data, research, UX, and mockup work, keep canonical agent-readable sources in `docs/artifacts/source/<family>/` unless a domain-specific docs path is better, then generate visual human review surfaces under `generated/review/<family>/`.
+- High-fidelity HTML/prototype review is the default for UI, product, customer-facing workflow, and mockup artifacts. Low-fidelity sketches are scratch only unless explicitly captured as research evidence.
+- Use specialist agent teams when artifact ownership crosses real boundaries: requirements for product, delivery for business, backend for data, research for evidence, UX for high-fidelity review, system-modeler for structural impact, and quality-reviewer for readiness gates.
 - Treat generated HTML under `generated/review/` as a human review surface only.
 - Open generated HTML with the best available human surface. In Codex app, use the Browser plugin for local HTML when available. In Claude desktop, use the built-in browser or preview when available. In CLI-only contexts, use `node scripts/open-artifact-review.mjs` to open the system default browser or print the file URL in headless/CI contexts.
 - Use `node scripts/open-artifact-review.mjs --json --print` when an app or agent needs a machine-readable target path, URL, and preferred host action before opening the review surface.
 - Record generated review surfaces in `docs/artifacts/artifacts.manifest.json` with source path, artifact type, evidence links, and freshness data when available.
+- Label synthetic user, simulated customer, or agent-generated evidence separately from real user/customer evidence in source artifacts, manifests, and review surfaces.
 - For Mermaid, C4, UML-style, UWE-inspired, dependency, and architecture-space views, keep the diagram/model source durable and pre-render diagrams into HTML as inline SVG or static markup.
 - Auto-detect model impact for every engineering change. If code, API, workflow, dependency, deployment, UI structure, or agent behavior changes, update the relevant canonical model source or record why no model change is needed.
 - In UML-first or baseline modeling mode, keep authored model sources in repo-relative text files, prefer `docs/artifacts/source/models/` when there is no better domain docs path, update `docs/artifacts/source/models/model-inventory.md`, put generated human HTML model reviews under `generated/review/models/`, run `node scripts/generate-model-review.mjs`, and validate with `node scripts/check-model-artifact-policy.mjs`.

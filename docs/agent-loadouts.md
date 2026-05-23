@@ -4,15 +4,15 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## requirements-analyst
 
-- Skills: problem-statement-refiner, assumptions-constraints-log, requirements-elicitation, requirements-interrogator, acceptance-criteria-writer, requirements-prioritizer, stakeholder-analysis, spec-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, agent-task-shaping, context-engineering-planner
+- Skills: problem-statement-refiner, assumptions-constraints-log, requirements-elicitation, requirements-interrogator, acceptance-criteria-writer, requirements-prioritizer, stakeholder-analysis, spec-writer, developer-artifact-shaper, visual-source-artifact, html-review-artifact, artifact-evidence-gate, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, agent-task-shaping, context-engineering-planner
 
 ## requirements-analyst-beads
 
-- Skills: problem-statement-refiner, assumptions-constraints-log, requirements-elicitation, requirements-interrogator, acceptance-criteria-writer, requirements-prioritizer, stakeholder-analysis, spec-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, agent-task-shaping, context-engineering-planner
+- Skills: problem-statement-refiner, assumptions-constraints-log, requirements-elicitation, requirements-interrogator, acceptance-criteria-writer, requirements-prioritizer, stakeholder-analysis, spec-writer, developer-artifact-shaper, visual-source-artifact, html-review-artifact, artifact-evidence-gate, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, agent-task-shaping, context-engineering-planner
 
 ## ux-researcher
 
-- Skills: persona-synthesizer, task-analysis-writer, usability-test-planner, representative-task-writer, wireframe-critic, field-study-planner, satisfaction-questionnaire-writer, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, demo-social-cut, demo-slideshow-edit, demo-review-surface
+- Skills: persona-synthesizer, task-analysis-writer, usability-test-planner, representative-task-writer, wireframe-critic, field-study-planner, satisfaction-questionnaire-writer, evaluation-report-writer, developer-artifact-shaper, visual-source-artifact, html-review-artifact, artifact-evidence-gate, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, demo-social-cut, demo-slideshow-edit, demo-review-surface
 
 ## system-modeler
 
@@ -24,19 +24,19 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## software-architect
 
-- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate, context-engineering-planner, autonomy-boundary-checker, tool-permission-planner, multi-agent-workflow-reviewer
+- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, visual-source-artifact, model-review-artifact, html-review-artifact, artifact-evidence-gate, context-engineering-planner, autonomy-boundary-checker, tool-permission-planner, multi-agent-workflow-reviewer
 
 ## software-architect-beads
 
-- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate, context-engineering-planner, autonomy-boundary-checker, tool-permission-planner, multi-agent-workflow-reviewer
+- Skills: adr-writer, architecture-option-generator, tradeoff-analysis-writer, quality-attribute-scenario-writer, service-decomposition-advisor, runtime-view-writer, deployment-view-writer, integration-boundary-mapper, public-private-hybrid-cloud-reviewer, mcp-server-planning, app-integration-shaping, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, visual-source-artifact, model-review-artifact, html-review-artifact, artifact-evidence-gate, context-engineering-planner, autonomy-boundary-checker, tool-permission-planner, multi-agent-workflow-reviewer
 
 ## web-engineer
 
-- Skills: route-and-controller-planner, client-server-responsibility-splitter, form-validation-designer, request-response-flow-mapper, session-state-strategy-reviewer, server-side-validation-enforcer, mvc-boundary-checker, class-responsibility-checker, figma-implementation-planning, design-token-alignment, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery
+- Skills: route-and-controller-planner, client-server-responsibility-splitter, form-validation-designer, request-response-flow-mapper, session-state-strategy-reviewer, server-side-validation-enforcer, mvc-boundary-checker, class-responsibility-checker, figma-implementation-planning, design-token-alignment, developer-artifact-shaper, visual-source-artifact, html-review-artifact, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery
 
 ## backend-engineer
 
-- Skills: entity-model-designer, repository-layer-designer, transaction-boundary-checker, api-contract-writer, api-error-model-designer, schema-normalizer, data-structure-selector, class-responsibility-checker, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery
+- Skills: entity-model-designer, repository-layer-designer, transaction-boundary-checker, api-contract-writer, api-error-model-designer, schema-normalizer, data-structure-selector, class-responsibility-checker, visual-source-artifact, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery
 
 ## test-designer
 
@@ -68,16 +68,16 @@ This document maps each shared `skill-harness` agent to its curated skill set.
 
 ## delivery-manager
 
-- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, artifact-handoff-pack, demo-release-packager, demo-story-packager, agent-task-shaping, autonomy-boundary-checker, multi-agent-workflow-reviewer, agent-run-evidence-reviewer
+- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, visual-source-artifact, artifact-handoff-pack, demo-release-packager, demo-story-packager, agent-task-shaping, autonomy-boundary-checker, multi-agent-workflow-reviewer, agent-run-evidence-reviewer
 
 ## delivery-manager-beads
 
-- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, artifact-handoff-pack, demo-release-packager, demo-story-packager, agent-task-shaping, autonomy-boundary-checker, multi-agent-workflow-reviewer, agent-run-evidence-reviewer
+- Skills: sprint-goal-writer, backlog-groomer, project-charter-writer, risk-register-builder, milestone-planner, go-live-readiness-reviewer, rollback-readiness-checker, maintenance-triage-helper, update-rollback-planner, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, visual-source-artifact, artifact-handoff-pack, demo-release-packager, demo-story-packager, agent-task-shaping, autonomy-boundary-checker, multi-agent-workflow-reviewer, agent-run-evidence-reviewer
 
 ## research-writer
 
-- Skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, self-improving-agent-loop, developer-artifact-shaper, model-review-artifact, html-review-artifact, artifact-evidence-gate, demo-review-surface, demo-story-packager, context-engineering-planner, agent-run-evidence-reviewer
+- Skills: search-string-designer, paper-screening-checker, related-work-synthesizer, evidence-strength-scorer, gap-finder, critical-analysis-writer, reference-integrity-checker, evaluation-report-writer, frontier-model-context, digital-expert-test, pre-ai-scarcity-thinking, self-improving-agent-loop, developer-artifact-shaper, visual-source-artifact, model-review-artifact, html-review-artifact, artifact-evidence-gate, demo-review-surface, demo-story-packager, context-engineering-planner, agent-run-evidence-reviewer
 
 ## workflow-engineer
 
-- Skills: issue-driven-delivery, gh-review-followthrough, gh-actions-failure-triage, review-ready-check, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, artifact-handoff-pack, demo-story-packager, demo-release-packager, agent-task-shaping, context-engineering-planner, autonomy-boundary-checker, tool-permission-planner, agent-memory-design-reviewer, multi-agent-workflow-reviewer, agent-run-evidence-reviewer
+- Skills: issue-driven-delivery, gh-review-followthrough, gh-actions-failure-triage, review-ready-check, frontier-model-context, digital-expert-test, legacy-automation-fallback, llm-default-architecture, verification-first-delivery, self-improving-agent-loop, developer-artifact-shaper, visual-source-artifact, artifact-handoff-pack, demo-story-packager, demo-release-packager, agent-task-shaping, context-engineering-planner, autonomy-boundary-checker, tool-permission-planner, agent-memory-design-reviewer, multi-agent-workflow-reviewer, agent-run-evidence-reviewer

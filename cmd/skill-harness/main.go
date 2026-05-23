@@ -1395,8 +1395,18 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	modelingEnabled := mode != modelingModeOff
 	dirs := []string{
 		filepath.Join(projectDir, "docs", "artifacts", "source"),
+		filepath.Join(projectDir, "docs", "artifacts", "source", "business"),
+		filepath.Join(projectDir, "docs", "artifacts", "source", "data"),
 		filepath.Join(projectDir, "docs", "artifacts", "templates"),
+		filepath.Join(projectDir, "docs", "artifacts", "source", "product"),
+		filepath.Join(projectDir, "docs", "artifacts", "source", "research"),
+		filepath.Join(projectDir, "docs", "artifacts", "source", "ux"),
 		filepath.Join(projectDir, "generated", "review"),
+		filepath.Join(projectDir, "generated", "review", "business"),
+		filepath.Join(projectDir, "generated", "review", "data"),
+		filepath.Join(projectDir, "generated", "review", "product"),
+		filepath.Join(projectDir, "generated", "review", "research"),
+		filepath.Join(projectDir, "generated", "review", "ux"),
 		filepath.Join(projectDir, ".skill-harness"),
 		filepath.Join(projectDir, "scripts"),
 	}
@@ -1431,7 +1441,7 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 				"profile":          string(effectiveProfile),
 				"specialization":   artifactSpecialization(profile),
 				"canonical": map[string]any{
-					"formats": []string{"markdown", "toon"},
+					"formats": []string{"markdown", "toon", "json", "yaml"},
 					"tooling": canonicalTooling,
 					"paths":   []string{"docs", "docs/artifacts/source"},
 				},
@@ -1446,8 +1456,9 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 						"hashAlgorithm":   "sha256",
 					},
 				},
-				"modeling":    artifactModelingConfig(mode),
-				"modelPolicy": artifactModelPolicy(mode),
+				"modeling":             artifactModelingConfig(mode),
+				"modelPolicy":          artifactModelPolicy(mode),
+				"visualArtifactPolicy": artifactVisualPolicy(),
 				"reviewSurface": map[string]any{
 					"format":          "html",
 					"outDir":          "generated/review",
@@ -1508,6 +1519,13 @@ func writeDeveloperArtifactScaffold(projectDir string, profile artifactProfile, 
 	templatePath := filepath.Join(projectDir, "docs", "artifacts", "templates", "review-artifact.md")
 	if !fileExists(templatePath) {
 		if err := os.WriteFile(templatePath, []byte(developerArtifactTemplate()), 0o644); err != nil {
+			return err
+		}
+	}
+
+	visualTemplatePath := filepath.Join(projectDir, "docs", "artifacts", "templates", "visual-source-artifact.md")
+	if !fileExists(visualTemplatePath) {
+		if err := os.WriteFile(visualTemplatePath, []byte(developerVisualSourceArtifactTemplate()), 0o644); err != nil {
 			return err
 		}
 	}
@@ -1675,6 +1693,19 @@ func artifactTypes(enableModeling bool) []string {
 		"decision",
 		"plan",
 		"spec",
+		"product-brief",
+		"opportunity-brief",
+		"business-case",
+		"stakeholder-map",
+		"data-dictionary",
+		"metric-definition",
+		"lineage-map",
+		"research-synthesis",
+		"claim-evidence-matrix",
+		"high-fidelity-prototype",
+		"interaction-state-board",
+		"journey-map",
+		"visual-review",
 		"handoff",
 		"evidence-pack",
 		"blast-radius",
@@ -1766,6 +1797,78 @@ func artifactModelPolicy(mode modelingMode) map[string]any {
 		}
 	}
 	return policy
+}
+
+func artifactVisualPolicy() map[string]any {
+	return map[string]any{
+		"enabled":             true,
+		"doctrine":            "visual-source-first",
+		"canonicalFirst":      true,
+		"generatedReviewOnly": true,
+		"defaultHumanSurface": "high-fidelity-html",
+		"lowFidelityPolicy":   "scratch-only-not-canonical",
+		"sourceDirs":          []string{"docs/artifacts/source/product", "docs/artifacts/source/business", "docs/artifacts/source/data", "docs/artifacts/source/research", "docs/artifacts/source/ux"},
+		"reviewDirs":          []string{"generated/review/product", "generated/review/business", "generated/review/data", "generated/review/research", "generated/review/ux"},
+		"families": []map[string]any{
+			{
+				"name":          "product",
+				"sourceDir":     "docs/artifacts/source/product",
+				"reviewDir":     "generated/review/product",
+				"sourceKinds":   []string{"prd", "opportunity-brief", "feature-map", "acceptance-criteria", "roadmap"},
+				"reviewKinds":   []string{"product-brief", "feature-map", "decision-dashboard"},
+				"primaryAgents": []string{"requirements-analyst", "delivery-manager"},
+			},
+			{
+				"name":          "business",
+				"sourceDir":     "docs/artifacts/source/business",
+				"reviewDir":     "generated/review/business",
+				"sourceKinds":   []string{"business-model", "pricing-assumptions", "stakeholder-map", "risk-register"},
+				"reviewKinds":   []string{"strategy-review", "assumption-dashboard", "stakeholder-map"},
+				"primaryAgents": []string{"requirements-analyst", "delivery-manager"},
+			},
+			{
+				"name":          "data",
+				"sourceDir":     "docs/artifacts/source/data",
+				"reviewDir":     "generated/review/data",
+				"sourceKinds":   []string{"schema", "data-dictionary", "metric-definition", "lineage-map", "quality-rules"},
+				"reviewKinds":   []string{"schema-map", "metric-dashboard", "data-quality-review"},
+				"primaryAgents": []string{"backend-engineer", "test-designer"},
+			},
+			{
+				"name":          "research",
+				"sourceDir":     "docs/artifacts/source/research",
+				"reviewDir":     "generated/review/research",
+				"sourceKinds":   []string{"claim-evidence-matrix", "literature-theme-map", "interview-synthesis", "assumption-register"},
+				"reviewKinds":   []string{"research-board", "evidence-map", "confidence-dashboard"},
+				"primaryAgents": []string{"research-writer", "ux-researcher"},
+			},
+			{
+				"name":          "ux",
+				"sourceDir":     "docs/artifacts/source/ux",
+				"reviewDir":     "generated/review/ux",
+				"sourceKinds":   []string{"design-brief", "component-state-spec", "interaction-flow", "prototype-source"},
+				"reviewKinds":   []string{"high-fidelity-prototype", "state-board", "journey-map", "accessibility-review"},
+				"primaryAgents": []string{"ux-researcher", "web-engineer"},
+			},
+		},
+		"agentTeam": []map[string]any{
+			{"agent": "research-writer", "owns": []string{"evidence", "citations", "claim strength", "research gaps"}},
+			{"agent": "requirements-analyst", "owns": []string{"product intent", "requirements", "acceptance criteria", "assumptions"}},
+			{"agent": "delivery-manager", "owns": []string{"business viability", "stakeholder impact", "risk and rollout"}},
+			{"agent": "backend-engineer", "owns": []string{"data structures", "schemas", "integrity constraints"}},
+			{"agent": "ux-researcher", "owns": []string{"task evidence", "prototype critique", "high-fidelity review"}},
+			{"agent": "system-modeler", "owns": []string{"model impact", "workflow and structure diagrams"}},
+			{"agent": "quality-reviewer", "owns": []string{"evidence gates", "freshness", "readiness risks"}},
+		},
+		"readinessGates": []string{
+			"canonical source exists before generated review",
+			"manifest entry links source, review surface, owner, evidence, and freshness",
+			"human review surface is visual when product, business, data, research, or UX comprehension benefits from layout",
+			"high-fidelity is required for UI and customer-facing workflow review",
+			"synthetic user or agent simulation evidence is labelled separately from real user evidence",
+			"HTML policy passes before handoff",
+		},
+	}
 }
 
 func artifactAgentLoopConfig(profile artifactProfile, beadsEnabled bool) map[string]any {
@@ -1884,19 +1987,39 @@ Use this directory for durable developer artifacts and generated review surfaces
 
 ## Source Of Truth
 
-- Keep canonical decisions, specs, investigations, and handoff notes in Markdown, TOON, or specgraph-compatible sources.
-- Treat HTML as a generated review surface for scanning, comparison, diagrams, prototypes, and desktop app previews.
+- Keep canonical decisions, specs, investigations, product briefs, business notes, data definitions, research syntheses, UX flows, and handoff notes in Markdown, TOON, JSON/YAML, or specgraph-compatible sources.
+- Treat HTML as a generated review surface for scanning, comparison, diagrams, dashboards, prototypes, mockups, and desktop app previews.
 - Do not make generated HTML the only durable source for a decision.
 - Record source-backed review surfaces in artifacts.manifest.json so agents and humans can detect stale output.
 
 ## Layout
 
 - source/ - canonical artifact sources when they do not belong in a domain-specific docs folder.
+- source/product/ - product briefs, feature maps, roadmaps, and acceptance matrices.
+- source/business/ - business models, pricing assumptions, stakeholder maps, and risk registers.
+- source/data/ - schemas, data dictionaries, metric definitions, lineage, and quality rules.
+- source/research/ - claim-evidence matrices, literature maps, interviews, and assumption registers.
+- source/ux/ - design briefs, interaction flows, component states, and prototype sources.
 - templates/ - local templates for recurring artifact types.
 - artifacts.manifest.json - provenance and freshness index for source-backed review artifacts.
 - ../../generated/review/ - generated HTML or rich review artifacts for humans.
+- ../../generated/review/product/ - generated product review surfaces.
+- ../../generated/review/business/ - generated business review surfaces.
+- ../../generated/review/data/ - generated data review surfaces.
+- ../../generated/review/research/ - generated research review surfaces.
+- ../../generated/review/ux/ - generated UX mockups, prototypes, and state boards.
 - ../../generated/media/ - generated demo media for media profile projects.
 - ../../generated/agent-runs/ - generated trace receipts and eval summaries for agent-loop profile projects.
+
+## Visual Source-First Policy
+
+- Use visual-source-first artifacts for product, business, data, research, and UX work when humans need to inspect structure, evidence, states, tradeoffs, or mockups.
+- Keep source artifacts agent-readable and diffable. Generated HTML, screenshots, videos, SVGs, PNGs, and comparison pages are review surfaces only.
+- High-fidelity HTML is the default human review surface for UI, customer-facing workflow, product, and mockup reviews. Low-fidelity sketches are scratch only and should not become canonical approval surfaces.
+- Visual review surfaces should show realistic data, states, error paths, assumptions, evidence strength, source links, and freshness metadata.
+- Label synthetic user, simulated customer, or agent-generated evidence separately from real user or customer evidence.
+- Use a team of agents when ownership crosses a real boundary: requirements-analyst for product intent, delivery-manager for business constraints, backend-engineer for data shape, research-writer for evidence, ux-researcher for high-fidelity UX review, system-modeler for structural impact, and quality-reviewer for readiness gates.
+- Record every durable generated visual artifact in artifacts.manifest.json with source, reviewSurface, owner, evidenceLinks, status, and freshness.
 
 ## Model And Diagram Policy
 
@@ -1968,6 +2091,48 @@ The smallest useful explanation for a reviewer.
 ## Follow-Up
 
 - [ ] Action item
+`
+}
+
+func developerVisualSourceArtifactTemplate() string {
+	return `# Visual Source Artifact: [Title]
+
+**Status:** Draft
+**Artifact type:** product-brief | business-case | data-dictionary | research-synthesis | high-fidelity-prototype | visual-review
+**Family:** product | business | data | research | ux
+**Canonical source:** [docs/artifacts/source/family/path.md]
+**Generated review:** [generated/review/family/path.html]
+**Owner agent:** requirements-analyst | ux-researcher | research-writer | backend-engineer | delivery-manager | system-modeler | quality-reviewer
+
+## Purpose
+
+What product, business, data, research, or UX decision this visual review supports.
+
+## Source Contract
+
+- Source format:
+- Structured data or model inputs:
+- Update rule: edit source first, regenerate review second.
+
+## Visual Review Surface
+
+- Human surface type: high-fidelity HTML | dashboard | state board | journey map | prototype | evidence board
+- Required states or views:
+- Accessibility and readability checks:
+
+## Evidence
+
+- Real user or customer evidence:
+- Synthetic user or agent simulation evidence:
+- Data, metrics, or source files:
+- Issues, tests, or review notes:
+
+## Readiness
+
+- Manifest entry:
+- Source hash:
+- Generated at:
+- Open risks:
 `
 }
 
