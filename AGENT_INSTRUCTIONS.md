@@ -197,6 +197,7 @@ After project setup:
 - [SUPPORT.md](SUPPORT.md)
 - [cmd/skill-harness/main.go](cmd/skill-harness/main.go)
 - [docs/developer-artifacts.md](docs/developer-artifacts.md)
+- [docs/dependency-provenance.md](docs/dependency-provenance.md)
 - [docs/agent-operating-skills.md](docs/agent-operating-skills.md)
 - [docs/demo-production-media.md](docs/demo-production-media.md)
 - [scripts/dependencies.json](scripts/dependencies.json)

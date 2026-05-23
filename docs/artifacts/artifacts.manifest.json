@@ -19,8 +19,26 @@
         "docs/artifacts/source/uml-model-driven-artifacts-research-2026-05-23.md",
         "docs/artifacts/source/uml-first-default-review-2026-05-23.md",
         "cmd/skill-harness/main.go",
-        "cmd/skill-harness/main_test.go",
-        "skill-harness-ra5"
+        "cmd/skill-harness/main_test.go"
+      ],
+      "freshness": {
+        "generatedAt": "2026-05-23",
+        "sourceFirst": true
+      }
+    },
+    {
+      "id": "skill-harness-opportunity-review-2026-05-23",
+      "type": "planning-artifact",
+      "source": "docs/artifacts/source/skill-harness-opportunity-review-2026-05-23.md",
+      "status": "ready",
+      "owner": "codex",
+      "reviewSurface": "generated/review/skill-harness-opportunity-review-2026-05-23.html",
+      "sourceHash": "920718282370bf254bec110ddae37aae93b36d8dcd5a0f0889c9ef6556fffba4",
+      "evidenceLinks": [
+        "README.md",
+        "scripts/dependencies.json",
+        "docs/third-party-skill-intake.md",
+        "packs/"
       ],
       "freshness": {
         "generatedAt": "2026-05-23",
@@ -98,8 +116,7 @@
       "evidenceLinks": [
         "docs/artifacts/source/model-to-code-human-artifacts-plan-2026-05-23.md",
         "docs/developer-artifacts.md",
-        "cmd/skill-harness/main.go",
-        "skill-harness-4i1"
+        "cmd/skill-harness/main.go"
       ],
       "reviewRequired": true,
       "updateTriggers": [

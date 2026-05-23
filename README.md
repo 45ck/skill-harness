@@ -41,6 +41,8 @@ Beads installation first uses an existing `bd`, then tries `go install github.co
 
 Use `--install-only` to install packages without running initialization commands, `--scope workspace` to avoid monorepo-root lifting, `--skip-claude-settings` to avoid changing Claude tool permissions, `--beads-worktrees=false` to skip the Beads worktree wrapper, and the other `--skip-*` flags to reduce setup side effects.
 
+Dependency source and pinning details are documented in [docs/dependency-provenance.md](docs/dependency-provenance.md).
+
 Generated HTML under `generated/review/` is a human review surface only. Canonical decisions, specs, models, and evidence stay in source files under `docs/`, `packs/`, scripts, or target repo scaffolds.
 
 ## What it can set up
@@ -391,6 +393,7 @@ If another agent needs to install this repo or use it as the setup entrypoint, p
 - [SECURITY.md](SECURITY.md)
 - [SUPPORT.md](SUPPORT.md)
 - [docs/developer-artifacts.md](docs/developer-artifacts.md)
+- [docs/dependency-provenance.md](docs/dependency-provenance.md)
 - [docs/agent-operating-skills.md](docs/agent-operating-skills.md)
 - [docs/demo-production-media.md](docs/demo-production-media.md)
 - [docs/third-party-skill-intake.md](docs/third-party-skill-intake.md)

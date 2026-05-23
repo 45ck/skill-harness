@@ -44,3 +44,4 @@ Security fixes target the default branch first. Until formal releases are publis
 - Do not add external scripts, external assets, telemetry, network calls, or hidden executable helpers to generated artifacts.
 - Review license, provenance, install scripts, MCP configuration, helper executables, and autonomy assumptions before adopting third-party skill content.
 
+See [docs/dependency-provenance.md](docs/dependency-provenance.md) for dependency source and pinning expectations.
