@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <title>Skill Harness Opportunity Review</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1b1f23;
+      --muted: #5d6673;
+      --line: #d8dee6;
+      --panel: #ffffff;
+      --soft: #f5f7fa;
+      --accent: #0f766e;
+      --accent-2: #7c3aed;
+      --accent-3: #b45309;
+      --good: #0f7a3d;
+      --risk: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #eef2f6;
+    }
+    header {
+      background: #0f172a;
+      color: white;
+      padding: 36px 24px 30px;
+      border-bottom: 6px solid var(--accent);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+    h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+    p { margin: 0 0 12px; }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+      background: #eef2f6;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+    .subtitle {
+      color: #cbd5e1;
+      max-width: 860px;
+      margin: 0;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .pill {
+      border: 1px solid rgba(255,255,255,0.32);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      color: #e2e8f0;
+    }
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .two {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 14px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+      min-width: 0;
+    }
+    .card.soft { background: var(--soft); }
+    .rank {
+      display: inline-flex;
+      width: 28px;
+      height: 28px;
+      align-items: center;
+      justify-content: center;
+      margin-right: 8px;
+      border-radius: 6px;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .score {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin: 12px 0;
+    }
+    .score span {
+      background: #eef2f6;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .score strong {
+      display: block;
+      color: var(--ink);
+      font-size: 14px;
+    }
+    .tagrow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .tag {
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      padding: 2px 8px;
+      font-size: 12px;
+      color: var(--muted);
+      background: white;
+    }
+    .callout {
+      border-left: 4px solid var(--accent-2);
+      background: #f7f3ff;
+      padding: 14px 16px;
+      border-radius: 6px;
+      margin: 14px 0;
+    }
+    .warning {
+      border-left-color: var(--risk);
+      background: #fff4f2;
+    }
+    .good {
+      border-left-color: var(--good);
+      background: #f0fdf4;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+      padding: 9px 8px;
+    }
+    th {
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 700;
+    }
+    ul {
+      margin: 8px 0 0 20px;
+      padding: 0;
+    }
+    li { margin: 4px 0; }
+    .path {
+      overflow-wrap: anywhere;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 900px) {
+      .grid, .two { grid-template-columns: 1fr; }
+      h1 { font-size: 28px; }
+      main { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Skill Harness Opportunity Review</h1>
+    <p class="subtitle">Five-agent brainstorm synthesized from the 45ck public repo inventory, local adjacent tooling docs, and the current skill-harness architecture. This page is a generated review surface, not the accepted roadmap.</p>
+    <div class="meta">
+      <span class="pill">Date: 2026-05-23</span>
+      <span class="pill">Issue: skill-harness-22q</span>
+      <span class="pill">Source: docs/artifacts/source/skill-harness-opportunity-review-2026-05-23.md</span>
+      <span class="pill">No external scripts or network assets</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <h2>Executive Read</h2>
+      <div class="two">
+        <div>
+          <p>The strongest opportunity is to make `skill-harness` a capability-profile system, not just a pack installer. It should understand when a repo wants desktop review artifacts, CLI-first source artifacts, media/demo tooling, governed agent execution, or a minimal setup.</p>
+          <p>The user's demo-machine idea is viable if it is scoped as structured post-capture editing: turn existing demo and QA evidence into polished silent cuts, slideshow reels, and review pages. Avoid positioning it as a general video editor.</p>
+        </div>
+        <div class="card soft">
+          <h3>Best First Slice</h3>
+          <ul>
+            <li>Add a documented `media` profile.</li>
+            <li>Incubate `packs/demo-production-skills`.</li>
+            <li>Start with `demo-social-cut`, `demo-review-surface`, and `qa-to-demo`.</li>
+            <li>Add install-proof artifacts and integration tests next.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Evidence Base</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Repo Inventory</h3>
+          <p>`gh repo list 45ck --limit 200` returned 120 accessible repos. Public repo metadata shows a mature skill-pack cluster plus adjacent runtime and media tools.</p>
+          <p class="small">Private repo names and details are intentionally excluded from this tracked artifact.</p>
+        </div>
+        <div class="card">
+          <h3>Current Harness</h3>
+          <p>`skill-harness` already installs remote packs, embedded packs, Claude/Codex agents, Beads, noslop, agent-docs, and developer artifact scaffolds.</p>
+          <p class="path">D:\Visual Studio Projects\skill-harness</p>
+        </div>
+        <div class="card">
+          <h3>Adjacent Tools</h3>
+          <p>`demo-machine`, `content-machine`, `video-evaluator`, `manual-qa-machine`, `prompt-language`, `Portarium`, `agent-docs`, and `noslop` are natural companion capabilities.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Ranked Opportunities</h2>
+      <div class="grid">
+        <article class="card">
+          <h3><span class="rank">1</span>Capability Profiles</h3>
+          <p>Create named profiles such as `minimal`, `default`, `desktop-review`, `cli`, `media`, and `governed-agent`.</p>
+          <div class="score"><span><strong>High</strong>Impact</span><span><strong>Medium</strong>Effort</span><span><strong>Low</strong>Risk</span></div>
+          <p class="small">Implementation: suite catalog, profile resolver, docs, setup-project mapping.</p>
+        </article>
+        <article class="card">
+          <h3><span class="rank">2</span>Demo Production Pack</h3>
+          <p>Add structured demo and media skills around demo-machine runs, QA evidence, silent cuts, slideshow edits, and review surfaces.</p>
+          <div class="score"><span><strong>High</strong>Impact</span><span><strong>Medium</strong>Effort</span><span><strong>Medium</strong>Risk</span></div>
+          <p class="small">Implementation: embedded `packs/demo-production-skills` first.</p>
+        </article>
+        <article class="card">
+          <h3><span class="rank">3</span>Install Proof Artifact</h3>
+          <p>Emit one JSON proof after setup that records selected capabilities, package manager, Beads, noslop, agent-docs, artifact policy, and rendered paths.</p>
+          <div class="score"><span><strong>High</strong>Impact</span><span><strong>Medium</strong>Effort</span><span><strong>Low</strong>Risk</span></div>
+          <p class="small">Implementation: `.skill-harness/install-proof.json` plus docs.</p>
+        </article>
+        <article class="card">
+          <h3><span class="rank">4</span>Integration Test Harness</h3>
+          <p>Test `install`, `render`, `check`, `setup-project`, and `beads-worktrees` against temp homes, temp repos, and fixture packs.</p>
+          <div class="score"><span><strong>High</strong>Impact</span><span><strong>High</strong>Effort</span><span><strong>Low</strong>Risk</span></div>
+          <p class="small">Implementation: Go integration tests and fixture packs.</p>
+        </article>
+        <article class="card">
+          <h3><span class="rank">5</span>CI And Drift Gates</h3>
+          <p>Add GitHub workflows for Go tests, build, Python compile, dependency checks, loadout drift, and temp setup smoke tests.</p>
+          <div class="score"><span><strong>High</strong>Impact</span><span><strong>Medium</strong>Effort</span><span><strong>Low</strong>Risk</span></div>
+          <p class="small">Implementation: `.github/workflows/quality.yml` and drift scripts.</p>
+        </article>
+        <article class="card">
+          <h3><span class="rank">6</span>Adoption Audit Command</h3>
+          <p>Scan local workspaces or org metadata for harness adoption, stale agents, missing project manifests, sparse metadata, and candidate profiles.</p>
+          <div class="score"><span><strong>Medium</strong>Impact</span><span><strong>Medium</strong>Effort</span><span><strong>Medium</strong>Risk</span></div>
+          <p class="small">Implementation: `skill-harness audit-suite` or `skill-harness catalog audit`.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Demo-Machine Video Skill</h2>
+      <div class="callout good">
+        <p><strong>Recommended framing:</strong> a structured post-capture edit generator for demo-machine and manual-qa-machine artifacts. It should create polished silent cuts, slideshow reels, posters, and review bundles from evidence-backed runs.</p>
+      </div>
+      <div class="two">
+        <div class="card">
+          <h3>Workflow</h3>
+          <ul>
+            <li>Start with a `.demo.yaml`, completed demo-machine run, or manual QA finding.</li>
+            <li>Read `events.json`, `quality.json`, storyboard, screenshot, and segment evidence.</li>
+            <li>Generate an edit plan with selected spans, still frames, transitions, title cards, and export targets.</li>
+            <li>Render silent short cuts or slideshow MP4s.</li>
+            <li>Generate a static review page comparing source spec, output media, and evidence.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Candidate Skills</h3>
+          <ul>
+            <li>`demo-social-cut`</li>
+            <li>`demo-slideshow-edit`</li>
+            <li>`demo-review-surface`</li>
+            <li>`qa-to-demo`</li>
+            <li>`demo-release-packager`</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout warning">
+        <p><strong>Constraint:</strong> do not make this a generic video editor. The differentiator is traceability from source flows and run evidence to polished outputs.</p>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Environment</th><th>Default Artifact Mode</th><th>Reason</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Codex app / Claude Desktop</td><td>HTML review surface plus source spec</td><td>The in-app browser makes visual media review cheap and useful.</td></tr>
+          <tr><td>CLI / TUI coding session</td><td>Markdown or TOON source plus optional generated media</td><td>Terminal workflows need durable diffs and plain handoffs first.</td></tr>
+          <tr><td>CI or release pipeline</td><td>Proof JSON, media manifest, and promoted assets only</td><td>Generated media should be reproducible and explicitly promoted.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Tool Mapping</h2>
+      <table>
+        <thead>
+          <tr><th>Repo / Tool</th><th>Harness Opportunity</th><th>Likely Profile</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>`demo-machine`</td><td>Demo specs, capture, render, analyzer-ready runs, media review bundles.</td><td>`media`, `desktop-review`</td></tr>
+          <tr><td>`manual-qa-machine`</td><td>QA evidence to repro demos and release confidence artifacts.</td><td>`media`, `default`</td></tr>
+          <tr><td>`content-machine`</td><td>Short-form media runtime and rendering knowledge for polished output.</td><td>`media`</td></tr>
+          <tr><td>`video-evaluator`</td><td>Video evidence, storyboard, layout safety, and review prompts.</td><td>`media`, `desktop-review`</td></tr>
+          <tr><td>`prompt-language`</td><td>Verification-first supervised agent execution and completion gates.</td><td>`governed-agent`</td></tr>
+          <tr><td>`Portarium`</td><td>Policy, approvals, audit trail, and human-in-the-loop operating model.</td><td>`governed-agent`</td></tr>
+          <tr><td>`noslop` and `agent-docs`</td><td>Quality gates, specgraph, doc governance, and install proof signals.</td><td>`default`, `cli`, `desktop-review`</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Risks</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Profile Sprawl</h3>
+          <p>Too many profiles will recreate flag complexity under better names. Start with six or fewer and make `default` boring.</p>
+        </div>
+        <div class="card">
+          <h3>Evidence Theater</h3>
+          <p>Generated artifacts need provenance, freshness, and proof links. Pretty HTML without source and verification is not enough.</p>
+        </div>
+        <div class="card">
+          <h3>Global Mutation</h3>
+          <p>Install and render commands mutate user-home directories. Integration tests need isolated temp homes before broadening the surface.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Next Decisions</h2>
+      <ol>
+        <li>Approve or reject `media` as a first-class profile name.</li>
+        <li>Decide whether `demo-production-skills` should start embedded under `packs/` or as a separate repo.</li>
+        <li>Choose the first shippable skill: `demo-social-cut`, `demo-review-surface`, or `qa-to-demo`.</li>
+        <li>Prioritize install-proof artifact versus CI/integration tests as the next infrastructure slice.</li>
+      </ol>
+      <p class="small">Recommended: start embedded, ship `demo-review-surface` first, then add `demo-social-cut` once the evidence manifest is stable.</p>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<title>Human HTML Artifact Self-Use Investigation</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1f2937;
+  --muted: #5b6472;
+  --line: #d8dee8;
+  --paper: #ffffff;
+  --canvas: #eef2f6;
+  --navy: #172033;
+  --teal: #0f766e;
+  --blue: #2457c5;
+  --amber: #a15c07;
+  --red: #b42318;
+  --green: #16794b;
+  --violet: #6546a3;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+a { color: #174ea6; }
+header {
+  background: var(--navy);
+  color: #fff;
+  padding: 28px;
+  border-bottom: 6px solid var(--teal);
+}
+header h1 {
+  margin: 0 0 8px;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+header p {
+  max-width: 1020px;
+  margin: 0;
+  color: #dce6f1;
+}
+main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 18px;
+}
+h2, h3 {
+  margin: 0 0 10px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+p { margin: 0 0 12px; }
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+}
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.metric {
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--teal);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+  min-height: 106px;
+}
+.metric strong {
+  display: block;
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.metric span {
+  color: var(--muted);
+  font-size: 13px;
+}
+.metric.blue { border-top-color: var(--blue); }
+.metric.amber { border-top-color: var(--amber); }
+.metric.green { border-top-color: var(--green); }
+.metric.violet { border-top-color: var(--violet); }
+.flow {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+.step {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #f9fbfd;
+  min-height: 112px;
+}
+.step strong { display: block; margin-bottom: 6px; }
+.step span { color: var(--muted); font-size: 13px; }
+.status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+  color: var(--muted);
+  font-size: 12px;
+}
+.status.good { color: var(--green); border-color: #9bd8b9; background: #effaf4; }
+.status.warn { color: var(--amber); border-color: #f4ca7b; background: #fff8e8; }
+.status.bad { color: var(--red); border-color: #f0a6a0; background: #fff1f1; }
+.tabs { margin-top: 16px; }
+.tabs > input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.tab-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+.tab-labels label {
+  cursor: pointer;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  font-weight: 650;
+}
+.tab-panel { display: none; margin-top: 14px; }
+#tab-why:checked ~ .tab-labels label[for="tab-why"],
+#tab-current:checked ~ .tab-labels label[for="tab-current"],
+#tab-standard:checked ~ .tab-labels label[for="tab-standard"],
+#tab-plan:checked ~ .tab-labels label[for="tab-plan"] {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: #ecfdf9;
+}
+#tab-why:checked ~ .tab-panels #panel-why,
+#tab-current:checked ~ .tab-panels #panel-current,
+#tab-standard:checked ~ .tab-panels #panel-standard,
+#tab-plan:checked ~ .tab-panels #panel-plan {
+  display: block;
+}
+.two {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+.bar-row {
+  display: grid;
+  grid-template-columns: 172px minmax(0, 1fr) 52px;
+  gap: 10px;
+  align-items: center;
+  margin: 10px 0;
+}
+.bar-track {
+  height: 18px;
+  background: #e8edf4;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bar {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--teal);
+}
+.w100 { width: 100%; }
+.w80 { width: 80%; }
+.w60 { width: 60%; }
+.w40 { width: 40%; }
+.w20 { width: 20%; }
+.amber { background: var(--amber); }
+.blue { background: var(--blue); }
+.green { background: var(--green); }
+.red { background: var(--red); }
+.muted { color: var(--muted); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+th, td {
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  padding: 9px;
+}
+th { background: #f7f9fc; }
+.callout {
+  border-left: 5px solid var(--teal);
+  background: #effaf8;
+  padding: 12px 14px;
+  border-radius: 7px;
+  margin: 12px 0;
+}
+.callout.warn { border-left-color: var(--amber); background: #fff8e8; }
+.callout.bad { border-left-color: var(--red); background: #fff1f1; }
+.artifact-map {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  background: #eef2f6;
+  border: 1px solid #dae2ec;
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+ul { margin: 8px 0 0 20px; padding: 0; }
+li { margin: 4px 0; }
+footer {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 0 0 20px;
+}
+@media (max-width: 920px) {
+  .hero-grid, .two, .flow, .metric-grid { grid-template-columns: 1fr; }
+  header { padding: 22px 18px; }
+  main { padding: 12px; }
+  .bar-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Human HTML Artifact Self-Use Investigation</h1>
+  <p>Why the prior discovery did not show a generated HTML review artifact, what the repo currently supports, and how skill-harness should self-use its own artifact doctrine.</p>
+</header>
+<main>
+  <section class="hero-grid" aria-labelledby="verdict-title">
+    <div class="panel">
+      <h2 id="verdict-title">Verdict</h2>
+      <p>The repo is partially self-scaffolded. It has source-first policy, committed generated review surfaces, a manifest, and HTML safety gates. The missing piece is a generic non-model artifact renderer and an operating rule that human-facing discovery must create and surface an HTML review page.</p>
+      <div class="callout warn">
+        <strong>Root cause:</strong> `scripts/generate-model-review.mjs` renders model artifacts only. Beads discovery work can complete without creating a `research`, `product`, `business`, `data`, or `ux` review surface.
+      </div>
+    </div>
+    <div class="metric-grid" aria-label="Investigation metrics">
+      <div class="metric green"><strong>5</strong><span>artifact system pieces already present</span></div>
+      <div class="metric amber"><strong>1</strong><span>generic renderer missing</span></div>
+      <div class="metric blue"><strong>0</strong><span>scripts allowed by default CSP</span></div>
+      <div class="metric violet"><strong>4</strong><span>follow-up investigation tracks</span></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="coverage-title">
+    <h2 id="coverage-title">Capability Coverage</h2>
+    <div class="bar-row"><span>Source-first doctrine</span><span class="bar-track"><span class="bar green w100"></span></span><strong>100%</strong></div>
+    <div class="bar-row"><span>Model HTML generation</span><span class="bar-track"><span class="bar green w100"></span></span><strong>100%</strong></div>
+    <div class="bar-row"><span>Non-model HTML generation</span><span class="bar-track"><span class="bar amber w20"></span></span><strong>20%</strong></div>
+    <div class="bar-row"><span>CSS-only interaction</span><span class="bar-track"><span class="bar blue w80"></span></span><strong>80%</strong></div>
+    <div class="bar-row"><span>Automatic handoff surfacing</span><span class="bar-track"><span class="bar red w40"></span></span><strong>40%</strong></div>
+  </section>
+
+  <section class="panel" aria-labelledby="flow-title">
+    <h2 id="flow-title">Expected Self-Use Flow</h2>
+    <div class="flow">
+      <div class="step"><strong>1. Track</strong><span>Create or claim a Beads issue before investigation.</span></div>
+      <div class="step"><strong>2. Source</strong><span>Write canonical source under `docs/artifacts/source/&lt;family&gt;`.</span></div>
+      <div class="step"><strong>3. Render</strong><span>Generate a self-contained HTML review surface.</span></div>
+      <div class="step"><strong>4. Manifest</strong><span>Link source, review, evidence, owner, status, and hash.</span></div>
+      <div class="step"><strong>5. Surface</strong><span>Open or link the HTML artifact in the final handoff.</span></div>
+    </div>
+  </section>
+
+  <section class="panel tabs" aria-labelledby="tabs-title">
+    <h2 id="tabs-title">Investigation Detail</h2>
+    <input id="tab-why" name="tabs" type="radio" checked>
+    <input id="tab-current" name="tabs" type="radio">
+    <input id="tab-standard" name="tabs" type="radio">
+    <input id="tab-plan" name="tabs" type="radio">
+    <div class="tab-labels">
+      <label for="tab-why">Why It Happened</label>
+      <label for="tab-current">Current System</label>
+      <label for="tab-standard">Review Standard</label>
+      <label for="tab-plan">Next Changes</label>
+    </div>
+    <div class="tab-panels">
+      <div class="tab-panel" id="panel-why">
+        <div class="two">
+          <div>
+            <h3>Behavioral Gap</h3>
+            <p>The prior response treated the request as discovery and Beads tracking. That closed the loop for agent task management, but not for a human review artifact.</p>
+            <ul>
+              <li>No canonical research source was created.</li>
+              <li>No generated HTML review page was created.</li>
+              <li>No HTML artifact path was surfaced in the final response.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Technical Gap</h3>
+            <p>The repo has a model review generator, but no generic visual-source renderer for research or planning artifacts.</p>
+            <ul>
+              <li>Model artifacts render under `generated/review/models`.</li>
+              <li>Research artifacts have source directories only after this artifact.</li>
+              <li>Package scripts do not include a generic `artifacts:generate` command.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="tab-panel" id="panel-current">
+        <table>
+          <thead><tr><th>Area</th><th>Status</th><th>Evidence</th></tr></thead>
+          <tbody>
+            <tr><td>Review output</td><td><span class="status good">present</span></td><td>`generated/review` exists and model HTML is committed.</td></tr>
+            <tr><td>Manifest</td><td><span class="status good">present</span></td><td>`docs/artifacts/artifacts.manifest.json` tracks source and review surfaces.</td></tr>
+            <tr><td>HTML safety</td><td><span class="status good">present</span></td><td>`check-artifact-html-policy.mjs` blocks scripts, network APIs, and external references.</td></tr>
+            <tr><td>Generic infographic renderer</td><td><span class="status bad">missing</span></td><td>No source-family renderer for research/product/business/data/UX artifacts.</td></tr>
+            <tr><td>Default interaction</td><td><span class="status warn">CSS only</span></td><td>CSP sets `script-src 'none'`; inline JavaScript is explicitly disabled.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-panel" id="panel-standard">
+        <svg class="artifact-map" role="img" aria-label="Source backed artifact map" viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0f766e"/></marker>
+          </defs>
+          <rect x="34" y="44" width="170" height="76" rx="8" fill="#effaf8" stroke="#86cfc3"/>
+          <text x="119" y="78" text-anchor="middle" font-size="15" font-weight="700" fill="#172033">Canonical Source</text>
+          <text x="119" y="100" text-anchor="middle" font-size="12" fill="#5b6472">Markdown / JSON / YAML</text>
+          <line x1="204" y1="82" x2="300" y2="82" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow)"/>
+          <rect x="304" y="44" width="170" height="76" rx="8" fill="#eef4ff" stroke="#9bb6ed"/>
+          <text x="389" y="78" text-anchor="middle" font-size="15" font-weight="700" fill="#172033">Infographic HTML</text>
+          <text x="389" y="100" text-anchor="middle" font-size="12" fill="#5b6472">Charts / tabs / diagrams</text>
+          <line x1="474" y1="82" x2="570" y2="82" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow)"/>
+          <rect x="574" y="44" width="170" height="76" rx="8" fill="#fff8e8" stroke="#e8bd71"/>
+          <text x="659" y="78" text-anchor="middle" font-size="15" font-weight="700" fill="#172033">Human Review</text>
+          <text x="659" y="100" text-anchor="middle" font-size="12" fill="#5b6472">Open / link / inspect</text>
+          <rect x="170" y="168" width="560" height="56" rx="8" fill="#ffffff" stroke="#d8dee8"/>
+          <text x="450" y="193" text-anchor="middle" font-size="14" font-weight="700" fill="#172033">Manifest binds source, review surface, owner, evidence, freshness, and hash</text>
+          <text x="450" y="214" text-anchor="middle" font-size="12" fill="#5b6472">HTML remains generated review material, not canonical truth.</text>
+        </svg>
+        <div class="callout">
+          <strong>Default interaction:</strong> use radio tabs, details sections, anchors, and inline SVG/CSS states. Add JavaScript only through an explicit policy lane.
+        </div>
+      </div>
+      <div class="tab-panel" id="panel-plan">
+        <ol>
+          <li>Define an interactive HTML policy lane before allowing scripts.</li>
+          <li>Add a generic infographic renderer for non-model artifacts.</li>
+          <li>Add package scripts such as `artifacts:generate` and `artifacts:review`.</li>
+          <li>Extend tests so non-model artifacts generate, drift-check, and pass HTML policy.</li>
+          <li>Update agent operating guidance: human-facing discovery gets source plus HTML review by default.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="links-title">
+    <h2 id="links-title">Source And Evidence</h2>
+    <table>
+      <tbody>
+        <tr><th>Canonical source</th><td><a href="../../../docs/artifacts/source/research/human-html-artifact-self-use-investigation-2026-05-24.md">docs/artifacts/source/research/human-html-artifact-self-use-investigation-2026-05-24.md</a></td></tr>
+        <tr><th>Beads issue</th><td>skill-harness-b04</td></tr>
+        <tr><th>Key policy files</th><td><a href="../../../.skill-harness/project.json">.skill-harness/project.json</a>, <a href="../../../docs/developer-artifacts.md">docs/developer-artifacts.md</a>, <a href="../../../scripts/check-artifact-html-policy.mjs">scripts/check-artifact-html-policy.mjs</a></td></tr>
+        <tr><th>Generated at</th><td>2026-05-24</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <footer>
+    Generated review surface. Edit the canonical source first, then regenerate this HTML.
+  </footer>
+</main>
+</body>
+</html>

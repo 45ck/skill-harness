@@ -7,10 +7,12 @@ __pycache__/
 social-preview.png
 dist/
 generated/review/*
-!generated/review/model-to-code-human-artifacts-plan-2026-05-23.html
+!generated/review/*.html
 !generated/review/models/
 !generated/review/models/*.html
 generated/review/models/*.png
+!generated/review/research/
+!generated/review/research/*.html
 generated/media/
 generated/agent-runs/
 

@@ -46,6 +46,30 @@
       }
     },
     {
+      "id": "human-html-artifact-self-use-investigation-2026-05-24",
+      "type": "research-synthesis",
+      "source": "docs/artifacts/source/research/human-html-artifact-self-use-investigation-2026-05-24.md",
+      "status": "ready",
+      "owner": "codex",
+      "reviewSurface": "generated/review/research/human-html-artifact-self-use-investigation-2026-05-24.html",
+      "sourceHash": "64fc2d062e36c57c926141a94a9aeef66579e62d1a3e440e4a78b6627f7d11a0",
+      "renderer": "manual static infographic review surface",
+      "generatedAt": "2026-05-24",
+      "evidenceLinks": [
+        ".skill-harness/project.json",
+        "docs/developer-artifacts.md",
+        "scripts/generate-model-review.mjs",
+        "scripts/check-artifact-html-policy.mjs",
+        "packs/developer-artifact-skills/skills/html-review-artifact/SKILL.md",
+        "packs/developer-artifact-skills/skills/visual-source-artifact/SKILL.md"
+      ],
+      "reviewRequired": true,
+      "freshness": {
+        "generatedAt": "2026-05-24",
+        "sourceFirst": true
+      }
+    },
+    {
       "id": "sh-system-context",
       "title": "Skill Harness System Context",
       "type": "model-view",
