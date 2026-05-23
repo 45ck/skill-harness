@@ -802,6 +802,16 @@ func TestArtifactReviewGeneratorCreatesInfographicHTML(t *testing.T) {
 func TestArtifactReviewGeneratorEmbedsScreenshotEvidence(t *testing.T) {
 	root := t.TempDir()
 	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+	mustWriteFile(t, filepath.Join(root, "node_modules", "@viz-js", "viz", "package.json"), "{\"type\":\"module\"}\n")
+	mustWriteFile(t, filepath.Join(root, "node_modules", "@viz-js", "viz", "index.js"), `
+export async function instance() {
+  return {
+    renderString() {
+      return '<svg width="320pt" height="180pt" viewBox="0.00 0.00 320.00 180.00" xmlns="http://www.w3.org/2000/svg"><g id="node1" class="node"><title>Landing</title><path fill="#ffffff" stroke="#9fb3c8" d="M130,-150C130,-150 20,-150 20,-150 14,-150 8,-144 8,-138 8,-138 8,-32 8,-32 8,-26 14,-20 20,-20 20,-20 130,-20 130,-20 136,-20 142,-26 142,-32 142,-32 142,-138 142,-138 142,-144 136,-150 130,-150"/><text x="75" y="-80">Landing</text></g><g id="node2" class="node"><title>Auth</title><path fill="#ffffff" stroke="#9fb3c8" d="M300,-150C300,-150 190,-150 190,-150 184,-150 178,-144 178,-138 178,-138 178,-32 178,-32 178,-26 184,-20 190,-20 190,-20 300,-20 300,-20 306,-20 312,-26 312,-32 312,-32 312,-138 312,-138 312,-144 306,-150 300,-150"/><text x="245" y="-80">Auth</text></g></svg>';
+    }
+  };
+}
+`)
 	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, modelingModeOff); err != nil {
 		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
 	}
@@ -845,7 +855,7 @@ func TestArtifactReviewGeneratorEmbedsScreenshotEvidence(t *testing.T) {
 	runNodeScript(t, root, "scripts/generate-artifact-review.mjs", true)
 	htmlPath := filepath.Join(root, "generated", "review", "product", "app-atlas.html")
 	html := mustReadText(t, htmlPath)
-	for _, want := range []string{"Screenshots And Evidence Images", "Landing page", "data:image/svg+xml;base64,", "UWE Screenshot Nodes", "«navigation class» Visitor acquisition", "«navigation node»", "/login", "<image href=\"data:image/svg+xml;base64,"} {
+	for _, want := range []string{"Screenshots And Evidence Images", "Landing page", "data:image/svg+xml;base64,", "UWE Screenshot Nodes", "graphviz-render", "«navigation node»", "/login", "<image href=\"data:image/svg+xml;base64,"} {
 		if !strings.Contains(html, want) {
 			t.Fatalf("expected generated artifact HTML to contain %q", want)
 		}

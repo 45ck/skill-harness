@@ -22,5 +22,8 @@
     "suite:docs": "python scripts/render_suite_docs.py",
     "suite:drift:check": "python scripts/check_suite_drift.py --check",
     "suite:graph": "python scripts/suite_graph.py --format json"
+  },
+  "devDependencies": {
+    "@viz-js/viz": "3.27.0"
   }
 }

@@ -3063,6 +3063,13 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile arti
 	if scripts == nil {
 		scripts = map[string]any{}
 	}
+	devDependencies, _ := metadata["devDependencies"].(map[string]any)
+	if devDependencies == nil {
+		devDependencies = map[string]any{}
+	}
+	if _, exists := devDependencies["@viz-js/viz"]; !exists {
+		devDependencies["@viz-js/viz"] = "3.27.0"
+	}
 	defaultScripts := map[string]string{
 		"artifacts:check":          "node scripts/generate-artifact-review.mjs --check && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
 		"artifacts:generate":       "node scripts/generate-artifact-review.mjs",
@@ -3101,6 +3108,7 @@ func updatePackageScripts(projectDir string, agentDocsEnabled bool, profile arti
 		}
 	}
 	metadata["scripts"] = scripts
+	metadata["devDependencies"] = devDependencies
 	updated, err := json.MarshalIndent(metadata, "", "  ")
 	if err != nil {
 		return err
@@ -4512,6 +4520,7 @@ const infographicTools = configuredInfographicTools.map((tool) => typeof tool ==
       output: tool.output ?? 'static review output'
     });
 const infographicToolIds = new Set(infographicTools.map((tool) => tool.id));
+let graphvizInstancePromise;
 
 function repoPath(filePath) {
   return path.relative(root, filePath).replaceAll(path.sep, '/');
@@ -4537,6 +4546,10 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
   return String(value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;');
+}
+
+function dotQuote(value) {
+  return '"' + String(value ?? '').replaceAll('\\', '\\\\').replaceAll('"', '\\"') + '"';
 }
 
 function normalizeToolId(value) {
@@ -4755,11 +4768,11 @@ function renderLineSvg(spec) {
   return '<svg class="infographic-chart" viewBox="0 0 720 300" role="img" aria-label="' + escapeAttribute(spec.title ?? 'line chart') + '"><line x1="58" y1="248" x2="700" y2="248" stroke="#d8dee8"></line><line x1="58" y1="28" x2="58" y2="248" stroke="#d8dee8"></line><polyline points="' + polyline + '" fill="none" stroke="#2457c5" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"></polyline>' + dots + '</svg>';
 }
 
-function renderGraphSvg(spec) {
+async function renderGraphSvg(spec) {
   const graph = graphData(spec);
   if (graph.nodes.length === 0) return '<p class="muted">No graph nodes or edges were provided for this infographic spec.</p>';
   const kind = String(spec.kind ?? spec.mark ?? spec.type ?? '').toLowerCase();
-  if (kind === 'uwe-navigation' || kind === 'uwe' || graph.nodes.some((node) => node.screenshot)) return renderUweNavigationSvg(spec, graph);
+  if (kind === 'uwe-navigation' || kind === 'uwe' || graph.nodes.some((node) => node.screenshot)) return await renderUweNavigationGraphvizSvg(spec, graph);
   const cx = 360;
   const cy = 170;
   const radius = 104;
@@ -4778,6 +4791,107 @@ function renderGraphSvg(spec) {
     return '<g><circle cx="' + pos.x.toFixed(1) + '" cy="' + pos.y.toFixed(1) + '" r="30" fill="#effaf8" stroke="#0f766e" stroke-width="2"></circle><text x="' + pos.x.toFixed(1) + '" y="' + (pos.y + 4).toFixed(1) + '" text-anchor="middle" font-size="11" fill="#1f2937">' + escapeHtml(node.label.slice(0, 12)) + '</text></g>';
   }).join('');
   return '<svg class="infographic-chart" viewBox="0 0 720 340" role="img" aria-label="' + escapeAttribute(spec.title ?? 'relationship graph') + '">' + edges + nodes + '</svg>';
+}
+
+async function graphvizSvg(dot) {
+  graphvizInstancePromise = graphvizInstancePromise || import('@viz-js/viz').then((module) => module.instance());
+  const viz = await graphvizInstancePromise;
+  return viz.renderString(dot, { format: 'svg' })
+    .replace(/^<\?xml[\s\S]*?<svg/, '<svg')
+    .replace(/<svg /, '<svg class="infographic-chart graphviz-render" ');
+}
+
+function uweGraphvizDot(spec, graph) {
+  const classNames = Array.isArray(spec.navigationClasses ?? spec.lanes ?? spec.classes)
+    ? (spec.navigationClasses ?? spec.lanes ?? spec.classes).map((item) => typeof item === 'string' ? item : (item.label ?? item.id ?? item.name)).filter(Boolean).map(String)
+    : [];
+  for (const node of graph.nodes) {
+    const name = node.navigationClass || 'Navigation';
+    if (!classNames.includes(name)) classNames.push(name);
+  }
+  const lines = [
+    'digraph UweNavigation {',
+    '  graph [rankdir=LR, bgcolor="transparent", pad="0.22", nodesep="0.42", ranksep="0.78", compound=true, fontname="Segoe UI", label=' + dotQuote(spec.title ?? 'UWE navigation model') + ', labelloc=t];',
+    '  node [shape=box, style="rounded,filled", fixedsize=true, width=2.92, height=2.34, margin=0, fontname="Segoe UI", fontsize=12, color="#9fb3c8", fillcolor="#ffffff"];',
+    '  edge [fontname="Segoe UI", fontsize=10, color="#64748b", fontcolor="#334155", arrowsize=0.72];'
+  ];
+  for (const className of classNames) {
+    const nodes = graph.nodes.filter((node) => (node.navigationClass || 'Navigation') === className);
+    if (nodes.length === 0) continue;
+    lines.push('  subgraph cluster_' + safeName(className).replaceAll('-', '_') + ' {');
+    lines.push('    label=' + dotQuote('«navigation class» ' + className) + ';');
+    lines.push('    color="#cbd5e1";');
+    lines.push('    fillcolor="#f8fafc";');
+    lines.push('    style="rounded,filled";');
+    for (const node of nodes) {
+      const label = '\\n\\n\\n\\n\\n' + String(node.label || node.id).slice(0, 36) + '\\n' + String(node.route || node.facet || node.role || '').slice(0, 42);
+      lines.push('    ' + dotQuote(node.id) + ' [label=' + dotQuote(label) + '];');
+    }
+    lines.push('  }');
+  }
+  for (const edge of graph.edges) lines.push('  ' + dotQuote(edge.from) + ' -> ' + dotQuote(edge.to) + (edge.label ? ' [label=' + dotQuote(edge.label) + ']' : '') + ';');
+  lines.push('}');
+  return lines.join('\n');
+}
+
+function polygonBounds(group) {
+  const match = group.match(/<polygon\b[^>]*\bpoints="([^"]+)"/);
+  let points = [];
+  if (match) {
+    points = match[1].trim().split(/\s+/).map((point) => point.split(',').map(Number)).filter((point) => point.length === 2 && point.every(Number.isFinite));
+  } else {
+    const pathMatch = group.match(/<path\b[^>]*\bd="([^"]+)"/);
+    if (!pathMatch) return null;
+    const numbers = [...pathMatch[1].matchAll(/-?\d+(?:\.\d+)?/g)].map((item) => Number(item[0]));
+    for (let index = 0; index + 1 < numbers.length; index += 2) points.push([numbers[index], numbers[index + 1]]);
+  }
+  if (points.length === 0) return null;
+  const xs = points.map((point) => point[0]);
+  const ys = points.map((point) => point[1]);
+  return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+}
+
+function injectUweScreenshots(svg, graph) {
+  let output = svg;
+  for (const node of graph.nodes) {
+    const title = '<title>' + escapeHtml(node.id) + '</title>';
+    const start = output.indexOf(title);
+    if (start < 0) continue;
+    const groupStart = output.lastIndexOf('<g ', start);
+    const groupEnd = output.indexOf('</g>', start);
+    if (groupStart < 0 || groupEnd < 0) continue;
+    const group = output.slice(groupStart, groupEnd + 4);
+    if (!group.includes('class="node"')) continue;
+    const bounds = polygonBounds(group);
+    if (!bounds) continue;
+    const dataUrl = imageDataUrl(node.screenshot);
+    const x = bounds.minX;
+    const y = bounds.minY;
+    const width = bounds.maxX - bounds.minX;
+    const imageX = x + 9;
+    const imageY = y + 31;
+    const imageWidth = width - 18;
+    const imageHeight = Math.min(92, (bounds.maxY - bounds.minY) * 0.56);
+    const cleaned = group.replace(/<text\b[\s\S]*?<\/text>/g, '');
+    const replacement = cleaned.replace('</g>',
+      '<text xml:space="preserve" x="' + (x + 10).toFixed(1) + '" y="' + (y + 18).toFixed(1) + '" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="700" fill="#0f766e">«navigation node»</text>' +
+      (dataUrl
+        ? '<image href="' + escapeAttribute(dataUrl) + '" x="' + imageX.toFixed(1) + '" y="' + imageY.toFixed(1) + '" width="' + imageWidth.toFixed(1) + '" height="' + imageHeight.toFixed(1) + '" preserveAspectRatio="xMidYMid meet"></image>'
+        : '<rect x="' + imageX.toFixed(1) + '" y="' + imageY.toFixed(1) + '" width="' + imageWidth.toFixed(1) + '" height="' + imageHeight.toFixed(1) + '" rx="6" fill="#eef2f6" stroke="#d8dee8"></rect><text x="' + (x + width / 2).toFixed(1) + '" y="' + (imageY + imageHeight / 2).toFixed(1) + '" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#64748b">no screenshot</text>') +
+      '<text xml:space="preserve" x="' + (x + 10).toFixed(1) + '" y="' + (bounds.maxY - 26).toFixed(1) + '" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="800" fill="#111827">' + escapeHtml(String(node.label || node.id).slice(0, 30)) + '</text>' +
+      '<text xml:space="preserve" x="' + (x + 10).toFixed(1) + '" y="' + (bounds.maxY - 10).toFixed(1) + '" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#334155">' + escapeHtml(String(node.route || node.facet || node.role || 'navigationNode').slice(0, 38)) + '</text></g>');
+    output = output.slice(0, groupStart) + replacement + output.slice(groupEnd + 4);
+  }
+  return output.replace(/<polygon fill="none" stroke="black"/g, '<polygon fill="#ffffff" stroke="#9fb3c8"')
+    .replace(/<polygon fill="none" stroke="#cbd5e1"/g, '<polygon fill="#f8fafc" stroke="#cbd5e1"');
+}
+
+async function renderUweNavigationGraphvizSvg(spec, graph) {
+  try {
+    return injectUweScreenshots(await graphvizSvg(uweGraphvizDot(spec, graph)), graph);
+  } catch (error) {
+    return renderUweNavigationSvg(spec, graph) + '<p class="muted">Graphviz render failed; fallback renderer used: ' + escapeHtml(error.message) + '</p>';
+  }
 }
 
 function renderUweNavigationSvg(spec, graph) {
@@ -4849,13 +4963,13 @@ function renderUweNavigationSvg(spec, graph) {
   return '<svg class="infographic-chart" viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="' + escapeAttribute(spec.title ?? 'UWE navigation screenshot model') + '"><defs><marker id="arrowHead" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 Z" fill="#64748b"></path></marker></defs>' + laneRects + edges + nodes + '</svg>';
 }
 
-function renderInfographicSpec(spec, index) {
+async function renderInfographicSpec(spec, index) {
   const tool = normalizeToolId(spec.tool ?? spec.renderer ?? 'source-spec');
   const allowed = infographicToolIds.has(tool) || tool === 'source-spec';
   const kind = String(spec.kind ?? spec.mark ?? spec.type ?? '').toLowerCase();
   let visual = '';
   if (['graphviz', 'mermaid'].includes(tool) || ['graph', 'network', 'lineage', 'relationship'].includes(kind)) {
-    visual = renderGraphSvg(spec);
+    visual = await renderGraphSvg(spec);
   } else if (kind === 'line' || kind === 'trend') {
     visual = renderLineSvg(spec);
   } else {
@@ -4868,10 +4982,10 @@ function renderInfographicToolkit() {
   return '<section class="panel"><h2>Open-Source Infographic Toolkit</h2><p class="muted">These tools are allowed as source/spec or generation-time renderers. The generated HTML does not load their browser runtimes.</p><div class="toolkit-grid">' + infographicTools.map((tool) => '<div class="tool-card"><strong>' + escapeHtml(tool.label) + '</strong><span>' + escapeHtml(tool.role) + '</span><em>' + escapeHtml(tool.output) + '</em></div>').join('') + '</div></section>';
 }
 
-function renderInfographicSpecs(source, artifact) {
+async function renderInfographicSpecs(source, artifact) {
   const specs = parseInfographicSpecs(source, artifact);
   if (specs.length === 0) return '';
-  return '<section class="panel"><h2>Static Infographic Specs</h2><div class="chart-grid">' + specs.map(renderInfographicSpec).join('') + '</div></section>';
+  return '<section class="panel"><h2>Static Infographic Specs</h2><div class="chart-grid">' + (await Promise.all(specs.map(renderInfographicSpec))).join('') + '</div></section>';
 }
 
 function imageMime(filePath) {
@@ -4920,7 +5034,7 @@ function htmlPage(title, body) {
   return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="' + escapeAttribute(requiredCsp) + '">\n<title>' + escapeHtml(title) + '</title>\n<style>\n:root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;--bg:#eef2f6;--panel:#fff;--text:#1f2937;--muted:#5b6472;--line:#d8dee8;--navy:#172033;--teal:#0f766e;--blue:#2457c5;--amber:#a15c07;--green:#16794b;--red:#b42318;--violet:#6546a3}*{box-sizing:border-box}body{margin:0;color:var(--text);background:var(--bg)}a{color:#174ea6}header{background:var(--navy);color:#fff;padding:28px;border-bottom:6px solid var(--teal)}header h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:0}header p{max-width:1040px;margin:0;color:#dce6f1}main{max-width:1240px;margin:0 auto;padding:18px}h2,h3{margin:0 0 10px;line-height:1.2;letter-spacing:0}p{margin:0 0 12px}.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{border:1px solid var(--line);border-top:5px solid var(--teal);border-radius:8px;padding:12px;background:#fff;min-height:104px}.metric strong{display:block;font-size:28px;line-height:1;margin-bottom:6px}.metric span{color:var(--muted);font-size:13px}.blue{border-top-color:var(--blue)}.amber{border-top-color:var(--amber)}.green{border-top-color:var(--green)}.violet{border-top-color:var(--violet)}.tabs>input{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)}.tab-labels{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}.tab-labels label{cursor:pointer;padding:8px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:650}.tab-panel{display:none;margin-top:14px}.tabs input:nth-of-type(1):checked~.tab-panels .tab-panel:nth-of-type(1),.tabs input:nth-of-type(2):checked~.tab-panels .tab-panel:nth-of-type(2),.tabs input:nth-of-type(3):checked~.tab-panels .tab-panel:nth-of-type(3),.tabs input:nth-of-type(4):checked~.tab-panels .tab-panel:nth-of-type(4){display:block}.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.step{border:1px solid var(--line);border-radius:8px;background:#f9fbfd;padding:12px;min-height:96px}.step strong{display:block;margin-bottom:5px}.step span,.muted{color:var(--muted)}.bar-row{display:grid;grid-template-columns:172px minmax(0,1fr) 52px;gap:10px;align-items:center;margin:10px 0}.bar-track{height:18px;background:#e8edf4;border-radius:999px;overflow:hidden}.bar{display:block;height:100%;border-radius:999px;background:var(--teal)}.w100{width:100%}.w80{width:80%}.w60{width:60%}.w40{width:40%}.w20{width:20%}.toolkit-grid,.chart-grid,.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.tool-card,.chart-panel{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px}.tool-card strong,.tool-card span,.tool-card em{display:block}.tool-card span{color:var(--muted);font-size:13px}.tool-card em{margin-top:6px;color:#334155;font-size:12px;font-style:normal}.chart-head{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}.tool-badge{display:inline-flex;border:1px solid #b9c7dc;background:#f4f7fb;border-radius:999px;padding:2px 8px;color:#334155;font-size:12px;font-weight:700;white-space:nowrap}.infographic-chart{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff;margin-top:8px}figure{margin:0;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}figure img{display:block;width:100%;height:auto}figcaption{padding:9px 10px;color:var(--muted);font-size:13px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid var(--line);text-align:left;vertical-align:top;padding:9px}th{background:#f7f9fc}pre{white-space:pre-wrap;overflow:auto;background:#101828;color:#e5edf7;padding:14px;border-radius:8px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#eef2f6;border:1px solid #dae2ec;border-radius:4px;padding:1px 4px}ul,ol{margin:8px 0 0 20px;padding:0}li{margin:4px 0}.callout{border-left:5px solid var(--teal);background:#effaf8;padding:12px 14px;border-radius:7px;margin:12px 0}@media(max-width:920px){.grid,.metrics{grid-template-columns:1fr}main{padding:12px}.bar-row{grid-template-columns:1fr}.chart-head{display:block}.tool-badge{margin-bottom:8px}}\n</style>\n</head>\n<body>\n' + body + '\n</body>\n</html>\n';
 }
 
-function renderArtifact(artifact, outPath) {
+async function renderArtifact(artifact, outPath) {
   const source = readSource(artifact);
   const summary = artifact.summary || artifact.purpose || firstParagraph(source) || 'Source-backed human review artifact.';
   const family = familyFor(artifact);
@@ -4934,7 +5048,7 @@ function renderArtifact(artifact, outPath) {
     '<div class="metrics"><div class="metric green"><strong>' + escapeHtml(artifact.status || 'draft') + '</strong><span>Status</span></div><div class="metric blue"><strong>' + evidenceCount + '</strong><span>Evidence links</span></div><div class="metric amber"><strong>' + stats.sectionCount + '</strong><span>Major sections</span></div><div class="metric violet"><strong>' + escapeHtml(family) + '</strong><span>Artifact family</span></div></div></section>' +
     '<section class="panel"><h2>Infographic Snapshot</h2><div class="bar-row"><span>Evidence coverage</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, evidenceCount * 20)) + '"></span></span><strong>' + evidenceCount + '</strong></div><div class="bar-row"><span>Source depth</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, stats.sectionCount * 20)) + '"></span></span><strong>' + stats.sectionCount + '</strong></div><div class="bar-row"><span>Update triggers</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, updateCount * 20)) + '"></span></span><strong>' + updateCount + '</strong></div></section>' +
     renderInfographicToolkit() +
-    renderInfographicSpecs(source, artifact) +
+    await renderInfographicSpecs(source, artifact) +
     gallerySection(artifact) +
     '<section class="panel"><h2>Source-To-Review Flow</h2><div class="flow"><div class="step"><strong>Canonical Source</strong><span>' + escapeHtml(artifact.source || '') + '</span></div><div class="step"><strong>Generated HTML</strong><span>' + escapeHtml(artifact.reviewSurface || '') + '</span></div><div class="step"><strong>Evidence</strong><span>' + evidenceCount + ' linked item(s)</span></div><div class="step"><strong>Freshness</strong><span>' + escapeHtml(artifact.generatedAt || artifact.freshness?.generatedAt || 'not-recorded') + '</span></div></div></section>' +
     '<section class="panel tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-evidence" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-metadata" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-evidence">Evidence</label><label for="tab-source">Source</label><label for="tab-metadata">Metadata</label></div><div class="tab-panels">' +
@@ -4971,7 +5085,7 @@ for (const artifact of artifacts) {
   artifact.generatedAt = checkOnly ? (artifact.generatedAt || artifact.freshness?.generatedAt || generationDate) : (sourceGeneratedAt(artifact) || generationDate);
   artifact.freshness = { ...(artifact.freshness ?? {}), generatedAt: artifact.generatedAt, sourceFirst: true };
   const outPath = resolveReviewSurface(artifact);
-  expectedFiles.set(outPath, renderArtifact(artifact, outPath));
+  expectedFiles.set(outPath, await renderArtifact(artifact, outPath));
 }
 
 if (artifacts.length > 0 || hasModelArtifacts) {
