@@ -385,8 +385,99 @@ func TestWriteDeveloperArtifactScaffoldModeling(t *testing.T) {
 		t.Fatalf("expected model source dir, got %#v", umlPolicy["sourceDir"])
 	}
 	scripts := packageScripts(t, filepath.Join(root, "package.json"))
+	if !strings.Contains(fmt.Sprint(scripts["artifacts:check"]), "check-model-artifact-policy.mjs") {
+		t.Fatalf("expected artifacts:check to include model policy, got %#v", scripts["artifacts:check"])
+	}
+	if scripts["artifacts:model:check"] != "node scripts/check-model-artifact-policy.mjs" {
+		t.Fatalf("expected model check script, got %#v", scripts["artifacts:model:check"])
+	}
 	if scripts["models:review"] != "node scripts/check-model-artifact-policy.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs" {
 		t.Fatalf("expected model review script, got %#v", scripts["models:review"])
+	}
+}
+
+func TestModelArtifactPolicyScriptAcceptsValidModelView(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, true); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	sourcePath := filepath.Join(root, "docs", "artifacts", "source", "models", "enrolment-flow.md")
+	source := "# Enrolment Flow\n\n```mermaid\nsequenceDiagram\n  actor Parent\n  Parent->>Portal: Apply\n```\n"
+	mustWriteFile(t, sourcePath, source)
+	mustWriteFile(t, filepath.Join(root, "generated", "review", "models", "enrolment-flow.html"), "<!doctype html><html><body><main><h1>Enrolment Flow</h1></main></body></html>")
+	writeManifest(t, root, []map[string]any{
+		{
+			"id":               "model-enrolment-flow",
+			"type":             "model-view",
+			"source":           "docs/artifacts/source/models/enrolment-flow.md",
+			"status":           "ready",
+			"modelId":          "enrolment-flow",
+			"modelKind":        "sequence",
+			"notation":         "mermaid",
+			"method":           "uml",
+			"abstractionLevel": "runtime",
+			"owner":            "system-modeler",
+			"reviewSurface":    "generated/review/models/enrolment-flow.html",
+			"sourceHash":       sha256Hex(source),
+			"evidenceLinks":    []string{"tests/enrolment.test.ts"},
+		},
+	})
+
+	runNodeScript(t, root, "scripts/check-model-artifact-policy.mjs", true)
+}
+
+func TestModelArtifactPolicyScriptRejectsInvalidFacetAndBrokenDiff(t *testing.T) {
+	root := t.TempDir()
+	mustWriteFile(t, filepath.Join(root, "package.json"), "{\n  \"name\": \"repo\",\n  \"private\": true\n}\n")
+	if err := writeDeveloperArtifactScaffold(root, artifactProfileDual, true, true, true); err != nil {
+		t.Fatalf("writeDeveloperArtifactScaffold returned error: %v", err)
+	}
+
+	source := "# Navigation\n"
+	mustWriteFile(t, filepath.Join(root, "docs", "artifacts", "source", "models", "navigation.md"), source)
+	writeManifest(t, root, []map[string]any{
+		{
+			"id":               "model-navigation",
+			"type":             "model-view",
+			"source":           "docs/artifacts/source/models/navigation.md",
+			"status":           "draft",
+			"modelId":          "navigation",
+			"modelKind":        "activity",
+			"notation":         "mermaid",
+			"method":           "uwe",
+			"facets":           []string{"unknown"},
+			"abstractionLevel": "design",
+			"owner":            "system-modeler",
+			"reviewSurface":    "generated/review/models/navigation.html",
+			"sourceHash":       sha256Hex(source),
+		},
+		{
+			"id":               "model-navigation-diff",
+			"type":             "model-diff",
+			"source":           "docs/artifacts/source/models/navigation.md",
+			"status":           "draft",
+			"modelId":          "navigation",
+			"modelKind":        "activity",
+			"notation":         "mermaid",
+			"method":           "uwe",
+			"facets":           []string{"navigation"},
+			"abstractionLevel": "design",
+			"owner":            "system-modeler",
+			"reviewSurface":    "generated/review/models/navigation-diff.html",
+			"diff": map[string]any{
+				"beforeArtifactId": "missing-before",
+				"afterArtifactId":  "model-navigation",
+				"method":           "source",
+				"reviewSurface":    "generated/review/models/navigation-diff.html",
+			},
+		},
+	})
+
+	output := runNodeScript(t, root, "scripts/check-model-artifact-policy.mjs", false)
+	if !strings.Contains(output, "unsupported UWE facet") || !strings.Contains(output, "references unknown artifact") {
+		t.Fatalf("expected facet and diff failures, got:\n%s", output)
 	}
 }
 
@@ -541,7 +632,46 @@ func mustMkdirAll(t *testing.T, path string) {
 
 func mustWriteFile(t *testing.T, path, content string) {
 	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("mkdir %s: %v", filepath.Dir(path), err)
+	}
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatalf("write %s: %v", path, err)
 	}
+}
+
+func sha256Hex(content string) string {
+	sum := sha256.Sum256([]byte(content))
+	return fmt.Sprintf("%x", sum)
+}
+
+func writeManifest(t *testing.T, root string, artifacts []map[string]any) {
+	t.Helper()
+	data, err := json.MarshalIndent(map[string]any{
+		"version": 1,
+		"rules": map[string]any{
+			"editSourceFirst":            true,
+			"generatedReviewIsCanonical": false,
+			"hashAlgorithm":              "sha256",
+		},
+		"artifacts": artifacts,
+	}, "", "  ")
+	if err != nil {
+		t.Fatalf("marshal manifest: %v", err)
+	}
+	mustWriteFile(t, filepath.Join(root, "docs", "artifacts", "artifacts.manifest.json"), string(data)+"\n")
+}
+
+func runNodeScript(t *testing.T, root string, script string, wantSuccess bool) string {
+	t.Helper()
+	cmd := exec.Command("node", script)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if wantSuccess && err != nil {
+		t.Fatalf("%s failed unexpectedly: %v\n%s", script, err, output)
+	}
+	if !wantSuccess && err == nil {
+		t.Fatalf("%s succeeded unexpectedly:\n%s", script, output)
+	}
+	return string(output)
 }
