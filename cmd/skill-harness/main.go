@@ -4144,7 +4144,7 @@ Use the Skill Harness UWE evidence renderer rather than a repo-local bespoke HTM
 - evidence[].annotations[].bounds uses normalized coordinates from 0 to 1.
 - evidence[].annotations[].semantics must be evidence-only.
 - Red boxes and zoom crops are rendered by the review surface inspector/lightbox; do not bake them into screenshots unless no source metadata is available.
-- For VibeCoord-style artifacts, map screenshotFocusByNode to evidence[].annotations[] and package groups to packages plus nodes[].package.
+- When migrating an existing one-off atlas, map screenshot focus data to evidence[].annotations[] and package groups to packages plus nodes[].package.
 
 ## Action And Side-Effect Matrix
 

@@ -27,7 +27,7 @@ UWE screenshot atlases are for whole-app inspection: routes, links, buttons, rol
 5. Render red focus boxes, crops, and callouts from structured evidence metadata; do not bake annotations into screenshots when the source can carry them.
 6. Keep Skill Harness glue thin: source parsing, screenshot data URLs, renderer invocation, policy checks, and manifest wiring.
 
-The renderer used by VibeCoord-style product modeling artifacts is this Skill Harness UWE evidence renderer. Repos should not maintain a separate custom UWE HTML renderer just because a one-off artifact looked better. Promote useful visual behavior into this contract and regenerate from source.
+The renderer used by downstream product modeling artifacts is this Skill Harness UWE evidence renderer. Repos should not maintain separate custom UWE HTML renderers just because a one-off artifact looked better. Promote useful visual behavior into this contract and regenerate from source.
 
 ## UWE Evidence Contract
 
@@ -55,15 +55,15 @@ Recommended screenshot treatment:
 - Keep Graphviz/UML nodes semantically clean; detailed red callouts belong in the inspector and lightbox.
 - For `processClass` and `processLink`, prefer trigger/result evidence over reusing only a generic full-screen navigation screenshot.
 
-## VibeCoord Alignment
+## Downstream Atlas Alignment
 
-The VibeCoord artifact at `qa-artifacts/e2e-product-modeling/vibecoord-uwe-navigation-source-2026-05-24.json` already has the right intent: Cytoscape/dagre graph, UWE packages, red focus boxes, zoom crops, and evidence notes. Its next durable version should be represented as a Skill Harness `artifact-infographic` source instead of bespoke HTML:
+When a downstream repo already has a one-off UWE screenshot atlas, convert the durable version into a Skill Harness `artifact-infographic` source instead of preserving bespoke HTML:
 
-- `uwePackageGroups` / `packageParentByNode` -> `packages` plus `nodes[].package`.
-- `screenshotFocusByNode` -> `evidence[].annotations[]` with normalized bounds.
-- `uweNodes` or equivalent graph node source -> `nodes[]` with explicit `stereotype`.
-- `uweEdges` -> `edges[]` with explicit `id`, `stereotype`, `guard`, and `evidenceRefs`.
-- VibeCoord-specific AI/proof tags -> `facets`, namespaced notes, or separate evidence metadata; keep official UWE stereotypes intact.
+- Package group maps -> `packages` plus `nodes[].package`.
+- Screenshot focus maps -> `evidence[].annotations[]` with normalized bounds.
+- Existing graph node source -> `nodes[]` with explicit `stereotype`.
+- Existing graph edge source -> `edges[]` with explicit `id`, `stereotype`, `guard`, and `evidenceRefs`.
+- Product-specific proof tags -> `facets`, namespaced notes, or separate evidence metadata; keep official UWE stereotypes intact.
 - Generated output -> `generated/review/product/<app>-e2e-product-system-atlas.html` from `node scripts/generate-artifact-review.mjs`.
 
 ## Source Spec
