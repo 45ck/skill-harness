@@ -28,10 +28,11 @@
   }
 
   function classFor(node) {
-    var raw = String(node.type || node.stereo || "navigation").toLowerCase();
-    if (raw.indexOf("process") >= 0) return "uwe-process";
-    if (raw.indexOf("access") >= 0) return "uwe-access";
-    if (raw.indexOf("adaptation") >= 0 || raw.indexOf("denied") >= 0) return "uwe-adaptation";
+    var stereo = String(node.stereo || "").toLowerCase();
+    var facets = String(node.type || "").toLowerCase();
+    if (stereo.indexOf("processclass") >= 0) return "uwe-process";
+    if (facets.indexOf("adaptation") >= 0 || facets.indexOf("denied") >= 0) return "uwe-adaptation";
+    if (facets.indexOf("access") >= 0) return "uwe-access";
     return "uwe-navigation";
   }
 
@@ -49,6 +50,19 @@
       img.alt = (data.name || data.id) + " screenshot";
       img.dataset.uweCaption = (data.stereo || "UWE node") + " " + (data.name || data.id) + ": " + (data.effect || "");
     }
+  }
+
+  function setActiveNodeButton(workspace, id) {
+    workspace.querySelectorAll("[data-uwe-focus-node]").forEach(function (button) {
+      button.classList.toggle("active", button.dataset.uweFocusNode === id);
+    });
+  }
+
+  function setActivePackageButton(workspace, packageName) {
+    workspace.querySelectorAll("[data-uwe-action]").forEach(function (button) {
+      var action = button.dataset.uweAction || "";
+      button.classList.toggle("active", action === "package:" + packageName);
+    });
   }
 
   function openLightbox(workspace) {
@@ -132,8 +146,8 @@
             height: 168,
             "background-color": "#ffffff",
             "background-image": "data(screenshot)",
-            "background-fit": "cover",
-            "background-opacity": 0.86,
+            "background-fit": "contain",
+            "background-opacity": 0.92,
             "border-color": "#111827",
             "border-width": 1.5,
             label: "data(name)",
@@ -187,8 +201,13 @@
     workspace.querySelector("[data-uwe-stat=packages]").textContent = String(new Set(nodes.map(function (node) { return node.packageName; })).size);
     if (badge) badge.textContent = "Cytoscape + dagre active: wheel zoom, drag pan, click inspect";
     if (nodes[0]) setInspector(workspace, nodes[0]);
+    if (nodes[0]) setActiveNodeButton(workspace, nodes[0].id);
+    if (nodes[0]) setActivePackageButton(workspace, nodes[0].packageName);
     cy.on("tap", "node", function (event) {
-      setInspector(workspace, event.target.data());
+      var data = event.target.data();
+      setInspector(workspace, data);
+      setActiveNodeButton(workspace, data.id);
+      setActivePackageButton(workspace, data.packageName);
     });
     workspace.querySelectorAll("[data-uwe-action]").forEach(function (button) {
       button.addEventListener("click", function () {
@@ -200,6 +219,7 @@
           var packageName = action.slice("package:".length);
           var collection = cy.nodes().filter(function (node) { return node.data("packageName") === packageName; });
           if (collection.length > 0) cy.fit(collection.union(collection.connectedEdges()), 56);
+          setActivePackageButton(workspace, packageName);
         }
       });
     });
@@ -209,6 +229,8 @@
         var node = nodes.find(function (candidate) { return candidate.id === id; });
         if (!node) return;
         setInspector(workspace, node);
+        setActiveNodeButton(workspace, node.id);
+        setActivePackageButton(workspace, node.packageName);
         var cyNode = cy.getElementById(id);
         if (cyNode && cyNode.length > 0) {
           cy.nodes().unselect();

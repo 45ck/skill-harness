@@ -168,8 +168,7 @@ function headings(markdown) {
     .split(/\r?\n/)
     .map((line) => line.match(/^(#{2,3})\s+(.+)$/))
     .filter(Boolean)
-    .map((match) => ({ level: match[1].length, text: match[2].trim() }))
-    .slice(0, 8);
+    .map((match) => ({ level: match[1].length, text: match[2].trim() }));
 }
 
 function familyFor(artifact) {
@@ -266,8 +265,15 @@ function numericSeries(spec) {
 
 function graphData(spec) {
   const edges = Array.isArray(spec.edges) ? spec.edges.map((edge) => Array.isArray(edge)
-    ? { from: String(edge[0] ?? ''), to: String(edge[1] ?? ''), label: String(edge[2] ?? '') }
-    : { from: String(edge.from ?? edge.source ?? ''), to: String(edge.to ?? edge.target ?? ''), label: String(edge.label ?? '') }) : [];
+    ? { from: String(edge[0] ?? ''), to: String(edge[1] ?? ''), label: String(edge[2] ?? ''), stereotype: 'navigationLink' }
+    : {
+      from: String(edge.from ?? edge.source ?? ''),
+      to: String(edge.to ?? edge.target ?? ''),
+      label: String(edge.label ?? edge.action ?? ''),
+      stereotype: String(edge.stereotype ?? edge.type ?? 'navigationLink'),
+      guard: edge.guard ? String(edge.guard) : '',
+      effect: edge.effect ? String(edge.effect) : ''
+    }) : [];
   const nodeIds = new Set();
   for (const edge of edges) {
     if (edge.from) nodeIds.add(edge.from);
@@ -278,9 +284,11 @@ function graphData(spec) {
       id: String(node.id ?? node.name ?? node.label),
       label: String(node.label ?? node.name ?? node.id),
       route: node.route ? String(node.route) : '',
-      facet: node.facet ? String(node.facet) : '',
+      facet: Array.isArray(node.facets) ? node.facets.join(', ') : (node.facet ? String(node.facet) : ''),
+      facets: Array.isArray(node.facets) ? node.facets.map(String) : (node.facet ? String(node.facet).split(/\s*\+\s*|\s*,\s*/).filter(Boolean) : []),
       role: node.role ? String(node.role) : '',
-      navigationClass: node.navigationClass || node.lane || node.class ? String(node.navigationClass ?? node.lane ?? node.class) : '',
+      packageName: node.package || node.packageName || node.lane || node.class || node.group ? String(node.package ?? node.packageName ?? node.lane ?? node.class ?? node.group) : '',
+      navigationClass: node.navigationClass ? String(node.navigationClass) : '',
       effect: node.effect || node.sideEffect ? String(node.effect ?? node.sideEffect) : '',
       screenshot: node.screenshot || node.image || node.visualEvidence || '',
       actions: node.actions || node.primaryActions || node.action ? String(node.actions ?? node.primaryActions ?? node.action) : '',
@@ -360,11 +368,11 @@ async function graphvizSvg(dot) {
 }
 
 function uweGraphvizDot(spec, graph) {
-  const classNames = Array.isArray(spec.navigationClasses ?? spec.lanes ?? spec.classes)
-    ? (spec.navigationClasses ?? spec.lanes ?? spec.classes).map((item) => typeof item === 'string' ? item : (item.label ?? item.id ?? item.name)).filter(Boolean).map(String)
+  const classNames = Array.isArray(spec.packages ?? spec.navigationPackages ?? spec.lanes ?? spec.classes)
+    ? (spec.packages ?? spec.navigationPackages ?? spec.lanes ?? spec.classes).map((item) => typeof item === 'string' ? item : (item.label ?? item.id ?? item.name)).filter(Boolean).map(String)
     : [];
   for (const node of graph.nodes) {
-    const name = node.navigationClass || 'Navigation';
+    const name = node.packageName || 'Navigation';
     if (!classNames.includes(name)) classNames.push(name);
   }
   const lines = [
@@ -374,17 +382,20 @@ function uweGraphvizDot(spec, graph) {
     '  edge [fontname="Segoe UI", fontsize=10, color="#111827", fontcolor="#111827", arrowsize=0.72, arrowhead=open];'
   ];
   for (const className of classNames) {
-    const nodes = graph.nodes.filter((node) => (node.navigationClass || 'Navigation') === className);
+    const nodes = graph.nodes.filter((node) => (node.packageName || 'Navigation') === className);
     if (nodes.length === 0) continue;
     lines.push('  subgraph cluster_' + safeName(className).replaceAll('-', '_') + ' {');
-    lines.push('    label=' + dotQuote('«navigation class» ' + className) + ';');
+    lines.push('    label=' + dotQuote('package ' + className) + ';');
     lines.push('    color="#111827";');
     lines.push('    fillcolor="#ffffff";');
     lines.push('    style="filled";');
     for (const node of nodes) lines.push('    ' + dotQuote(node.id) + ' [label=<' + uweNodeHtmlLabel(node) + '>];');
     lines.push('  }');
   }
-  for (const edge of graph.edges) lines.push('  ' + dotQuote(edge.from) + ' -> ' + dotQuote(edge.to) + (edge.label ? ' [label=' + dotQuote(edge.label) + ']' : '') + ';');
+  for (const edge of graph.edges) {
+    const label = [edge.stereotype ? '«' + edge.stereotype + '»' : '', edge.label, edge.guard ? '[' + edge.guard + ']' : ''].filter(Boolean).join(' ');
+    lines.push('  ' + dotQuote(edge.from) + ' -> ' + dotQuote(edge.to) + (label ? ' [label=' + dotQuote(label) + ']' : '') + ';');
+  }
   lines.push('}');
   return lines.join('\n');
 }
@@ -392,12 +403,18 @@ function uweGraphvizDot(spec, graph) {
 function uweNodeHtmlLabel(node) {
   const label = dotHtmlText(String(node.label || node.id).slice(0, 36));
   const route = dotHtmlText(String(node.route || node.facet || node.role || '').slice(0, 42));
+  const role = dotHtmlText(String(node.role || 'all roles').slice(0, 42));
+  const action = dotHtmlText(String(node.actions || 'action not recorded').slice(0, 52));
+  const effect = dotHtmlText(String(node.effect || 'effect not recorded').slice(0, 52));
   const screenshotToken = 'screenshot:' + dotHtmlText(node.id);
   return '<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" COLOR="#111827">' +
-    '<TR><TD BGCOLOR="#f3f4f6"><FONT FACE="Segoe UI" POINT-SIZE="11" COLOR="#111827">«navigation node»</FONT></TD></TR>' +
+    '<TR><TD BGCOLOR="#f3f4f6"><FONT FACE="Segoe UI" POINT-SIZE="11" COLOR="#111827">' + dotHtmlText(uweStereotype(node)) + '</FONT></TD></TR>' +
     '<TR><TD FIXEDSIZE="TRUE" WIDTH="320" HEIGHT="184" BGCOLOR="#ffffff"><FONT FACE="Segoe UI" POINT-SIZE="9" COLOR="#6b7280">' + screenshotToken + '</FONT></TD></TR>' +
     '<TR><TD ALIGN="LEFT"><FONT FACE="Segoe UI" POINT-SIZE="12"><B>' + label + '</B></FONT></TD></TR>' +
     '<TR><TD ALIGN="LEFT"><FONT FACE="Segoe UI" POINT-SIZE="10" COLOR="#334155">' + route + '</FONT></TD></TR>' +
+    '<TR><TD ALIGN="LEFT"><FONT FACE="Segoe UI" POINT-SIZE="9" COLOR="#475569">role: ' + role + '</FONT></TD></TR>' +
+    '<TR><TD ALIGN="LEFT"><FONT FACE="Segoe UI" POINT-SIZE="9" COLOR="#475569">action: ' + action + '</FONT></TD></TR>' +
+    '<TR><TD ALIGN="LEFT"><FONT FACE="Segoe UI" POINT-SIZE="9" COLOR="#475569">effect: ' + effect + '</FONT></TD></TR>' +
     '</TABLE>';
 }
 
@@ -472,7 +489,7 @@ function renderZoomableUmlSvg(visual, index) {
 }
 
 function uweStereotype(node) {
-  if (node.stereotype) return node.stereotype;
+  if (node.stereotype) return String(node.stereotype).startsWith('«') ? node.stereotype : '«' + node.stereotype + '»';
   const type = String(node.type || node.facet || '').toLowerCase();
   if (type.includes('process')) return '«processClass»';
   if (type.includes('menu')) return '«menu»';
@@ -486,23 +503,32 @@ function uweStereotype(node) {
 
 function renderUweWorkspace(spec, graph, index) {
   const workspaceId = 'uwe-workspace-' + index;
-  const packages = [...new Set(graph.nodes.map((node) => node.navigationClass || 'Navigation'))];
+  const packages = [...new Set(graph.nodes.map((node) => node.packageName || 'Navigation'))];
   const first = graph.nodes[0] ?? {};
-  const packageButtons = packages.map((name) => '<button type="button" data-uwe-action="package:' + escapeAttribute(name) + '">' + escapeHtml(name.slice(0, 28)) + '</button>').join('');
-  const nodeButtons = graph.nodes.map((node) => '<button type="button" data-uwe-focus-node="' + escapeAttribute(node.id) + '">' + escapeHtml((node.label || node.id).slice(0, 24)) + '</button>').join('');
+  const packageButtons = packages.map((name) => '<button type="button" title="' + escapeAttribute(name) + '" data-uwe-action="package:' + escapeAttribute(name) + '">' + escapeHtml(name) + '</button>').join('');
+  const nodeButtons = graph.nodes.map((node) => '<button type="button" title="' + escapeAttribute((node.label || node.id) + ' - ' + uweStereotype(node)) + '" data-uwe-focus-node="' + escapeAttribute(node.id) + '">' + escapeHtml(node.label || node.id) + '</button>').join('');
+  const guidedButtons = graph.nodes.filter((node) => String(node.type || node.facet || '').match(/navigation|access|adaptation|process/i)).slice(0, 4)
+    .map((node) => '<button type="button" title="Inspect ' + escapeAttribute(node.label || node.id) + '" data-uwe-focus-node="' + escapeAttribute(node.id) + '">' + escapeHtml('Inspect ' + (node.label || node.id)) + '</button>').join('');
   const nodeData = graph.nodes.map((node) => {
     const dataUrl = imageDataUrl(node.screenshot) || '';
-    return '<span data-uwe-node data-uwe-id="' + escapeAttribute(node.id) + '" data-uwe-label="' + escapeAttribute(node.label || node.id) + '" data-uwe-stereo="' + escapeAttribute(uweStereotype(node)) + '" data-uwe-type="' + escapeAttribute(node.type || node.facet || 'navigation') + '" data-uwe-package="' + escapeAttribute(node.navigationClass || 'Navigation') + '" data-uwe-route="' + escapeAttribute(node.route || '') + '" data-uwe-role="' + escapeAttribute(node.role || '') + '" data-uwe-actions="' + escapeAttribute(node.actions || 'Inspect this node and outgoing UWE links.') + '" data-uwe-effect="' + escapeAttribute(node.effect || '') + '" data-uwe-screenshot="' + escapeAttribute(dataUrl) + '"></span>';
+    return '<span data-uwe-node data-uwe-id="' + escapeAttribute(node.id) + '" data-uwe-label="' + escapeAttribute(node.label || node.id) + '" data-uwe-stereo="' + escapeAttribute(uweStereotype(node)) + '" data-uwe-type="' + escapeAttribute(node.type || node.facet || 'navigation') + '" data-uwe-package="' + escapeAttribute(node.packageName || 'Navigation') + '" data-uwe-route="' + escapeAttribute(node.route || '') + '" data-uwe-role="' + escapeAttribute(node.role || '') + '" data-uwe-actions="' + escapeAttribute(node.actions || 'Inspect this node and outgoing UWE links.') + '" data-uwe-effect="' + escapeAttribute(node.effect || '') + '" data-uwe-screenshot="' + escapeAttribute(dataUrl) + '"></span>';
   }).join('');
-  const edgeData = graph.edges.map((edge) => '<span data-uwe-edge data-uwe-from="' + escapeAttribute(edge.from) + '" data-uwe-to="' + escapeAttribute(edge.to) + '" data-uwe-label="' + escapeAttribute(edge.label || '«navigationLink»') + '"></span>').join('');
+  const edgeData = graph.edges.map((edge) => '<span data-uwe-edge data-uwe-from="' + escapeAttribute(edge.from) + '" data-uwe-to="' + escapeAttribute(edge.to) + '" data-uwe-label="' + escapeAttribute([edge.stereotype ? '«' + edge.stereotype + '»' : '', edge.label, edge.guard ? '[' + edge.guard + ']' : ''].filter(Boolean).join(' ') || '«navigationLink»') + '"></span>').join('');
   const firstImage = imageDataUrl(first.screenshot) || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
-  return '<style>html.uwe-focus-active body{overflow:hidden}.uwe-engine-workspace{border:1px solid #111827;background:#fff;margin:12px 0 18px}.uwe-engine-workspace.uwe-focus-mode{position:fixed;inset:14px;z-index:40;margin:0;display:flex;flex-direction:column;box-shadow:0 18px 60px rgba(15,23,42,.28)}.uwe-engine-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #111827;background:#f3f4f6;padding:10px 12px}.uwe-engine-head h4{margin:0;font-size:15px;line-height:1.2}.uwe-engine-toolbar,.uwe-node-map{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 12px;border-bottom:1px solid #d8dee8}.uwe-node-map{background:#fbfdff}.uwe-engine-toolbar button,.uwe-node-map button,.uwe-inspector-button{cursor:pointer;border:1px solid #111827;background:#fff;color:#111827;padding:5px 9px;font-size:12px;font-weight:700}.uwe-engine-toolbar button:hover,.uwe-node-map button:hover,.uwe-inspector-button:hover{background:#111827;color:#fff}.uwe-runtime-badge{margin-left:auto;color:#374151;font-size:12px;font-weight:800}.uwe-engine-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;min-height:620px}.uwe-focus-mode .uwe-engine-grid{min-height:0;height:calc(100vh - 236px);flex:1}.uwe-cy-graph{min-height:620px;background:linear-gradient(#f8fafc,#fff);position:relative}.uwe-focus-mode .uwe-cy-graph{min-height:0}.uwe-cy-placeholder{position:absolute;inset:0;display:grid;place-items:center;color:#64748b;font-weight:800}.uwe-engine-inspector{border-left:1px solid #111827;background:#fbfdff;padding:12px;overflow:auto}.uwe-engine-inspector img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border:1px solid #111827;background:#fff;margin:8px 0;cursor:zoom-in}.uwe-inspector-kicker{display:block;color:#0f766e;font-size:12px;font-weight:900;text-transform:uppercase}.uwe-inspector-title{margin:2px 0 0;font-size:18px}.uwe-inspector-block{border-top:1px solid #d8dee8;padding:8px 0}.uwe-inspector-block strong{display:block;font-size:11px;text-transform:uppercase;color:#5b6472}.uwe-engine-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:9px 12px;border-top:1px solid #d8dee8}.uwe-engine-stats div{border:1px solid #d8dee8;background:#f8fafc;padding:8px}.uwe-engine-stats strong{display:block;font-size:20px}.uwe-lightbox{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.78);padding:22px}.uwe-lightbox.active{display:flex}.uwe-lightbox-panel{max-width:min(1180px,96vw);max-height:94vh}.uwe-lightbox-panel img{display:block;max-width:100%;max-height:82vh;background:#fff;border:1px solid #fff}.uwe-lightbox-caption{color:#fff;margin-top:8px;font-size:14px}.uwe-lightbox-close{cursor:pointer;margin-bottom:8px;border:1px solid #fff;background:#fff;color:#111827;padding:6px 10px;font-weight:800}@media(max-width:920px){.uwe-engine-grid{grid-template-columns:1fr}.uwe-focus-mode .uwe-engine-grid{height:calc(100vh - 290px)}.uwe-engine-inspector{border-left:0;border-top:1px solid #111827}.uwe-runtime-badge{margin-left:0}}</style>' +
+  const profileRows = graph.nodes.map((node) => '<span class="uwe-profile-chip"><strong>' + escapeHtml(uweStereotype(node)) + '</strong>' + escapeHtml(node.label || node.id) + '</span>').join('');
+  const edgeRows = graph.edges.map((edge) => '<tr><td>' + escapeHtml(edge.from) + '</td><td>' + escapeHtml(edge.stereotype ? '«' + edge.stereotype + '»' : '«navigationLink»') + '</td><td>' + escapeHtml(edge.label || '') + (edge.guard ? '<br><span class="muted">guard: ' + escapeHtml(edge.guard) + '</span>' : '') + '</td><td>' + escapeHtml(edge.to) + '</td></tr>').join('');
+  const workspaceCss = 'html.uwe-focus-active body{overflow:hidden}.uwe-engine-workspace{border:1px solid #223049;background:#fff;margin:12px 0 18px;box-shadow:0 1px 0 rgba(15,23,42,.04)}.uwe-engine-workspace.uwe-focus-mode{position:fixed;inset:14px;z-index:40;margin:0;display:flex;flex-direction:column;box-shadow:0 18px 60px rgba(15,23,42,.28)}.uwe-engine-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;border-bottom:1px solid #223049;background:#f7f9fc;padding:14px 16px}.uwe-engine-kicker{display:block;margin-bottom:4px;color:#0f766e;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.uwe-engine-head h4{margin:0;font-size:19px;line-height:1.18}.uwe-engine-head p{max-width:920px}.uwe-conformance{border-bottom:1px solid #d8dee8;background:#fff;padding:10px 16px;color:#334155}.uwe-profile-strip{display:flex;flex-wrap:wrap;gap:7px;padding:10px 16px;border-bottom:1px solid #d8dee8;background:#fbfdff}.uwe-profile-chip{display:inline-flex;gap:6px;align-items:center;border:1px solid #cbd5e1;background:#fff;padding:4px 8px;font-size:12px}.uwe-profile-chip strong{color:#0f766e}.uwe-engine-toolbar,.uwe-node-map,.uwe-guided-map{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 16px;border-bottom:1px solid #d8dee8}.uwe-node-map{background:#fbfdff}.uwe-guided-map{background:#f8fafc}.uwe-map-label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#5b6472}.uwe-engine-toolbar button,.uwe-node-map button,.uwe-guided-map button,.uwe-inspector-button{cursor:pointer;border:1px solid #223049;background:#fff;color:#111827;padding:6px 10px;font-size:12px;font-weight:800;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.uwe-engine-toolbar button:hover,.uwe-node-map button:hover,.uwe-guided-map button:hover,.uwe-inspector-button:hover,.uwe-engine-toolbar button.active,.uwe-node-map button.active,.uwe-guided-map button.active{background:#223049;color:#fff}.uwe-runtime-badge{margin-left:auto;color:#374151;font-size:12px;font-weight:800}.uwe-engine-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;min-height:660px}.uwe-focus-mode .uwe-engine-grid{min-height:0;height:calc(100vh - 372px);flex:1}.uwe-cy-graph{min-height:660px;background:linear-gradient(180deg,#fbfdff,#f8fafc);position:relative}.uwe-focus-mode .uwe-cy-graph{min-height:0}.uwe-cy-placeholder{position:absolute;inset:0;display:grid;place-items:center;color:#64748b;font-weight:800}.uwe-engine-inspector{border-left:1px solid #223049;background:#fbfdff;padding:14px;overflow:auto}.uwe-engine-inspector img{display:block;width:100%;aspect-ratio:16/10;object-fit:contain;border:1px solid #223049;background:#fff;margin:10px 0;cursor:zoom-in}.uwe-inspector-kicker{display:block;color:#0f766e;font-size:12px;font-weight:900;text-transform:uppercase}.uwe-inspector-title{margin:2px 0 0;font-size:20px}.uwe-inspector-block{border-top:1px solid #d8dee8;padding:9px 0}.uwe-inspector-block strong{display:block;font-size:11px;text-transform:uppercase;color:#5b6472}.uwe-edge-inventory{border-top:1px solid #d8dee8;background:#fff;padding:10px 16px}.uwe-edge-inventory summary{cursor:pointer;font-weight:800}.uwe-edge-inventory table{font-size:12px}.uwe-engine-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px 16px;border-top:1px solid #d8dee8}.uwe-engine-stats div{border:1px solid #d8dee8;background:#f8fafc;padding:9px}.uwe-engine-stats strong{display:block;font-size:22px;line-height:1}.uwe-engine-stats span{display:block;margin-top:4px;color:#5b6472}.uwe-lightbox{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.78);padding:22px}.uwe-lightbox.active{display:flex}.uwe-lightbox-panel{max-width:min(1180px,96vw);max-height:94vh}.uwe-lightbox-panel img{display:block;max-width:100%;max-height:82vh;background:#fff;border:1px solid #fff}.uwe-lightbox-caption{color:#fff;margin-top:8px;font-size:14px}.uwe-lightbox-close{cursor:pointer;margin-bottom:8px;border:1px solid #fff;background:#fff;color:#111827;padding:6px 10px;font-weight:800}@media(max-width:920px){.uwe-engine-head{grid-template-columns:1fr}.uwe-engine-toolbar,.uwe-node-map,.uwe-guided-map{flex-wrap:nowrap;overflow-x:auto}.uwe-engine-grid{grid-template-columns:1fr}.uwe-focus-mode .uwe-engine-grid{height:calc(100vh - 440px)}.uwe-cy-graph{min-height:420px}.uwe-engine-inspector{border-left:0;border-top:1px solid #223049}.uwe-runtime-badge{margin-left:0}.uwe-engine-stats{grid-template-columns:1fr}}';
+  return '<style>' + workspaceCss + '</style>' +
     '<div id="' + workspaceId + '" class="uwe-engine-workspace" role="group" aria-label="Engine-backed UWE navigation workspace">' +
-    '<div class="uwe-engine-head"><div><h4>Engine-Backed UWE Navigation Workspace</h4><p class="muted">Primary view rendered from structured source data with Cytoscape.js and dagre. Screenshots are node backgrounds; click nodes to inspect actions and effects.</p></div><span class="tool-badge">Cytoscape + dagre</span></div>' +
+    '<div class="uwe-engine-head"><div><span class="uwe-engine-kicker">UWE navigation model with screenshot evidence</span><h4>Engine-Backed UWE Navigation Workspace</h4><p class="muted">Primary view rendered from structured source data with Cytoscape.js and dagre. Screenshots are embedded evidence; UWE stereotypes, access scope, actions, links, and effects remain explicit.</p></div><span class="tool-badge">Cytoscape + dagre</span></div>' +
+    '<div class="uwe-conformance"><strong>UWE conformance:</strong> screen-level destinations are modeled as <code>«navigationClass»</code>, process/access states retain their own stereotypes, and screenshot thumbnails are review evidence attached to those nodes.</div>' +
+    '<div class="uwe-profile-strip" aria-label="UWE profile summary">' + profileRows + '</div>' +
     '<div class="uwe-engine-toolbar"><button type="button" data-uwe-action="fit">Fit graph</button><button type="button" data-uwe-action="layout">Re-run layout</button><button type="button" data-uwe-action="workspace-focus">Focus workspace</button>' + packageButtons + '<span class="uwe-runtime-badge" data-uwe-runtime-badge>Workspace runtime pending</span></div><div class="uwe-node-map" aria-label="UWE node focus map">' + nodeButtons + '</div>' +
+    (guidedButtons ? '<div class="uwe-guided-map" aria-label="Guided UWE inspection paths"><span class="uwe-map-label">Review path</span>' + guidedButtons + '</div>' : '') +
     '<div class="uwe-engine-grid"><div class="uwe-cy-graph" data-uwe-cy><div class="uwe-cy-placeholder">Rendering UWE graph workspace...</div></div>' +
-    '<aside class="uwe-engine-inspector" aria-label="Selected UWE node inspector"><span class="uwe-inspector-kicker" data-uwe-inspector-stereo>' + escapeHtml(uweStereotype(first)) + '</span><h4 class="uwe-inspector-title" data-uwe-inspector-title>' + escapeHtml(first.label || first.id || 'UWE node') + '</h4><img data-uwe-inspector-image src="' + escapeAttribute(firstImage) + '" alt="Selected UWE node screenshot"><button type="button" class="uwe-inspector-button" data-uwe-open-screenshot>Open screenshot</button><div class="uwe-inspector-block"><strong>Package</strong><span data-uwe-inspector-package>' + escapeHtml(first.navigationClass || 'Navigation') + '</span></div><div class="uwe-inspector-block"><strong>Route or state</strong><span data-uwe-inspector-route>' + escapeHtml(first.route || 'state') + '</span></div><div class="uwe-inspector-block"><strong>Role</strong><span data-uwe-inspector-role>' + escapeHtml(first.role || 'all roles') + '</span></div><div class="uwe-inspector-block"><strong>Available user action</strong><span data-uwe-inspector-actions>' + escapeHtml(first.actions || 'Inspect this node and outgoing UWE links.') + '</span></div><div class="uwe-inspector-block"><strong>System effect</strong><span data-uwe-inspector-effect>' + escapeHtml(first.effect || 'Effect not recorded.') + '</span></div></aside></div>' +
-    '<div class="uwe-engine-stats"><div><strong data-uwe-stat="nodes">' + graph.nodes.length + '</strong>UWE nodes</div><div><strong data-uwe-stat="edges">' + graph.edges.length + '</strong>typed links</div><div><strong data-uwe-stat="packages">' + packages.length + '</strong>packages</div></div>' +
+    '<aside class="uwe-engine-inspector" aria-label="Selected UWE node inspector"><span class="uwe-inspector-kicker" data-uwe-inspector-stereo>' + escapeHtml(uweStereotype(first)) + '</span><h4 class="uwe-inspector-title" data-uwe-inspector-title>' + escapeHtml(first.label || first.id || 'UWE node') + '</h4><img data-uwe-inspector-image src="' + escapeAttribute(firstImage) + '" alt="Selected UWE node screenshot"><button type="button" class="uwe-inspector-button" data-uwe-open-screenshot>Open screenshot</button><div class="uwe-inspector-block"><strong>Package</strong><span data-uwe-inspector-package>' + escapeHtml(first.packageName || 'Navigation') + '</span></div><div class="uwe-inspector-block"><strong>Route or state</strong><span data-uwe-inspector-route>' + escapeHtml(first.route || 'state') + '</span></div><div class="uwe-inspector-block"><strong>Role</strong><span data-uwe-inspector-role>' + escapeHtml(first.role || 'all roles') + '</span></div><div class="uwe-inspector-block"><strong>Available user action</strong><span data-uwe-inspector-actions>' + escapeHtml(first.actions || 'Inspect this node and outgoing UWE links.') + '</span></div><div class="uwe-inspector-block"><strong>System effect</strong><span data-uwe-inspector-effect>' + escapeHtml(first.effect || 'Effect not recorded.') + '</span></div></aside></div>' +
+    '<details class="uwe-edge-inventory"><summary>Typed UWE link inventory</summary><table><thead><tr><th>From</th><th>Type</th><th>Action / guard</th><th>To</th></tr></thead><tbody>' + edgeRows + '</tbody></table></details>' +
+    '<div class="uwe-engine-stats"><div><strong data-uwe-stat="nodes">' + graph.nodes.length + '</strong><span>UWE nodes</span></div><div><strong data-uwe-stat="edges">' + graph.edges.length + '</strong><span>typed links</span></div><div><strong data-uwe-stat="packages">' + packages.length + '</strong><span>packages</span></div></div>' +
     '<div hidden>' + nodeData + edgeData + '</div><div class="uwe-lightbox" data-uwe-lightbox role="dialog" aria-modal="true" aria-label="UWE screenshot preview"><div class="uwe-lightbox-panel"><button type="button" class="uwe-lightbox-close" data-uwe-lightbox-close>Close</button><img data-uwe-lightbox-image alt="Selected UWE screenshot"><div class="uwe-lightbox-caption" data-uwe-lightbox-caption></div></div></div></div>';
 }
 
@@ -513,13 +539,13 @@ function renderUweNavigationSvg(spec, graph) {
   const gapY = 34;
   const laneGap = 32;
   const lanePadding = 18;
-  const explicitClasses = Array.isArray(spec.navigationClasses ?? spec.lanes ?? spec.classes)
-    ? (spec.navigationClasses ?? spec.lanes ?? spec.classes).map((item) => typeof item === 'string' ? item : (item.label ?? item.id ?? item.name)).filter(Boolean).map(String)
+  const explicitClasses = Array.isArray(spec.packages ?? spec.navigationPackages ?? spec.lanes ?? spec.classes)
+    ? (spec.packages ?? spec.navigationPackages ?? spec.lanes ?? spec.classes).map((item) => typeof item === 'string' ? item : (item.label ?? item.id ?? item.name)).filter(Boolean).map(String)
     : [];
-  const discoveredClasses = graph.nodes.map((node) => node.navigationClass || 'Navigation').filter((value, index, all) => all.indexOf(value) === index);
+  const discoveredClasses = graph.nodes.map((node) => node.packageName || 'Navigation').filter((value, index, all) => all.indexOf(value) === index);
   const classNames = [...explicitClasses, ...discoveredClasses.filter((name) => !explicitClasses.includes(name))];
   const lanes = classNames.map((name) => {
-    const nodes = graph.nodes.filter((node) => (node.navigationClass || 'Navigation') === name);
+    const nodes = graph.nodes.filter((node) => (node.packageName || 'Navigation') === name);
     return { name, nodes: nodes.length > 0 ? nodes : [] };
   }).filter((lane) => lane.nodes.length > 0);
   const cols = Math.min(4, Math.max(1, ...lanes.map((lane) => lane.nodes.length)));
@@ -544,7 +570,7 @@ function renderUweNavigationSvg(spec, graph) {
   const height = Math.max(260, yCursor + 4);
   const laneRects = lanes.map((lane) =>
     '<g><rect x="4" y="' + lane.y + '" width="' + (laneWidth - 8) + '" height="' + lane.height + '" rx="8" fill="#f8fafc" stroke="#cbd5e1"></rect>' +
-    '<text x="20" y="' + (lane.y + 24) + '" font-size="13" font-weight="800" fill="#334155">«navigation class» ' + escapeHtml(lane.name.slice(0, 80)) + '</text></g>'
+    '<text x="20" y="' + (lane.y + 24) + '" font-size="13" font-weight="800" fill="#334155">package ' + escapeHtml(lane.name.slice(0, 80)) + '</text></g>'
   ).join('');
   const edges = graph.edges.map((edge) => {
     const from = positions.get(edge.from);
@@ -567,7 +593,7 @@ function renderUweNavigationSvg(spec, graph) {
       : '<rect x="' + (pos.x + 10) + '" y="' + (pos.y + 34) + '" width="' + (cardWidth - 20) + '" height="96" rx="6" fill="#eef2f6" stroke="#d8dee8"></rect><text x="' + (pos.x + cardWidth / 2) + '" y="' + (pos.y + 86) + '" text-anchor="middle" font-size="11" fill="#64748b">no screenshot</text>';
     return '<g><rect x="' + pos.x + '" y="' + pos.y + '" width="' + cardWidth + '" height="' + cardHeight + '" rx="8" fill="#ffffff" stroke="#9fb3c8" stroke-width="1.5"></rect>' +
       '<rect x="' + pos.x + '" y="' + pos.y + '" width="' + cardWidth + '" height="25" rx="8" fill="#effaf8"></rect>' +
-      '<text x="' + (pos.x + 10) + '" y="' + (pos.y + 17) + '" font-size="11" font-weight="800" fill="#0f766e">«navigation node»</text>' +
+      '<text x="' + (pos.x + 10) + '" y="' + (pos.y + 17) + '" font-size="11" font-weight="800" fill="#0f766e">' + escapeHtml(uweStereotype(node)) + '</text>' +
       image +
       '<text x="' + (pos.x + 10) + '" y="' + (pos.y + 146) + '" font-size="12" font-weight="800" fill="#111827">' + escapeHtml(node.label.slice(0, 26)) + '</text>' +
       '<text x="' + (pos.x + 10) + '" y="' + (pos.y + 160) + '" font-size="10" fill="#334155">' + escapeHtml((node.route || node.facet || node.role || 'navigationNode').slice(0, 34)) + '</text></g>';
@@ -654,6 +680,9 @@ function gallerySection(artifact) {
 
 function htmlPage(title, body, options = {}) {
   const svgPanZoomInitializer = 'document.querySelectorAll("[data-svg-pan-zoom=true] svg").forEach(function(svg){svgPanZoom(svg,{controlIconsEnabled:true,fit:true,center:true,minZoom:.1,maxZoom:20,zoomScaleSensitivity:.25});});document.querySelectorAll(".viewer-badge").forEach(function(el){el.textContent="svg-pan-zoom active: drag, wheel, +/- controls";});document.documentElement.classList.add("svg-pan-zoom-active");';
+  if (options.enableUweWorkspace && !(svgPanZoomRuntime && cytoscapeRuntime && dagreRuntime && cytoscapeDagreRuntime && uweWorkspaceRuntime)) {
+    throw new Error('reviewed-uwe-workspace requires bundled svg-pan-zoom, cytoscape, dagre, cytoscape-dagre, and scripts/uwe-workspace-runtime.js');
+  }
   const scripts = options.enableUweWorkspace && svgPanZoomRuntime && cytoscapeRuntime && dagreRuntime && cytoscapeDagreRuntime && uweWorkspaceRuntime
     ? '<script>' + svgPanZoomRuntime + '</script>\n<script>' + cytoscapeRuntime + '</script>\n<script>' + dagreRuntime + '</script>\n<script>' + cytoscapeDagreRuntime + '</script>\n<script>' + uweWorkspaceRuntime + '</script>\n'
     : options.enableSvgPanZoom && svgPanZoomRuntime
@@ -670,14 +699,21 @@ async function renderArtifact(artifact, outPath) {
   const stats = sourceStats(source);
   const title = artifact.title || sourceTitle(source) || artifact.id;
   const sectionHeads = headings(source);
+  const infographicSpecs = parseInfographicSpecs(source, artifact);
+  const hasUweInfographic = infographicSpecs.some((spec) => ['uwe-navigation', 'uwe'].includes(String(spec.kind ?? spec.mark ?? spec.type ?? '').toLowerCase()));
+  const infographicSection = await renderInfographicSpecs(source, artifact);
+  const toolkitSection = hasUweInfographic
+    ? '<details class="panel"><summary><strong>Open-Source Infographic Toolkit</strong></summary>' + renderInfographicToolkit().replace(/^<section class="panel">|<\/section>$/g, '') + '</details>'
+    : renderInfographicToolkit();
   const evidenceCount = Array.isArray(artifact.evidenceLinks) ? artifact.evidenceLinks.length : 0;
   const updateCount = Array.isArray(artifact.updateTriggers) ? artifact.updateTriggers.length : 0;
   const body = '<header><h1>' + escapeHtml(title) + '</h1><p>' + escapeHtml(summary) + '</p></header><main>' +
+    (hasUweInfographic ? infographicSection : '') +
     '<section class="grid"><div class="panel"><h2>Review Verdict</h2><p>' + escapeHtml(summary) + '</p><div class="callout"><strong>Source first:</strong> edit ' + linkFor(outPath, artifact.source, artifact.source) + ' before regenerating this review surface.</div></div>' +
     '<div class="metrics"><div class="metric green"><strong>' + escapeHtml(artifact.status || 'draft') + '</strong><span>Status</span></div><div class="metric blue"><strong>' + evidenceCount + '</strong><span>Evidence links</span></div><div class="metric amber"><strong>' + stats.sectionCount + '</strong><span>Major sections</span></div><div class="metric violet"><strong>' + escapeHtml(family) + '</strong><span>Artifact family</span></div></div></section>' +
     '<section class="panel"><h2>Infographic Snapshot</h2><div class="bar-row"><span>Evidence coverage</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, evidenceCount * 20)) + '"></span></span><strong>' + evidenceCount + '</strong></div><div class="bar-row"><span>Source depth</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, stats.sectionCount * 20)) + '"></span></span><strong>' + stats.sectionCount + '</strong></div><div class="bar-row"><span>Update triggers</span><span class="bar-track"><span class="bar w' + Math.min(100, Math.max(20, updateCount * 20)) + '"></span></span><strong>' + updateCount + '</strong></div></section>' +
-    renderInfographicToolkit() +
-    await renderInfographicSpecs(source, artifact) +
+    toolkitSection +
+    (hasUweInfographic ? '' : infographicSection) +
     gallerySection(artifact) +
     '<section class="panel"><h2>Source-To-Review Flow</h2><div class="flow"><div class="step"><strong>Canonical Source</strong><span>' + escapeHtml(artifact.source || '') + '</span></div><div class="step"><strong>Generated HTML</strong><span>' + escapeHtml(artifact.reviewSurface || '') + '</span></div><div class="step"><strong>Evidence</strong><span>' + evidenceCount + ' linked item(s)</span></div><div class="step"><strong>Freshness</strong><span>' + escapeHtml(artifact.generatedAt || artifact.freshness?.generatedAt || 'not-recorded') + '</span></div></div></section>' +
     '<section class="panel tabs"><input id="tab-overview" name="tabs" type="radio" checked><input id="tab-evidence" name="tabs" type="radio"><input id="tab-source" name="tabs" type="radio"><input id="tab-metadata" name="tabs" type="radio"><div class="tab-labels"><label for="tab-overview">Overview</label><label for="tab-evidence">Evidence</label><label for="tab-source">Source</label><label for="tab-metadata">Metadata</label></div><div class="tab-panels">' +

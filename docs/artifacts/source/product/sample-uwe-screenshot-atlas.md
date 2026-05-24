@@ -26,6 +26,21 @@ Demonstrate the reusable shape: navigation nodes are the spine, screenshots make
 
 This atlas is intentionally OSS-first. The source graph is rendered first as a Cytoscape.js + dagre workspace for pan, zoom, package focus, and node inspection. The same source is also converted to DOT and rendered with Graphviz through `@viz-js/viz`; Skill Harness only injects screenshot evidence into UML node compartments after the renderer has produced SVG. The HTML review surface opts into the reviewed `reviewed-uwe-workspace` lane so the bundled graph viewer works without CDN scripts or network access.
 
+## UWE Profile Contract
+
+The atlas uses a UWE Navigation Model as its structural spine and adds screenshot evidence as a review extension:
+
+| UWE element | Used for | Screenshot extension |
+| --- | --- | --- |
+| `navigationClass` | A reachable screen or state a user can navigate to. | Primary screenshot is embedded as the node image and inspector preview. |
+| `menu` | A repeated set of navigation choices. | Screenshot should show the menu open when available. |
+| `index` / `query` | A collection, list, search, or filtered navigation access primitive. | Screenshot should show the collection or query result state. |
+| `processClass` | State-changing flow such as create, generate, deploy, checkout, or save. | Screenshot should show the initiating UI plus the expected effect. |
+| `processLink` / `navigationLink` | User action linking nodes or invoking a process. | Link label records the user action; the inspector records side effects. |
+| `externalNode` | Identity provider, docs site, payment portal, deployed workload, or external runtime boundary. | Screenshot is evidence of the boundary handoff or reachable external surface. |
+
+The screenshot extension must not hide the model semantics: every node still needs a UWE stereotype, route/state, role or access scope, action inventory, and expected system effect.
+
 ## Scope
 
 | Field | Value |
@@ -56,7 +71,7 @@ This atlas is intentionally OSS-first. The source graph is rendered first as a C
   "tool": "graphviz",
   "kind": "uwe-navigation",
   "summary": "A bounded UWE navigation graph with navigation classes and screenshots embedded inside the navigational nodes.",
-  "navigationClasses": [
+  "packages": [
     "Visitor acquisition and access",
     "Authenticated workspace flow",
     "Workspace utilities and admin"
@@ -66,8 +81,9 @@ This atlas is intentionally OSS-first. The source graph is rendered first as a C
       "id": "Landing",
       "label": "Landing",
       "route": "/",
-      "navigationClass": "Visitor acquisition and access",
-      "facet": "navigation",
+      "package": "Visitor acquisition and access",
+      "stereotype": "navigationClass",
+      "facets": ["navigation", "presentation"],
       "role": "anonymous",
       "actions": "sign in, get started",
       "effect": "route transition only",
@@ -77,20 +93,34 @@ This atlas is intentionally OSS-first. The source graph is rendered first as a C
       "id": "Auth",
       "label": "Auth",
       "route": "/login",
-      "navigationClass": "Visitor acquisition and access",
-      "facet": "access",
+      "package": "Visitor acquisition and access",
+      "stereotype": "navigationClass",
+      "facets": ["navigation", "access", "process"],
       "role": "anonymous",
       "actions": "submit credentials, recover password",
-      "effect": "session token on success",
+      "effect": "session token on success; validation errors on failure",
+      "screenshot": "generated/review/evidence/sample-uwe-atlas/auth.svg"
+    },
+    {
+      "id": "Authenticate",
+      "label": "Authenticate",
+      "route": "auth process",
+      "package": "Visitor acquisition and access",
+      "stereotype": "processClass",
+      "facets": ["process", "access"],
+      "role": "anonymous",
+      "actions": "validate credentials",
+      "effect": "creates session or returns validation failure",
       "screenshot": "generated/review/evidence/sample-uwe-atlas/auth.svg"
     },
     {
       "id": "Dashboard",
       "label": "Dashboard",
       "route": "/app",
-      "navigationClass": "Authenticated workspace flow",
-      "facet": "content",
-      "role": "member",
+      "package": "Authenticated workspace flow",
+      "stereotype": "navigationClass",
+      "facets": ["content", "navigation", "presentation"],
+      "role": "member, admin",
       "actions": "open channels, view activity, open settings",
       "effect": "membership and activity read",
       "screenshot": "generated/review/evidence/sample-uwe-atlas/dashboard.svg"
@@ -99,8 +129,9 @@ This atlas is intentionally OSS-first. The source graph is rendered first as a C
       "id": "Channels",
       "label": "Channels",
       "route": "/app/channels",
-      "navigationClass": "Authenticated workspace flow",
-      "facet": "navigation",
+      "package": "Authenticated workspace flow",
+      "stereotype": "index",
+      "facets": ["navigation", "content"],
       "role": "member",
       "actions": "inspect rooms, select channel",
       "effect": "channel list query",
@@ -110,19 +141,33 @@ This atlas is intentionally OSS-first. The source graph is rendered first as a C
       "id": "Settings",
       "label": "Settings",
       "route": "/app/settings",
-      "navigationClass": "Workspace utilities and admin",
-      "facet": "access",
+      "package": "Workspace utilities and admin",
+      "stereotype": "navigationClass",
+      "facets": ["access", "presentation"],
       "role": "admin",
       "actions": "change settings, save",
-      "effect": "authorization check",
+      "effect": "authorization check; settings read/update",
+      "screenshot": "generated/review/evidence/sample-uwe-atlas/settings.svg"
+    },
+    {
+      "id": "SaveSettings",
+      "label": "Save settings",
+      "route": "settings save process",
+      "package": "Workspace utilities and admin",
+      "stereotype": "processClass",
+      "facets": ["process"],
+      "role": "admin",
+      "actions": "submit settings form",
+      "effect": "persists settings after authorization check",
       "screenshot": "generated/review/evidence/sample-uwe-atlas/settings.svg"
     },
     {
       "id": "Denied",
       "label": "Access denied",
       "route": "access-denied",
-      "navigationClass": "Workspace utilities and admin",
-      "facet": "adaptation",
+      "package": "Workspace utilities and admin",
+      "stereotype": "navigationClass",
+      "facets": ["access", "adaptation"],
       "role": "member",
       "actions": "back to app",
       "effect": "blocked settings mutation",
@@ -130,20 +175,24 @@ This atlas is intentionally OSS-first. The source graph is rendered first as a C
     }
   ],
   "edges": [
-    ["Landing", "Auth", "sign in"],
-    ["Auth", "Dashboard", "valid session"],
-    ["Dashboard", "Channels", "open channels"],
-    ["Dashboard", "Settings", "admin only"],
-    ["Dashboard", "Denied", "member denied"],
-    ["Denied", "Dashboard", "back"],
-    ["Settings", "Dashboard", "back"]
+    { "from": "Landing", "to": "Auth", "label": "sign in", "stereotype": "navigationLink" },
+    { "from": "Auth", "to": "Authenticate", "label": "submit credentials", "stereotype": "processLink" },
+    { "from": "Authenticate", "to": "Dashboard", "label": "valid session", "stereotype": "navigationLink", "guard": "valid credentials" },
+    { "from": "Authenticate", "to": "Auth", "label": "show validation errors", "stereotype": "navigationLink", "guard": "invalid credentials" },
+    { "from": "Dashboard", "to": "Channels", "label": "open channels", "stereotype": "navigationLink" },
+    { "from": "Dashboard", "to": "Settings", "label": "open settings", "stereotype": "navigationLink", "guard": "admin role" },
+    { "from": "Settings", "to": "SaveSettings", "label": "save", "stereotype": "processLink" },
+    { "from": "SaveSettings", "to": "Dashboard", "label": "settings saved", "stereotype": "navigationLink" },
+    { "from": "Dashboard", "to": "Denied", "label": "open settings", "stereotype": "navigationLink", "guard": "member role" },
+    { "from": "Denied", "to": "Dashboard", "label": "back", "stereotype": "navigationLink" },
+    { "from": "Settings", "to": "Dashboard", "label": "back", "stereotype": "navigationLink" }
   ]
 }
 ```
 
 ## Presentation Evidence
 
-The manifest lists three synthetic screenshots. A real repo should replace these with Playwright captures from an authorized test environment:
+The manifest lists six synthetic screenshots. A real repo should replace these with Playwright captures from an authorized test environment:
 
 | Screenshot | Node | Purpose |
 | --- | --- | --- |
@@ -201,11 +250,11 @@ The manifest lists three synthetic screenshots. A real repo should replace these
   "kind": "bar",
   "summary": "Synthetic coverage values show what a real atlas should make visible.",
   "values": [
-    {"label": "Nodes", "value": 3},
-    {"label": "Screens", "value": 3},
-    {"label": "Actions", "value": 4},
-    {"label": "Roles", "value": 2},
-    {"label": "Runtime", "value": 1}
+    {"label": "UWE nodes", "value": 8},
+    {"label": "Screens", "value": 6},
+    {"label": "Typed links", "value": 11},
+    {"label": "Roles", "value": 3},
+    {"label": "Runtime effects", "value": 5}
   ]
 }
 ```
