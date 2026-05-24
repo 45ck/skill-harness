@@ -40,6 +40,7 @@ The atlas uses a UWE Navigation Model as its structural spine and adds screensho
 | `externalNode` | Identity provider, docs site, payment portal, deployed workload, or external runtime boundary. | Screenshot is evidence of the boundary handoff or reachable external surface. |
 
 The screenshot extension must not hide the model semantics: every node still needs a UWE stereotype, route/state, role or access scope, action inventory, and expected system effect.
+Red boxes, crops, and callouts are evidence-only annotations. They reference UWE nodes, links, or actions; they do not change the UWE stereotype or create extra model elements.
 
 ## Scope
 
@@ -87,6 +88,7 @@ The screenshot extension must not hide the model semantics: every node still nee
       "role": "anonymous",
       "actions": "sign in, get started",
       "effect": "route transition only",
+      "evidenceRefs": ["ev-landing-cta"],
       "screenshot": "generated/review/evidence/sample-uwe-atlas/landing.svg"
     },
     {
@@ -99,6 +101,7 @@ The screenshot extension must not hide the model semantics: every node still nee
       "role": "anonymous",
       "actions": "submit credentials, recover password",
       "effect": "session token on success; validation errors on failure",
+      "evidenceRefs": ["ev-auth-submit"],
       "screenshot": "generated/review/evidence/sample-uwe-atlas/auth.svg"
     },
     {
@@ -111,6 +114,7 @@ The screenshot extension must not hide the model semantics: every node still nee
       "role": "anonymous",
       "actions": "validate credentials",
       "effect": "creates session or returns validation failure",
+      "evidenceRefs": ["ev-auth-submit"],
       "screenshot": "generated/review/evidence/sample-uwe-atlas/auth.svg"
     },
     {
@@ -123,6 +127,7 @@ The screenshot extension must not hide the model semantics: every node still nee
       "role": "member, admin",
       "actions": "open channels, view activity, open settings",
       "effect": "membership and activity read",
+      "evidenceRefs": ["ev-dashboard-nav"],
       "screenshot": "generated/review/evidence/sample-uwe-atlas/dashboard.svg"
     },
     {
@@ -135,6 +140,7 @@ The screenshot extension must not hide the model semantics: every node still nee
       "role": "member",
       "actions": "inspect rooms, select channel",
       "effect": "channel list query",
+      "evidenceRefs": ["ev-channels-list"],
       "screenshot": "generated/review/evidence/sample-uwe-atlas/channels.svg"
     },
     {
@@ -147,6 +153,7 @@ The screenshot extension must not hide the model semantics: every node still nee
       "role": "admin",
       "actions": "change settings, save",
       "effect": "authorization check; settings read/update",
+      "evidenceRefs": ["ev-settings-save-trigger"],
       "screenshot": "generated/review/evidence/sample-uwe-atlas/settings.svg"
     },
     {
@@ -159,6 +166,7 @@ The screenshot extension must not hide the model semantics: every node still nee
       "role": "admin",
       "actions": "submit settings form",
       "effect": "persists settings after authorization check",
+      "evidenceRefs": ["ev-settings-save-trigger", "ev-settings-save-result"],
       "screenshot": "generated/review/evidence/sample-uwe-atlas/settings.svg"
     },
     {
@@ -171,21 +179,146 @@ The screenshot extension must not hide the model semantics: every node still nee
       "role": "member",
       "actions": "back to app",
       "effect": "blocked settings mutation",
+      "evidenceRefs": ["ev-denied-guard"],
       "screenshot": "generated/review/evidence/sample-uwe-atlas/denied.svg"
     }
   ],
   "edges": [
-    { "from": "Landing", "to": "Auth", "label": "sign in", "stereotype": "navigationLink" },
-    { "from": "Auth", "to": "Authenticate", "label": "submit credentials", "stereotype": "processLink" },
-    { "from": "Authenticate", "to": "Dashboard", "label": "valid session", "stereotype": "navigationLink", "guard": "valid credentials" },
-    { "from": "Authenticate", "to": "Auth", "label": "show validation errors", "stereotype": "navigationLink", "guard": "invalid credentials" },
-    { "from": "Dashboard", "to": "Channels", "label": "open channels", "stereotype": "navigationLink" },
-    { "from": "Dashboard", "to": "Settings", "label": "open settings", "stereotype": "navigationLink", "guard": "admin role" },
-    { "from": "Settings", "to": "SaveSettings", "label": "save", "stereotype": "processLink" },
-    { "from": "SaveSettings", "to": "Dashboard", "label": "settings saved", "stereotype": "navigationLink" },
-    { "from": "Dashboard", "to": "Denied", "label": "open settings", "stereotype": "navigationLink", "guard": "member role" },
-    { "from": "Denied", "to": "Dashboard", "label": "back", "stereotype": "navigationLink" },
-    { "from": "Settings", "to": "Dashboard", "label": "back", "stereotype": "navigationLink" }
+    { "id": "edge-landing-auth", "from": "Landing", "to": "Auth", "label": "sign in", "stereotype": "navigationLink", "evidenceRefs": ["ev-landing-cta"] },
+    { "id": "edge-auth-authenticate", "from": "Auth", "to": "Authenticate", "label": "submit credentials", "stereotype": "processLink", "evidenceRefs": ["ev-auth-submit"] },
+    { "id": "edge-authenticate-dashboard", "from": "Authenticate", "to": "Dashboard", "label": "valid session", "stereotype": "navigationLink", "guard": "valid credentials", "evidenceRefs": ["ev-dashboard-nav"] },
+    { "id": "edge-authenticate-auth", "from": "Authenticate", "to": "Auth", "label": "show validation errors", "stereotype": "navigationLink", "guard": "invalid credentials", "evidenceRefs": ["ev-auth-submit"] },
+    { "id": "edge-dashboard-channels", "from": "Dashboard", "to": "Channels", "label": "open channels", "stereotype": "navigationLink", "evidenceRefs": ["ev-dashboard-nav"] },
+    { "id": "edge-dashboard-settings", "from": "Dashboard", "to": "Settings", "label": "open settings", "stereotype": "navigationLink", "guard": "admin role", "evidenceRefs": ["ev-settings-save-trigger"] },
+    { "id": "edge-settings-save", "from": "Settings", "to": "SaveSettings", "label": "save", "stereotype": "processLink", "evidenceRefs": ["ev-settings-save-trigger"] },
+    { "id": "edge-save-dashboard", "from": "SaveSettings", "to": "Dashboard", "label": "settings saved", "stereotype": "navigationLink", "evidenceRefs": ["ev-settings-save-result"] },
+    { "id": "edge-dashboard-denied", "from": "Dashboard", "to": "Denied", "label": "open settings", "stereotype": "navigationLink", "guard": "member role", "evidenceRefs": ["ev-denied-guard"] },
+    { "id": "edge-denied-dashboard", "from": "Denied", "to": "Dashboard", "label": "back", "stereotype": "navigationLink", "evidenceRefs": ["ev-denied-guard"] },
+    { "id": "edge-settings-dashboard", "from": "Settings", "to": "Dashboard", "label": "back", "stereotype": "navigationLink", "evidenceRefs": ["ev-settings-save-trigger"] }
+  ],
+  "evidence": [
+    {
+      "id": "ev-landing-cta",
+      "kind": "screenshot",
+      "path": "generated/review/evidence/sample-uwe-atlas/landing.svg",
+      "state": "visitor-entry",
+      "viewport": "desktop",
+      "caption": "Primary CTA routes the anonymous visitor into auth.",
+      "primaryFor": ["Landing"],
+      "annotations": [
+        {
+          "id": "ann-landing-cta",
+          "kind": "highlight",
+          "bounds": { "x": 0.07, "y": 0.48, "w": 0.15, "h": 0.09 },
+          "label": "Get started CTA",
+          "relatesTo": { "edgeId": "edge-landing-auth", "actionId": "ACT-001" },
+          "semantics": "evidence-only"
+        }
+      ]
+    },
+    {
+      "id": "ev-auth-submit",
+      "kind": "screenshot",
+      "path": "generated/review/evidence/sample-uwe-atlas/auth.svg",
+      "state": "auth-submit",
+      "viewport": "desktop",
+      "caption": "Submit control starts credential validation.",
+      "primaryFor": ["Auth", "Authenticate"],
+      "annotations": [
+        {
+          "id": "ann-auth-submit",
+          "kind": "highlight",
+          "bounds": { "x": 0.33, "y": 0.64, "w": 0.15, "h": 0.09 },
+          "label": "Submit credentials",
+          "relatesTo": { "edgeId": "edge-auth-authenticate", "actionId": "ACT-002" },
+          "semantics": "evidence-only"
+        }
+      ]
+    },
+    {
+      "id": "ev-dashboard-nav",
+      "kind": "screenshot",
+      "path": "generated/review/evidence/sample-uwe-atlas/dashboard.svg",
+      "state": "authenticated-home",
+      "viewport": "desktop",
+      "caption": "Authenticated navigation exposes channels and settings branches.",
+      "primaryFor": ["Dashboard"],
+      "annotations": [
+        {
+          "id": "ann-dashboard-nav",
+          "kind": "highlight",
+          "bounds": { "x": 0.02, "y": 0.20, "w": 0.18, "h": 0.18 },
+          "label": "Workspace nav choices",
+          "relatesTo": { "edgeId": "edge-dashboard-channels", "actionId": "ACT-003" },
+          "semantics": "evidence-only"
+        }
+      ]
+    },
+    {
+      "id": "ev-channels-list",
+      "kind": "screenshot",
+      "path": "generated/review/evidence/sample-uwe-atlas/channels.svg",
+      "state": "channel-index",
+      "viewport": "desktop",
+      "caption": "Channel list and selected room prove the index/query surface.",
+      "primaryFor": ["Channels"],
+      "annotations": [
+        {
+          "id": "ann-channel-list",
+          "kind": "highlight",
+          "bounds": { "x": 0.27, "y": 0.25, "w": 0.27, "h": 0.38 },
+          "label": "Channel index",
+          "relatesTo": { "nodeId": "Channels", "actionId": "ACT-003" },
+          "semantics": "evidence-only"
+        }
+      ]
+    },
+    {
+      "id": "ev-settings-save-trigger",
+      "kind": "screenshot",
+      "path": "generated/review/evidence/sample-uwe-atlas/settings.svg",
+      "state": "settings-visible",
+      "viewport": "desktop",
+      "caption": "Admin save control initiates the settings persistence process.",
+      "primaryFor": ["Settings", "SaveSettings"],
+      "annotations": [
+        {
+          "id": "ann-settings-save",
+          "kind": "highlight",
+          "bounds": { "x": 0.30, "y": 0.68, "w": 0.14, "h": 0.09 },
+          "label": "Save starts process",
+          "relatesTo": { "edgeId": "edge-settings-save", "actionId": "ACT-005" },
+          "semantics": "evidence-only"
+        }
+      ]
+    },
+    {
+      "id": "ev-settings-save-result",
+      "kind": "crop",
+      "sourceRef": "ev-settings-save-trigger",
+      "crop": { "x": 0.28, "y": 0.42, "w": 0.58, "h": 0.36 },
+      "caption": "Settings form area where persisted values would be confirmed.",
+      "primaryFor": ["SaveSettings"]
+    },
+    {
+      "id": "ev-denied-guard",
+      "kind": "screenshot",
+      "path": "generated/review/evidence/sample-uwe-atlas/denied.svg",
+      "state": "member-denied",
+      "viewport": "desktop",
+      "caption": "Denied state proves the member guard and no-mutation branch.",
+      "primaryFor": ["Denied"],
+      "annotations": [
+        {
+          "id": "ann-denied-guard",
+          "kind": "highlight",
+          "bounds": { "x": 0.27, "y": 0.22, "w": 0.47, "h": 0.47 },
+          "label": "Access guard result",
+          "relatesTo": { "edgeId": "edge-dashboard-denied", "actionId": "ACT-004" },
+          "semantics": "evidence-only"
+        }
+      ]
+    }
   ]
 }
 ```

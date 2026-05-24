@@ -3,6 +3,15 @@
     return value || fallback || "";
   }
 
+  function readJson(value, fallback) {
+    if (!value) return fallback;
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return fallback;
+    }
+  }
+
   function nodeDataFrom(element) {
     return {
       id: element.dataset.uweId,
@@ -14,6 +23,9 @@
       role: text(element.dataset.uweRole, ""),
       actions: text(element.dataset.uweActions, "Inspect available actions in the source matrix."),
       effect: text(element.dataset.uweEffect, "Effect not recorded."),
+      focus: text(element.dataset.uweFocus, ""),
+      crop: readJson(element.dataset.uweCrop, null),
+      annotations: readJson(element.dataset.uweAnnotations, []),
       screenshot: text(element.dataset.uweScreenshot, "")
     };
   }
@@ -36,7 +48,51 @@
     return "uwe-navigation";
   }
 
+  function percent(value) {
+    return (Math.max(0, Math.min(1, Number(value) || 0)) * 100).toFixed(2) + "%";
+  }
+
+  function primaryBounds(data) {
+    if (data && data.crop) return data.crop;
+    if (data && Array.isArray(data.annotations) && data.annotations[0]) return data.annotations[0].bounds;
+    return null;
+  }
+
+  function renderAnnotationLayer(layer, data) {
+    if (!layer) return;
+    layer.innerHTML = "";
+    var annotations = Array.isArray(data.annotations) ? data.annotations : [];
+    annotations.forEach(function (annotation, index) {
+      var bounds = annotation.bounds;
+      if (!bounds) return;
+      var box = document.createElement("span");
+      box.className = "uwe-screenshot-focus-box";
+      box.style.left = percent(bounds.x);
+      box.style.top = percent(bounds.y);
+      box.style.width = percent(bounds.w);
+      box.style.height = percent(bounds.h);
+      var label = document.createElement("span");
+      label.textContent = String(index + 1) + ". " + (annotation.label || "focus");
+      box.appendChild(label);
+      layer.appendChild(box);
+    });
+  }
+
+  function renderCrop(workspace, data) {
+    var crop = workspace.querySelector("[data-uwe-focus-crop]");
+    var bounds = primaryBounds(data);
+    if (!crop || !data.screenshot || !bounds) {
+      if (crop) crop.classList.remove("active");
+      return;
+    }
+    crop.style.backgroundImage = "url(\"" + data.screenshot.replace(/"/g, "%22") + "\")";
+    crop.style.backgroundSize = (100 / bounds.w).toFixed(2) + "% " + (100 / bounds.h).toFixed(2) + "%";
+    crop.style.backgroundPosition = (bounds.x >= 1 ? "100" : ((bounds.x / Math.max(1 - bounds.w, 0.001)) * 100).toFixed(2)) + "% " + (bounds.y >= 1 ? "100" : ((bounds.y / Math.max(1 - bounds.h, 0.001)) * 100).toFixed(2)) + "%";
+    crop.classList.add("active");
+  }
+
   function setInspector(workspace, data) {
+    workspace.uweSelectedNode = data;
     workspace.querySelector("[data-uwe-inspector-stereo]").textContent = data.stereo || "UWE node";
     workspace.querySelector("[data-uwe-inspector-title]").textContent = data.name || data.id;
     workspace.querySelector("[data-uwe-inspector-package]").textContent = data.packageName || "Navigation";
@@ -44,12 +100,15 @@
     workspace.querySelector("[data-uwe-inspector-role]").textContent = data.role || "all roles";
     workspace.querySelector("[data-uwe-inspector-actions]").textContent = data.actions || "No action inventory recorded.";
     workspace.querySelector("[data-uwe-inspector-effect]").textContent = data.effect || "No side effect recorded.";
+    workspace.querySelector("[data-uwe-inspector-focus]").textContent = data.focus || (data.annotations && data.annotations[0] && data.annotations[0].label) || "No focused screenshot annotation recorded.";
     var img = workspace.querySelector("[data-uwe-inspector-image]");
     if (img && data.screenshot) {
       img.src = data.screenshot;
       img.alt = (data.name || data.id) + " screenshot";
       img.dataset.uweCaption = (data.stereo || "UWE node") + " " + (data.name || data.id) + ": " + (data.effect || "");
     }
+    renderAnnotationLayer(workspace.querySelector("[data-uwe-annotation-layer]"), data);
+    renderCrop(workspace, data);
   }
 
   function setActiveNodeButton(workspace, id) {
@@ -74,6 +133,7 @@
     lightboxImg.src = img.src;
     lightboxImg.alt = img.alt || "Selected UWE screenshot";
     if (caption) caption.textContent = img.dataset.uweCaption || img.alt || "Selected UWE screenshot";
+    renderAnnotationLayer(workspace.querySelector("[data-uwe-lightbox-layer]"), workspace.uweSelectedNode || {});
     lightbox.classList.add("active");
   }
 
