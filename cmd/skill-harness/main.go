@@ -4003,7 +4003,7 @@ func developerE2EProductSystemAtlasTemplate() string {
 
 ## Purpose
 
-Create a source-first atlas for inspecting the whole app from landing page to deployed workload behavior. The review surface should show the UWE navigation structure, screenshots for navigable nodes, manual QA evidence for actions, and runtime side effects.
+Create a source-first atlas for inspecting the whole app from landing page to deployed workload behavior. The review surface should show the UWE navigation structure, screenshots for navigable nodes, red evidence-only highlights/crops for important controls, manual QA evidence for actions, and runtime side effects.
 
 ## Scope
 
@@ -4029,7 +4029,7 @@ artifact-infographic:
       "tool": "graphviz",
       "kind": "uwe-navigation",
       "summary": "Navigable app nodes grouped by UWE navigation class with screenshots embedded inside the UWE navigation nodes. Keep this bounded, not a giant whole-system UML diagram.",
-      "navigationClasses": [
+      "packages": [
         "Visitor acquisition and access",
         "Authenticated app flow",
         "Utilities and admin"
@@ -4039,40 +4039,112 @@ artifact-infographic:
           "id": "Landing",
           "label": "Landing",
           "route": "/",
-          "navigationClass": "Visitor acquisition and access",
-          "facet": "navigation",
+          "package": "Visitor acquisition and access",
+          "stereotype": "navigationClass",
+          "facets": ["navigation", "presentation"],
           "role": "anonymous",
           "effect": "session unchanged",
+          "evidenceRefs": ["ev-landing-primary-cta"],
           "screenshot": "generated/review/evidence/[app]/landing.png"
         },
         {
           "id": "Auth",
           "label": "Auth",
           "route": "/login",
-          "navigationClass": "Visitor acquisition and access",
-          "facet": "access",
+          "package": "Visitor acquisition and access",
+          "stereotype": "navigationClass",
+          "facets": ["access", "presentation"],
           "role": "anonymous",
           "effect": "session created on success",
+          "evidenceRefs": ["ev-auth-submit"],
           "screenshot": "generated/review/evidence/[app]/auth.png"
         },
         {
           "id": "Dashboard",
           "label": "Dashboard",
           "route": "/app",
-          "navigationClass": "Authenticated app flow",
-          "facet": "content",
+          "package": "Authenticated app flow",
+          "stereotype": "navigationClass",
+          "facets": ["content", "navigation", "presentation"],
           "role": "member",
           "effect": "account/project data read",
+          "evidenceRefs": ["ev-dashboard-primary-action"],
           "screenshot": "generated/review/evidence/[app]/dashboard.png"
         }
       ],
       "edges": [
-        ["Landing", "Auth", "sign in"],
-        ["Auth", "Dashboard", "valid session"],
-        ["Dashboard", "Primary Workflow", "primary action"],
-        ["Primary Workflow", "Result State", "success"]
+        {
+          "id": "edge-landing-auth",
+          "from": "Landing",
+          "to": "Auth",
+          "label": "sign in",
+          "stereotype": "navigationLink",
+          "evidenceRefs": ["ev-landing-primary-cta"]
+        },
+        {
+          "id": "edge-auth-dashboard",
+          "from": "Auth",
+          "to": "Dashboard",
+          "label": "valid session",
+          "stereotype": "navigationLink",
+          "guard": "valid credentials",
+          "evidenceRefs": ["ev-auth-submit"]
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev-landing-primary-cta",
+          "kind": "screenshot",
+          "path": "generated/review/evidence/[app]/landing.png",
+          "state": "visitor-entry",
+          "viewport": "desktop",
+          "caption": "Primary CTA moves the visitor into auth.",
+          "primaryFor": ["Landing"],
+          "annotations": [
+            {
+              "id": "ann-landing-cta",
+              "kind": "highlight",
+              "bounds": { "x": 0.07, "y": 0.48, "w": 0.15, "h": 0.09 },
+              "label": "Primary CTA",
+              "relatesTo": { "edgeId": "edge-landing-auth", "actionId": "ACT-001" },
+              "semantics": "evidence-only"
+            }
+          ]
+        },
+        {
+          "id": "ev-auth-submit",
+          "kind": "screenshot",
+          "path": "generated/review/evidence/[app]/auth.png",
+          "state": "auth-submit",
+          "viewport": "desktop",
+          "caption": "Submit control starts credential validation.",
+          "primaryFor": ["Auth"],
+          "annotations": [
+            {
+              "id": "ann-auth-submit",
+              "kind": "highlight",
+              "bounds": { "x": 0.30, "y": 0.64, "w": 0.18, "h": 0.09 },
+              "label": "Submit credentials",
+              "relatesTo": { "edgeId": "edge-auth-dashboard", "actionId": "ACT-002" },
+              "semantics": "evidence-only"
+            }
+          ]
+        }
       ]
     }
+
+## Screenshot Evidence Contract
+
+Use the Skill Harness UWE evidence renderer rather than a repo-local bespoke HTML diagram:
+
+- nodes[].stereotype carries official UWE meaning.
+- nodes[].facets carries descriptive concerns only.
+- nodes[].evidenceRefs and edges[].evidenceRefs attach screenshot evidence to modeled elements.
+- edges[].id is required when annotations reference a navigation or process link.
+- evidence[].annotations[].bounds uses normalized coordinates from 0 to 1.
+- evidence[].annotations[].semantics must be evidence-only.
+- Red boxes and zoom crops are rendered by the review surface inspector/lightbox; do not bake them into screenshots unless no source metadata is available.
+- For VibeCoord-style artifacts, map screenshotFocusByNode to evidence[].annotations[] and package groups to packages plus nodes[].package.
 
 ## Action And Side-Effect Matrix
 

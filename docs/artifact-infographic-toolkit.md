@@ -21,10 +21,50 @@ Generated review HTML must not load these libraries in the browser by default. R
 UWE screenshot atlases are for whole-app inspection: routes, links, buttons, role branches, side effects, and screenshots should be visible in one navigable model surface. They must stay OSS-first:
 
 1. Author the canonical atlas as source data in an `artifact-infographic` JSON fence.
-2. Render structure with an established renderer, currently Graphviz through `@viz-js/viz`; PlantUML-compatible source can be added as another generation backend later.
-3. Inject screenshots into generated UML node compartments as an extension step.
-4. Use `svg-pan-zoom` for pan/zoom when the artifact opts into `reviewed-svg-pan-zoom`.
-5. Keep Skill Harness glue thin: source parsing, screenshot data URLs, renderer invocation, policy checks, and manifest wiring.
+2. Use `kind: "uwe-navigation"` and `htmlInteractionLane: "reviewed-uwe-workspace"` on the manifest entry when the artifact needs the interactive workspace.
+3. Render structure with established OSS renderers: Cytoscape.js plus dagre for the primary workspace, and Graphviz through `@viz-js/viz` for the UML fallback.
+4. Inject screenshots into generated UML node compartments as an evidence extension step.
+5. Render red focus boxes, crops, and callouts from structured evidence metadata; do not bake annotations into screenshots when the source can carry them.
+6. Keep Skill Harness glue thin: source parsing, screenshot data URLs, renderer invocation, policy checks, and manifest wiring.
+
+The renderer used by VibeCoord-style product modeling artifacts is this Skill Harness UWE evidence renderer. Repos should not maintain a separate custom UWE HTML renderer just because a one-off artifact looked better. Promote useful visual behavior into this contract and regenerate from source.
+
+## UWE Evidence Contract
+
+A UWE screenshot atlas uses UWE for semantics and a separate evidence layer for screenshots, red boxes, crops, and callouts:
+
+- `packages`: UWE package/lane labels used to group nodes.
+- `nodes[].id`: stable node id.
+- `nodes[].stereotype`: explicit UWE stereotype such as `navigationClass`, `menu`, `index`, `query`, `processClass`, or `externalNode`.
+- `nodes[].facets`: descriptive concerns such as `navigation`, `presentation`, `process`, `access`, or `adaptation`; these are not substitutes for `stereotype`.
+- `nodes[].evidenceRefs`: evidence ids that provide the node screenshot, focus annotation, or crop.
+- `edges[].id`: stable edge id so annotations can point at links.
+- `edges[].stereotype`: `navigationLink` or `processLink`.
+- `edges[].guard`: optional role, feature flag, state, or validation condition.
+- `edges[].evidenceRefs`: evidence ids that prove the link trigger or result.
+- `evidence[]`: screenshot or crop objects; this is the only place where red focus/crop metadata should live.
+- `evidence[].annotations[].bounds`: normalized `{x,y,w,h}` coordinates relative to the displayed screenshot.
+- `evidence[].annotations[].relatesTo`: `{nodeId, edgeId, actionId}` reference.
+- `evidence[].annotations[].semantics`: use `evidence-only`; annotations never redefine UWE semantics.
+
+Recommended screenshot treatment:
+
+- Use red only for evidence highlights, not page decoration.
+- Pair every red box with a number and short label.
+- Show the full screenshot plus a zoomed crop in the inspector.
+- Keep Graphviz/UML nodes semantically clean; detailed red callouts belong in the inspector and lightbox.
+- For `processClass` and `processLink`, prefer trigger/result evidence over reusing only a generic full-screen navigation screenshot.
+
+## VibeCoord Alignment
+
+The VibeCoord artifact at `qa-artifacts/e2e-product-modeling/vibecoord-uwe-navigation-source-2026-05-24.json` already has the right intent: Cytoscape/dagre graph, UWE packages, red focus boxes, zoom crops, and evidence notes. Its next durable version should be represented as a Skill Harness `artifact-infographic` source instead of bespoke HTML:
+
+- `uwePackageGroups` / `packageParentByNode` -> `packages` plus `nodes[].package`.
+- `screenshotFocusByNode` -> `evidence[].annotations[]` with normalized bounds.
+- `uweNodes` or equivalent graph node source -> `nodes[]` with explicit `stereotype`.
+- `uweEdges` -> `edges[]` with explicit `id`, `stereotype`, `guard`, and `evidenceRefs`.
+- VibeCoord-specific AI/proof tags -> `facets`, namespaced notes, or separate evidence metadata; keep official UWE stereotypes intact.
+- Generated output -> `generated/review/product/<app>-e2e-product-system-atlas.html` from `node scripts/generate-artifact-review.mjs`.
 
 ## Source Spec
 
@@ -57,6 +97,63 @@ Graph specs can use structured nodes and edges:
     ["Source", "Manifest"],
     ["Manifest", "Generated HTML"],
     ["Generated HTML", "Policy Check"]
+  ]
+}
+```
+````
+
+UWE screenshot specs should use the evidence contract:
+
+````markdown
+```artifact-infographic
+{
+  "title": "App UWE Navigation Atlas",
+  "tool": "graphviz",
+  "kind": "uwe-navigation",
+  "packages": ["Public", "Authenticated", "Runtime"],
+  "nodes": [
+    {
+      "id": "Settings",
+      "label": "Settings",
+      "route": "/app/settings",
+      "package": "Authenticated",
+      "stereotype": "navigationClass",
+      "facets": ["access", "presentation"],
+      "role": "admin",
+      "actions": "save settings",
+      "effect": "authorization check; settings update",
+      "evidenceRefs": ["ev-settings-save"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-settings-save",
+      "from": "Settings",
+      "to": "SaveSettings",
+      "label": "save",
+      "stereotype": "processLink",
+      "guard": "admin role",
+      "evidenceRefs": ["ev-settings-save"]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-settings-save",
+      "kind": "screenshot",
+      "path": "generated/review/evidence/app/settings.png",
+      "primaryFor": ["Settings"],
+      "caption": "Save control starts the settings persistence process.",
+      "annotations": [
+        {
+          "id": "ann-settings-save",
+          "kind": "highlight",
+          "bounds": {"x": 0.30, "y": 0.68, "w": 0.14, "h": 0.09},
+          "label": "Save starts process",
+          "relatesTo": {"edgeId": "edge-settings-save", "actionId": "ACT-005"},
+          "semantics": "evidence-only"
+        }
+      ]
+    }
   ]
 }
 ```

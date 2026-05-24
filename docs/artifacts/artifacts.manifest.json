@@ -466,6 +466,38 @@
       "driftVerdict": "aligned"
     },
     {
+      "id": "vibecoord-uwe-renderer-adoption-2026-05-24",
+      "title": "VibeCoord UWE Renderer Adoption",
+      "type": "implementation-plan",
+      "family": "product",
+      "source": "docs/artifacts/source/product/vibecoord-uwe-renderer-adoption-2026-05-24.md",
+      "status": "ready",
+      "owner": "system-modeler",
+      "reviewRequired": true,
+      "reviewSurface": "generated/review/product/vibecoord-uwe-renderer-adoption-2026-05-24.html",
+      "renderer": "skill-harness artifact review generator",
+      "evidenceLinks": [
+        "docs/artifact-infographic-toolkit.md",
+        "docs/artifacts/templates/e2e-product-system-atlas.md",
+        "docs/artifacts/source/product/sample-uwe-screenshot-atlas.md",
+        "scripts/generate-artifact-review.mjs",
+        "scripts/uwe-workspace-runtime.js",
+        "C:/Dev/VibeCoord/qa-artifacts/e2e-product-modeling/vibecoord-uwe-navigation-source-2026-05-24.json",
+        "C:/Dev/VibeCoord/qa-artifacts/html/vibecoord-e2e-product-modeling-2026-05-24.html"
+      ],
+      "updateTriggers": [
+        "UWE evidence contract changes",
+        "VibeCoord atlas source conversion changes",
+        "reviewed-uwe-workspace renderer changes"
+      ],
+      "freshness": {
+        "generatedAt": "2026-05-24",
+        "sourceFirst": true
+      },
+      "sourceHash": "bf6ac1b1881e9a660da30b5b1869f711b00b089d901108a0f1711e62256096b0",
+      "generatedAt": "2026-05-24"
+    },
+    {
       "id": "sample-uwe-screenshot-atlas",
       "title": "Sample UWE Screenshot Atlas",
       "type": "e2e-product-system-atlas",
