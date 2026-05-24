@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Synthetic access denied screenshot">
   <rect width="960" height="540" fill="#f4f7fb"/>
   <rect x="0" y="0" width="960" height="72" fill="#172033"/>
-  <text x="40" y="45" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#ffffff">Vibecord</text>
+  <text x="40" y="45" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#ffffff">SampleApp</text>
   <rect x="260" y="126" width="440" height="286" rx="8" fill="#ffffff" stroke="#d8dee8"/>
   <circle cx="326" cy="190" r="28" fill="#fee4e2"/>
   <text x="317" y="201" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" fill="#b42318">!</text>

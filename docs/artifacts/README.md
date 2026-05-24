@@ -34,7 +34,7 @@ Use this directory for durable developer artifacts and generated review surfaces
 
 ## Examples
 
-- `source/product/sample-uwe-screenshot-atlas.md` demonstrates a synthetic Vibecord-style UWE navigation atlas with screenshot-backed nodes, action side effects, access branches, and generated review HTML.
+- `source/product/sample-uwe-screenshot-atlas.md` demonstrates a synthetic community-app UWE navigation atlas with screenshot-backed nodes, action side effects, access branches, and generated review HTML.
 - `source/models/sample-uwe-navigation.md` is the paired UWE navigation model source.
 - `../../generated/review/product/sample-uwe-screenshot-atlas.html` and `../../generated/review/models/sample-uwe-navigation.html` show the generated review surfaces.
 

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Synthetic channels screenshot">
   <rect width="960" height="540" fill="#f4f7fb"/>
   <rect x="0" y="0" width="220" height="540" fill="#172033"/>
-  <text x="28" y="48" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff">Vibecord</text>
+  <text x="28" y="48" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff">SampleApp</text>
   <rect x="24" y="96" width="172" height="36" rx="6" fill="#0f766e"/>
   <text x="44" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#ffffff">Dashboard</text>
   <rect x="24" y="150" width="172" height="36" rx="6" fill="#ffffff" opacity=".14"/>

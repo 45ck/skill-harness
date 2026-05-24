@@ -6,6 +6,7 @@ node_modules/
 /skill-harness
 /skill-harness.exe
 social-preview.png
+tmp-uwe-atlas-*.png
 dist/
 generated/review/*
 !generated/review/*.html

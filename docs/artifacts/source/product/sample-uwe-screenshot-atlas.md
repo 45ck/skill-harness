@@ -16,7 +16,7 @@ evidenceLinks:
 
 # Sample UWE Screenshot Atlas
 
-This is a synthetic Vibecord-style example showing how a UWE navigation model can become a screenshot-backed inspection artifact. It is not evidence from the real Vibecord app.
+This is a synthetic community-app example showing how a UWE navigation model can become a screenshot-backed inspection artifact. It is not evidence from a real downstream app.
 
 ## Purpose
 
@@ -50,7 +50,7 @@ Red boxes, crops, and callouts are evidence-only annotations. They reference UWE
 | Environment | generated sample evidence only |
 | Roles | anonymous, member, admin |
 | Included entry points | landing, sign-in, dashboard |
-| Exclusions | real Vibecord routes, production data, real auth secrets |
+| Exclusions | real downstream routes, production data, real auth secrets |
 | Data safety | screenshots are synthetic SVGs |
 
 ## UWE Navigation Nodes
