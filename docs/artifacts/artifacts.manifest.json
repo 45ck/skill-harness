@@ -70,6 +70,39 @@
       }
     },
     {
+      "id": "public-agentic-ecosystem-research-2026-06-19",
+      "type": "research-synthesis",
+      "family": "research",
+      "source": "docs/artifacts/source/research/public-agentic-ecosystem-research-2026-06-19.md",
+      "status": "ready",
+      "owner": "codex",
+      "issue": "skill-harness-4r6",
+      "reviewRequired": true,
+      "reviewSurface": "generated/review/research/public-agentic-ecosystem-research-2026-06-19.html",
+      "renderer": "skill-harness artifact review generator",
+      "evidenceLinks": [
+        "docs/third-party-skill-intake.md",
+        "docs/dependency-provenance.md",
+        "docs/repo-placement.md",
+        "docs/agent-operating-skills.md",
+        "scripts/external_skill_intake.py",
+        "scripts/dependencies.json"
+      ],
+      "updateTriggers": [
+        "third-party skill intake policy changes",
+        "new host instruction surface support",
+        "external skill scanner behavior changes",
+        "Beads or task-memory setup behavior changes",
+        "MCP/plugin manifest policy changes"
+      ],
+      "freshness": {
+        "generatedAt": "2026-06-19",
+        "sourceFirst": true
+      },
+      "sourceHash": "2c99adb1d3fe757a9d4504cf7c1babaed8e97a7de820c9969341abe751ce34eb",
+      "generatedAt": "2026-06-19"
+    },
+    {
       "id": "agent-native-bootstrap-update-plan-2026-05-24",
       "type": "planning-artifact",
       "source": "docs/artifacts/source/agent-native-bootstrap-update-plan-2026-05-24.md",
@@ -166,11 +199,11 @@
         "visual-source-first policy changes"
       ],
       "freshness": {
-        "generatedAt": "2026-05-24",
+        "generatedAt": "2026-06-18",
         "sourceFirst": true
       },
       "sourceHash": "4618673cd352facfc973e3f46a4e8c449471ba258d73b7444ca74ee520ba7155",
-      "generatedAt": "2026-05-24"
+      "generatedAt": "2026-06-18"
     },
     {
       "id": "sh-uwe-navigation-atlas",
@@ -525,11 +558,11 @@
         "UWE atlas renderer behavior changes"
       ],
       "freshness": {
-        "generatedAt": "2026-05-24",
+        "generatedAt": "2026-06-18",
         "sourceFirst": true
       },
       "sourceHash": "19cfbb6e861841ca42a148342f17347f5beb02179ae1b7e1e39d0cdb1f50ff06",
-      "generatedAt": "2026-05-24"
+      "generatedAt": "2026-06-18"
     },
     {
       "id": "sample-uwe-navigation",
