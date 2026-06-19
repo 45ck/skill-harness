@@ -104,7 +104,6 @@ Generated HTML review artifacts must be static and self-contained by default:
 - clear human review structure with overview, visuals, source, evidence, and diff/comparison sections when relevant
 - tabs or equivalent navigation for dense artifacts, implemented without external runtimes
 - infographic-style summary metrics, charts, timelines, evidence/freshness panels, and source links when the artifact is for human decision review
-- multi-lane planning, launch-readiness, project-management, chat-history, and "what next" artifacts should include a static Kanban/status board near the top with Done / Doing / Planned / Blocked / Idle lanes, familiar status icons, source links or task IDs, and one-sentence acceptance evidence per card
 - source-declared infographic specs rendered as static SVG/HTML, not browser-loaded chart runtimes
 - screenshots or evidence images embedded as data URLs when they are listed in the manifest and safe to include
 - no external scripts
@@ -157,7 +156,6 @@ Rules:
 - Put generated visual review surfaces under `generated/review/<family>/`.
 - High-fidelity HTML/prototype review is the default for UI, product, customer-facing workflow, and mockup artifacts. Low-fidelity sketches are scratch unless explicitly captured as research evidence.
 - Visual review surfaces should expose realistic states, data density, error paths, assumptions, evidence strength, source links, and freshness metadata.
-- Planning and launch-readiness review surfaces should make progress visually scannable with a static Kanban/status board or equivalent lane map before detailed tables, using explicit Done / Doing / Planned / Blocked / Idle states and evidence-backed cards.
 - Use an E2E Product System Atlas when whole-app inspection needs a UWE navigation model with screenshots, manual QA verdicts, runtime side effects, and access/adaptation branches. Keep it bounded to discovered user-reachable routes, states, actions, and important error paths.
 - Human-facing discovery and planning work should produce source plus generated HTML by default when the intended audience is a human reviewer. Mark those manifest entries with `reviewRequired: true` and generate the infographic surface with `node scripts/generate-artifact-review.mjs`.
 - Use the infographic toolkit when charts or diagrams improve review: Mermaid for authored diagrams, Vega-Lite as the default chart grammar, Observable Plot for compact exploratory charts, D3 for bespoke static layouts, Graphviz for node-edge maps, ECharts only as generation-time/static output, RAWGraphs for exported design-led SVGs, and Chart.js only through server-rendered/static output or an equivalent static chart.
