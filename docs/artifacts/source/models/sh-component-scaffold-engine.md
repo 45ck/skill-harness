@@ -11,6 +11,8 @@ implementationTouchpoints:
   - scripts/suite_graph.py
   - scripts/render_suite_docs.py
   - scripts/check_suite_drift.py
+  - scripts/external_skill_intake.py
+  - scripts/check_external_skill_intake.py
   - scripts/check-artifact-manifest.mjs
   - scripts/check-model-artifact-policy.mjs
   - scripts/generate-artifact-review.mjs
@@ -18,16 +20,20 @@ implementationTouchpoints:
 docTouchpoints:
   - docs/agent-loadouts.md
   - docs/developer-artifacts.md
+  - docs/agent-operating-skills.md
+  - docs/third-party-skill-intake.md
 evidenceLinks:
   - cmd/skill-harness/main_test.go
   - scripts/dependencies.json
   - scripts/agent_loadouts.json
+  - tests/fixtures/external-skill-intake/
 reviewRequired: true
 updateTriggers:
   - scaffold script changes
   - artifact review generator changes
   - suite graph schema changes
   - agent template rendering changes
+  - external intake scanner or fixture changes
 driftVerdict: aligned
 ---
 
@@ -41,7 +47,7 @@ Show the design-level components that collaborate to scaffold and verify suite o
 
 ## Scope
 
-Included components are the CLI command router, dependency/loadout readers, agent stack resolver, agent-stack lock/proof writer, repo baseline governance auditor, repo baseline lock/report writer, install orchestrator, project setup orchestrator, developer artifact scaffold writer, model policy/review script emitters, Beads worktree wrapper installer, Python helper scripts, agent template sources, target repo filesystem, and external command dependencies.
+Included components are the CLI command router, dependency/loadout readers, agent stack resolver, agent-stack lock/proof writer, repo baseline governance auditor, repo baseline lock/report writer, install orchestrator, project setup orchestrator, developer artifact scaffold writer, model policy/review script emitters, external skill intake scanner, synthetic intake fixtures, Beads worktree wrapper installer, Python helper scripts, agent template sources, target repo filesystem, and external command dependencies.
 
 ## Source Model
 
@@ -70,16 +76,19 @@ flowchart LR
   GenericRenderer["generic artifact review generator"] --> ReviewHTML
   ModelRenderer["model review generator"] --> ReviewHTML
   SuiteScripts["suite graph scripts"] --> LoadoutDocs["docs/agent-loadouts.md"]
+  IntakeScanner["external skill intake scanner"] --> IntakeFixtures["tests/fixtures/external-skill-intake"]
+  IntakeScanner --> IntakeReport["markdown/json intake reports"]
+  QualityChecks["package scripts and quality workflow"] --> IntakeScanner
 ```
 
 ## Responsibility Split
 
-Go owns portable project setup, agent stack resolution, agent-stack lock/proof writing, repo baseline governance, repo audit state, and baseline lock/report writing. Repo governance is conservative: it writes only baseline manifest, baseline lock, and update-report files, while classifying project-specific skills, agents, Beads state, and instruction files as overlay or owned unless a repo opts into generated or managed-section treatment. Node scripts own artifact and HTML checks because target projects commonly already have Node for package scripts. Python scripts own suite graph generation because existing suite maintenance scripts are Python.
+Go owns portable project setup, agent stack resolution, agent-stack lock/proof writing, repo baseline governance, repo audit state, and baseline lock/report writing. Repo governance is conservative: it writes only baseline manifest, baseline lock, and update-report files, while classifying project-specific skills, agents, Beads state, and instruction files as overlay or owned unless a repo opts into generated or managed-section treatment. Node scripts own artifact and HTML checks because target projects commonly already have Node for package scripts. Python scripts own suite graph generation and external skill intake checks because existing suite maintenance scripts are Python and the intake scanner is filesystem-oriented.
 
 ## Evidence
 
-Evidence comes from the Go CLI, Node artifact scripts, Python suite scripts, loadout JSON, dependency JSON, and generated agent templates.
+Evidence comes from the Go CLI, Node artifact scripts, Python suite scripts, the external skill intake scanner, synthetic intake fixtures, loadout JSON, dependency JSON, and generated agent templates.
 
 ## Freshness
 
-Update this model when scaffold writers, repo governance commands, artifact review generators, suite graph scripts, agent rendering scripts, or target repo output contracts change.
+Update this model when scaffold writers, repo governance commands, artifact review generators, suite graph scripts, external intake scanners, agent rendering scripts, or target repo output contracts change.

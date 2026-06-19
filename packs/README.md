@@ -15,7 +15,7 @@ Current embedded packs:
 - `integration-tooling-skills`
 - `specgraph-skills` — 5 specgraph workflow skills (requires `@45ck/agent-docs`)
 - `noslop-skills` — 3 noslop quality gate skills (requires `@45ck/noslop`)
-- `agent-operating-skills` — frontier-agent task shaping, context engineering, autonomy boundaries, tool permissions, memory review, multi-agent workflow review, and run evidence checks
+- `agent-operating-skills` — frontier-agent task shaping, context engineering, autonomy boundaries, tool permissions, memory review, multi-agent workflow review, run evidence checks, external ecosystem intake, provenance review, host drift checks, record/replay review, and task-memory profile planning
 - `developer-artifact-skills` — developer artifact shaping, source-backed model views, generated HTML review surfaces, evidence gates, and handoff bundles
 - `demo-production-skills` — source-backed demo, QA, silent cut, slideshow, review surface, and release media workflows
 

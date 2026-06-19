@@ -37,6 +37,9 @@ jobs:
       - name: Suite drift
         run: python scripts/check_suite_drift.py --check
 
+      - name: External skill intake fixtures
+        run: npm run intake:check
+
       - name: Model review and artifact policy
         run: npm run artifacts:check
 

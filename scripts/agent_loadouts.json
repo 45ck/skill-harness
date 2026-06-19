@@ -124,7 +124,9 @@
       "context-engineering-planner",
       "autonomy-boundary-checker",
       "tool-permission-planner",
-      "multi-agent-workflow-reviewer"
+      "multi-agent-workflow-reviewer",
+      "host-instruction-drift-checker",
+      "task-memory-profile-planner"
     ]
   },
   "software-architect-beads": {
@@ -154,7 +156,9 @@
       "context-engineering-planner",
       "autonomy-boundary-checker",
       "tool-permission-planner",
-      "multi-agent-workflow-reviewer"
+      "multi-agent-workflow-reviewer",
+      "host-instruction-drift-checker",
+      "task-memory-profile-planner"
     ]
   },
   "web-engineer": {
@@ -265,7 +269,11 @@
       "artifact-evidence-gate",
       "artifact-handoff-pack",
       "autonomy-boundary-checker",
-      "agent-run-evidence-reviewer"
+      "agent-run-evidence-reviewer",
+      "skill-provenance-reviewer",
+      "external-skill-fixture-builder",
+      "host-instruction-drift-checker",
+      "record-replay-skill-reviewer"
     ]
   },
   "security-reviewer": {
@@ -283,7 +291,10 @@
       "verification-first-delivery",
       "autonomy-boundary-checker",
       "tool-permission-planner",
-      "agent-memory-design-reviewer"
+      "agent-memory-design-reviewer",
+      "skill-provenance-reviewer",
+      "host-instruction-drift-checker",
+      "record-replay-skill-reviewer"
     ]
   },
   "security-reviewer-beads": {
@@ -301,7 +312,10 @@
       "verification-first-delivery",
       "autonomy-boundary-checker",
       "tool-permission-planner",
-      "agent-memory-design-reviewer"
+      "agent-memory-design-reviewer",
+      "skill-provenance-reviewer",
+      "host-instruction-drift-checker",
+      "record-replay-skill-reviewer"
     ]
   },
   "pentest-reviewer": {
@@ -343,7 +357,8 @@
       "agent-task-shaping",
       "autonomy-boundary-checker",
       "multi-agent-workflow-reviewer",
-      "agent-run-evidence-reviewer"
+      "agent-run-evidence-reviewer",
+      "task-memory-profile-planner"
     ]
   },
   "delivery-manager-beads": {
@@ -370,7 +385,8 @@
       "agent-task-shaping",
       "autonomy-boundary-checker",
       "multi-agent-workflow-reviewer",
-      "agent-run-evidence-reviewer"
+      "agent-run-evidence-reviewer",
+      "task-memory-profile-planner"
     ]
   },
   "research-writer": {
@@ -395,7 +411,13 @@
       "demo-review-surface",
       "demo-story-packager",
       "context-engineering-planner",
-      "agent-run-evidence-reviewer"
+      "agent-run-evidence-reviewer",
+      "third-party-skill-intake",
+      "skill-provenance-reviewer",
+      "external-skill-fixture-builder",
+      "host-instruction-drift-checker",
+      "record-replay-skill-reviewer",
+      "task-memory-profile-planner"
     ]
   },
   "workflow-engineer": {
@@ -421,7 +443,13 @@
       "tool-permission-planner",
       "agent-memory-design-reviewer",
       "multi-agent-workflow-reviewer",
-      "agent-run-evidence-reviewer"
+      "agent-run-evidence-reviewer",
+      "third-party-skill-intake",
+      "skill-provenance-reviewer",
+      "external-skill-fixture-builder",
+      "host-instruction-drift-checker",
+      "record-replay-skill-reviewer",
+      "task-memory-profile-planner"
     ]
   }
 }

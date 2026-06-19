@@ -24,6 +24,8 @@ implementationTouchpoints:
   - scripts/suite_graph.py
   - scripts/render_suite_docs.py
   - scripts/check_suite_drift.py
+  - scripts/external_skill_intake.py
+  - scripts/check_external_skill_intake.py
   - scripts/check-artifact-manifest.mjs
   - scripts/check-model-artifact-policy.mjs
   - scripts/generate-artifact-review.mjs
@@ -31,16 +33,20 @@ implementationTouchpoints:
 docTouchpoints:
   - docs/agent-loadouts.md
   - docs/developer-artifacts.md
+  - docs/agent-operating-skills.md
+  - docs/third-party-skill-intake.md
 evidenceLinks:
   - cmd/skill-harness/main_test.go
   - scripts/dependencies.json
   - scripts/agent_loadouts.json
+  - tests/fixtures/external-skill-intake/
 reviewRequired: true
 updateTriggers:
   - scaffold script changes
   - artifact review generator changes
   - suite graph schema changes
   - agent template rendering changes
+  - external intake scanner or fixture changes
 driftVerdict: aligned
 ---
 
@@ -54,7 +60,7 @@ Show the design-level components that collaborate to scaffold and verify suite o
 
 ## Scope
 
-Included components are the CLI command router, dependency/loadout readers, agent stack resolver, agent-stack lock/proof writer, repo baseline governance auditor, repo baseline lock/report writer, install orchestrator, project setup orchestrator, developer artifact scaffold writer, model policy/review script emitters, Beads worktree wrapper installer, Python helper scripts, agent template sources, target repo filesystem, and external command dependencies.
+Included components are the CLI command router, dependency/loadout readers, agent stack resolver, agent-stack lock/proof writer, repo baseline governance auditor, repo baseline lock/report writer, install orchestrator, project setup orchestrator, developer artifact scaffold writer, model policy/review script emitters, external skill intake scanner, synthetic intake fixtures, Beads worktree wrapper installer, Python helper scripts, agent template sources, target repo filesystem, and external command dependencies.
 
 ## Source Model
 
@@ -83,20 +89,23 @@ flowchart LR
   GenericRenderer[&quot;generic artifact review generator&quot;] --&gt; ReviewHTML
   ModelRenderer[&quot;model review generator&quot;] --&gt; ReviewHTML
   SuiteScripts[&quot;suite graph scripts&quot;] --&gt; LoadoutDocs[&quot;docs/agent-loadouts.md&quot;]
+  IntakeScanner[&quot;external skill intake scanner&quot;] --&gt; IntakeFixtures[&quot;tests/fixtures/external-skill-intake&quot;]
+  IntakeScanner --&gt; IntakeReport[&quot;markdown/json intake reports&quot;]
+  QualityChecks[&quot;package scripts and quality workflow&quot;] --&gt; IntakeScanner
 ```
 
 ## Responsibility Split
 
-Go owns portable project setup, agent stack resolution, agent-stack lock/proof writing, repo baseline governance, repo audit state, and baseline lock/report writing. Repo governance is conservative: it writes only baseline manifest, baseline lock, and update-report files, while classifying project-specific skills, agents, Beads state, and instruction files as overlay or owned unless a repo opts into generated or managed-section treatment. Node scripts own artifact and HTML checks because target projects commonly already have Node for package scripts. Python scripts own suite graph generation because existing suite maintenance scripts are Python.
+Go owns portable project setup, agent stack resolution, agent-stack lock/proof writing, repo baseline governance, repo audit state, and baseline lock/report writing. Repo governance is conservative: it writes only baseline manifest, baseline lock, and update-report files, while classifying project-specific skills, agents, Beads state, and instruction files as overlay or owned unless a repo opts into generated or managed-section treatment. Node scripts own artifact and HTML checks because target projects commonly already have Node for package scripts. Python scripts own suite graph generation and external skill intake checks because existing suite maintenance scripts are Python and the intake scanner is filesystem-oriented.
 
 ## Evidence
 
-Evidence comes from the Go CLI, Node artifact scripts, Python suite scripts, loadout JSON, dependency JSON, and generated agent templates.
+Evidence comes from the Go CLI, Node artifact scripts, Python suite scripts, the external skill intake scanner, synthetic intake fixtures, loadout JSON, dependency JSON, and generated agent templates.
 
 ## Freshness
 
-Update this model when scaffold writers, repo governance commands, artifact review generators, suite graph scripts, agent rendering scripts, or target repo output contracts change.
-</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../cmd/skill-harness/main_test.go">cmd/skill-harness/main_test.go</a></li><li><a href="../../../scripts/dependencies.json">scripts/dependencies.json</a></li><li><a href="../../../scripts/agent_loadouts.json">scripts/agent_loadouts.json</a></li></ul><h3>Update Triggers</h3><ul><li>scaffold script changes</li><li>artifact review generator changes</li><li>suite graph schema changes</li><li>agent template rendering changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>56123a56a5ae4511974e786fb1cfb6c10de02702b2a034033fc99bd44e909f1b</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-24</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
+Update this model when scaffold writers, repo governance commands, artifact review generators, suite graph scripts, external intake scanners, agent rendering scripts, or target repo output contracts change.
+</pre></section><section class="tab-panel"><h2>Evidence</h2><ul><li><a href="../../../cmd/skill-harness/main_test.go">cmd/skill-harness/main_test.go</a></li><li><a href="../../../scripts/dependencies.json">scripts/dependencies.json</a></li><li><a href="../../../scripts/agent_loadouts.json">scripts/agent_loadouts.json</a></li></ul><h3>Update Triggers</h3><ul><li>scaffold script changes</li><li>artifact review generator changes</li><li>suite graph schema changes</li><li>agent template rendering changes</li></ul><h3>Freshness</h3><div class="meta"><div><strong>Source Hash</strong><br>aaff50364fef77ae681e61aabbb32c22d050d867597785fadc3fc16cffed73dc</div><div><strong>Renderer</strong><br>skill-harness model review generator</div><div><strong>Generated</strong><br>2026-05-24</div></div></section><section class="tab-panel"><h2>Diff</h2><p class="muted">This is a model-view artifact. Create a model-diff artifact to compare model revisions.</p></section></div></div>
 </main>
 </body>
 </html>

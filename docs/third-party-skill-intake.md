@@ -32,6 +32,17 @@ Current high-signal shortlist:
 - `sickn33/antigravity-awesome-skills`
 - `VoltAgent/awesome-agent-skills`
 
+The June 2026 ecosystem research adds these high-signal lanes to the same intake process:
+
+- OpenAI/Codex record-and-replay generated skills
+- Beads and task-memory repos
+- Gas Town style multi-agent workspace managers
+- Cursor `.cursor/rules/*.mdc`, skills, and subagent compatibility surfaces
+- MCP server/tool-boundary packs
+- methodology-led systems such as BMad
+
+These lanes are not default dependencies. They are fixture, provenance, and installer-profile inputs until a first-party rewrite is approved.
+
 ## Intake rule
 
 Do this:
@@ -40,6 +51,9 @@ Do this:
 - inspect repo structure, license, install surface, skill layout, and any helper scripts
 - compare with the existing 45ck catalog before proposing imports
 - map every worthwhile idea to a first-party destination
+- use `third-party-skill-intake`, `skill-provenance-reviewer`, and `external-skill-fixture-builder` before adoption
+- use `host-instruction-drift-checker` when a repo contains AGENTS, Claude, Codex, Cursor, Copilot, or skill surfaces
+- use `record-replay-skill-reviewer` before accepting generated skills from recorded workflows
 
 Do not do this:
 
@@ -156,6 +170,8 @@ The intake script now reports the fields that matter before any external repo ca
 - MCP config files such as `.mcp.json`
 - lock, index, or manifest files such as `skills_index.json`
 - license and third-party notice files
+- Cursor `.mdc` rule files
+- host instruction files such as `AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md`
 - executable helpers such as shell, PowerShell, Python, JavaScript, and TypeScript files
 - blocked flags for approval bypass, remote shell execution, or secret exfiltration patterns
 - review flags for token references, MCP/tool config, install scripts, and executable helpers
@@ -178,3 +194,15 @@ python scripts/external_skill_intake.py `
 ```
 
 `--fail-on-blocked` is intentionally narrow. It catches patterns that should not flow into shared installs, but it does not replace license review, script review, MCP review, or a first-party rewrite decision.
+
+## Fixture check
+
+Synthetic fixtures for the intake scanner live under `tests/fixtures/external-skill-intake/`.
+
+Run:
+
+```powershell
+npm run intake:check
+```
+
+This check verifies the scanner recognizes clean cross-host packs, Cursor rules, Copilot instructions, plugin metadata, MCP config, and blocked remote shell install patterns. Real public repos still belong in the sibling intake workspace, not under `tests/fixtures/`.

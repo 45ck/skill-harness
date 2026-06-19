@@ -13,6 +13,7 @@
     "artifacts:model:review": "node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
     "artifacts:open": "node scripts/open-artifact-review.mjs",
     "artifacts:review": "node scripts/generate-artifact-review.mjs && node scripts/generate-model-review.mjs && node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/check-artifact-manifest.mjs && node scripts/check-artifact-html-policy.mjs",
+    "intake:check": "python scripts/check_external_skill_intake.py",
     "models:check": "node scripts/check-model-artifact-policy.mjs && node scripts/check-model-inventory.mjs && node scripts/generate-model-review.mjs --check",
     "models:drift": "node scripts/generate-model-review.mjs --check",
     "models:generate": "node scripts/generate-model-review.mjs",

@@ -1,0 +1,6 @@
+---
+description: Fixture Cursor rule for intake scanner coverage.
+alwaysApply: false
+---
+
+Use this rule only as synthetic intake data.

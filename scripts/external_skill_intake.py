@@ -88,6 +88,9 @@ class RepoSummary:
     path: Path
     skill_names: list[str]
     agent_file_count: int
+    cursor_rule_count: int
+    host_instruction_count: int
+    copilot_instruction_count: int
     plugin_manifest_count: int
     plugin_surface_count: int
     openai_metadata_count: int
@@ -152,6 +155,41 @@ def count_agent_files(repo_root: Path) -> int:
         ):
             count += 1
     return count
+
+
+def count_cursor_rules(repo_root: Path) -> int:
+    count = 0
+    for path in iter_repo_files(repo_root):
+        normalized = relative_posix(repo_root, path).lower()
+        if normalized.startswith(".cursor/rules/") and path.suffix.lower() == ".mdc":
+            count += 1
+    return count
+
+
+def count_host_instruction_files(repo_root: Path) -> int:
+    names = {
+        "agents.md",
+        "agent_instructions.md",
+        "claude.md",
+        "gemini.md",
+        "llms.txt",
+    }
+    count = 0
+    for path in iter_repo_files(repo_root):
+        normalized = relative_posix(repo_root, path).lower()
+        if path.name.lower() in names:
+            count += 1
+        elif normalized == ".github/copilot-instructions.md":
+            count += 1
+    return count
+
+
+def count_copilot_instruction_files(repo_root: Path) -> int:
+    return sum(
+        1
+        for path in iter_repo_files(repo_root)
+        if relative_posix(repo_root, path).lower() == ".github/copilot-instructions.md"
+    )
 
 
 def count_plugin_manifests(repo_root: Path) -> int:
@@ -247,6 +285,12 @@ def detect_install_surface(repo_root: Path, readme: str) -> str:
         or "$codeX_home/skills".lower() in normalized
     ):
         surfaces.append("copy")
+    if ".cursor/rules" in normalized or count_cursor_rules(repo_root):
+        surfaces.append("cursor-rules")
+    if "copilot-instructions.md" in normalized or count_copilot_instruction_files(repo_root):
+        surfaces.append("copilot-instructions")
+    if count_host_instruction_files(repo_root):
+        surfaces.append("host-instructions")
     if "curated list" in normalized or "awesome" in normalized:
         surfaces.append("index")
 
@@ -280,6 +324,9 @@ def summarize_repo(repo_root: Path, local_names: set[str]) -> RepoSummary:
         path=repo_root,
         skill_names=skills,
         agent_file_count=count_agent_files(repo_root),
+        cursor_rule_count=count_cursor_rules(repo_root),
+        host_instruction_count=count_host_instruction_files(repo_root),
+        copilot_instruction_count=count_copilot_instruction_files(repo_root),
         plugin_manifest_count=count_plugin_manifests(repo_root),
         plugin_surface_count=count_plugin_surfaces(repo_root),
         openai_metadata_count=count_path_suffix(repo_root, "/agents/openai.yaml"),
@@ -308,13 +355,14 @@ def find_repo_roots(paths: list[str], intake_root: Path) -> list[Path]:
 
 def markdown_table(summaries: list[RepoSummary]) -> list[str]:
     lines = [
-        "| Repo | Skills | Agent files | Plugins | OpenAI metadata | MCP configs | Executables | License files | Blocked flags | Recommendation | Install surface |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |",
+        "| Repo | Skills | Agents | Cursor rules | Host instructions | Plugins | OpenAI metadata | MCP configs | Executables | License files | Blocked flags | Recommendation | Install surface |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |",
     ]
     for summary in summaries:
         blocked = ", ".join(summary.blocked_flags) if summary.blocked_flags else "none"
         lines.append(
             f"| `{summary.name}` | {len(summary.skill_names)} | {summary.agent_file_count} | "
+            f"{summary.cursor_rule_count} | {summary.host_instruction_count} | "
             f"{summary.plugin_manifest_count + summary.plugin_surface_count} | "
             f"{summary.openai_metadata_count} | {summary.mcp_config_count} | "
             f"{summary.executable_file_count} | {summary.license_file_count} | "
@@ -331,6 +379,9 @@ def repo_section(summary: RepoSummary, sample_size: int) -> list[str]:
         f"- Path: `{summary.path}`",
         f"- Skills: {len(summary.skill_names)}",
         f"- Agent files: {summary.agent_file_count}",
+        f"- Cursor rules: {summary.cursor_rule_count}",
+        f"- Host instruction files: {summary.host_instruction_count}",
+        f"- Copilot instruction files: {summary.copilot_instruction_count}",
         f"- Plugin manifests: {summary.plugin_manifest_count}",
         f"- Plugin surfaces: {summary.plugin_surface_count}",
         f"- OpenAI metadata files: {summary.openai_metadata_count}",

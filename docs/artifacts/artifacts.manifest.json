@@ -199,11 +199,11 @@
         "visual-source-first policy changes"
       ],
       "freshness": {
-        "generatedAt": "2026-06-18",
+        "generatedAt": "2026-06-19",
         "sourceFirst": true
       },
       "sourceHash": "4618673cd352facfc973e3f46a4e8c449471ba258d73b7444ca74ee520ba7155",
-      "generatedAt": "2026-06-18"
+      "generatedAt": "2026-06-19"
     },
     {
       "id": "sh-uwe-navigation-atlas",
@@ -268,7 +268,7 @@
       "abstractionLevel": "runtime",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-system-context.html",
-      "sourceHash": "a0688e14f4ed20bd49d068ec435f847689305982843163da097e4304e9812f92",
+      "sourceHash": "b38564535b9a5adcb87509df4fb80b5d16115b21eb95d53226c0f270da9c870b",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -424,7 +424,7 @@
       "abstractionLevel": "design",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-component-scaffold-engine.html",
-      "sourceHash": "56123a56a5ae4511974e786fb1cfb6c10de02702b2a034033fc99bd44e909f1b",
+      "sourceHash": "aaff50364fef77ae681e61aabbb32c22d050d867597785fadc3fc16cffed73dc",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-24",
       "implementationTouchpoints": [
@@ -558,11 +558,11 @@
         "UWE atlas renderer behavior changes"
       ],
       "freshness": {
-        "generatedAt": "2026-06-18",
+        "generatedAt": "2026-06-19",
         "sourceFirst": true
       },
       "sourceHash": "19cfbb6e861841ca42a148342f17347f5beb02179ae1b7e1e39d0cdb1f50ff06",
-      "generatedAt": "2026-06-18"
+      "generatedAt": "2026-06-19"
     },
     {
       "id": "sample-uwe-navigation",

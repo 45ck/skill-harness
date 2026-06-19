@@ -448,6 +448,17 @@ Use it in two ways:
 
 The optional [skill-harness helpers plugin](plugins/skill-harness-helpers/README.md) packages Codex-oriented helper skills for agent selection, handoff planning, Beads task shaping, and third-party skill intake. It is a local helper bundle, not a replacement for the main `.codex/agents/` loadouts installed by the CLI.
 
+## External agentic ecosystem intake
+
+Public skill, agent, rule, plugin, MCP, record/replay, and task-memory repos are intake material, not default dependencies. Use [docs/third-party-skill-intake.md](docs/third-party-skill-intake.md), the `agent-operating-skills` intake/provenance/drift skills, and the scanner fixture check before promoting anything into `packs/`:
+
+```bash
+npm run intake:check
+python scripts/external_skill_intake.py ../skill-intake/some-repo --json-output docs/external-skill-intake-report.json
+```
+
+The intended adoption path is first-party rewrite or synthetic fixture coverage. Do not add public catalogs directly to `scripts/dependencies.json`.
+
 ## Tooling repos used here
 
 - [`45ck/skill-harness`](https://github.com/45ck/skill-harness)
