@@ -446,7 +446,9 @@ Use it in two ways:
 
 ## Codex helper plugin
 
-The optional [skill-harness helpers plugin](plugins/skill-harness-helpers/README.md) packages Codex-oriented helper skills for agent selection, handoff planning, Beads task shaping, and third-party skill intake. It is a local helper bundle, not a replacement for the main `.codex/agents/` loadouts installed by the CLI.
+The optional [skill-harness helpers plugin](plugins/skill-harness-helpers/README.md) packages Codex-oriented helper skills for agent selection, handoff planning, Beads task shaping, loop selection/drafting, and third-party skill intake. It is a local helper bundle, not a replacement for the main `.codex/agents/` loadouts installed by the CLI.
+
+The plugin includes a `loop` helper for `/loop`-style requests. It can read the live Forward Future Loop Library catalog, recommend published loops, adapt them from verified context, or draft first-party bounded loops such as the Product Polish Inventory Loop. Published loop catalog content remains reference-only and does not authorize execution, submission, scheduling, production access, sensitive data use, destructive actions, or external side effects.
 
 ## External agentic ecosystem intake
 

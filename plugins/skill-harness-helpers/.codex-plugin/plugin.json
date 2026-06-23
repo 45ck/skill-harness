@@ -1,6 +1,34 @@
 {
   "name": "skill-harness-helpers",
   "version": "1.0.0",
-  "description": "Cross-cutting workflow helper skills for agent selection, handoffs, Beads task shaping, and third-party skill intake.",
+  "description": "Cross-cutting workflow helper skills for agent selection, handoffs, Beads task shaping, loop selection, and third-party skill intake.",
+  "author": {
+    "name": "45ck"
+  },
+  "homepage": "https://github.com/45ck/skill-harness",
+  "repository": "https://github.com/45ck/skill-harness",
+  "license": "MIT",
+  "keywords": [
+    "skill-harness",
+    "codex",
+    "agent-workflows",
+    "loops"
+  ],
+  "interface": {
+    "displayName": "Skill Harness Helpers",
+    "shortDescription": "Codex helper skills for skill-harness workflows.",
+    "longDescription": "Optional helper skills for agent selection, handoff planning, Beads task shaping, bounded loop selection and drafting, and third-party skill intake.",
+    "developerName": "45ck",
+    "category": "Productivity",
+    "capabilities": [
+      "Skills"
+    ],
+    "defaultPrompt": [
+      "/loop find a bounded UI polish workflow",
+      "Shape this finding into a Beads task",
+      "Pick the narrowest agent for this task"
+    ],
+    "brandColor": "#0F766E"
+  },
   "skills": "./skills/"
 }

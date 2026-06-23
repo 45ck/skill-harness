@@ -199,11 +199,11 @@
         "visual-source-first policy changes"
       ],
       "freshness": {
-        "generatedAt": "2026-06-19",
+        "generatedAt": "2026-06-23",
         "sourceFirst": true
       },
       "sourceHash": "4618673cd352facfc973e3f46a4e8c449471ba258d73b7444ca74ee520ba7155",
-      "generatedAt": "2026-06-19"
+      "generatedAt": "2026-06-23"
     },
     {
       "id": "sh-uwe-navigation-atlas",
@@ -268,7 +268,7 @@
       "abstractionLevel": "runtime",
       "owner": "system-modeler",
       "reviewSurface": "generated/review/models/sh-system-context.html",
-      "sourceHash": "b38564535b9a5adcb87509df4fb80b5d16115b21eb95d53226c0f270da9c870b",
+      "sourceHash": "b469e9cf6b40eecc46e942d9106f9ca75198985710f892c969ee30ac04625154",
       "renderer": "skill-harness model review generator",
       "generatedAt": "2026-05-23",
       "implementationTouchpoints": [
@@ -558,11 +558,11 @@
         "UWE atlas renderer behavior changes"
       ],
       "freshness": {
-        "generatedAt": "2026-06-19",
+        "generatedAt": "2026-06-23",
         "sourceFirst": true
       },
       "sourceHash": "19cfbb6e861841ca42a148342f17347f5beb02179ae1b7e1e39d0cdb1f50ff06",
-      "generatedAt": "2026-06-19"
+      "generatedAt": "2026-06-23"
     },
     {
       "id": "sample-uwe-navigation",
