@@ -12,6 +12,7 @@ implementationTouchpoints:
   - scripts/agent_loadouts.json
   - scripts/external_skill_intake.py
   - scripts/check_external_skill_intake.py
+  - scripts/check-loop-helper.mjs
   - plugins/skill-harness-helpers/
   - packs/
 docTouchpoints:
@@ -23,12 +24,15 @@ evidenceLinks:
   - AGENTS.md
   - scripts/dependencies.json
   - scripts/agent_loadouts.json
+  - scripts/check-loop-helper.mjs
+  - plugins/skill-harness-helpers/
   - tests/fixtures/external-skill-intake/
 reviewRequired: true
 updateTriggers:
   - CLI command surface changes
   - agent loadout or pack boundary changes
   - developer artifact capability changes
+  - helper plugin behavior or loop catalog policy changes
   - external skill intake policy or scanner changes
 driftVerdict: aligned
 ---

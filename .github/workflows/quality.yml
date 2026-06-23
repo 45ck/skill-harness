@@ -40,6 +40,9 @@ jobs:
       - name: External skill intake fixtures
         run: npm run intake:check
 
+      - name: Loop helper fixtures
+        run: npm run loop:check
+
       - name: Model review and artifact policy
         run: npm run artifacts:check
 

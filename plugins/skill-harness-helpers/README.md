@@ -32,6 +32,12 @@ Optional local catalog ranking from this plugin directory:
 node scripts/find-loop.mjs "ui ux polish"
 ```
 
+Repo-level deterministic loop helper check:
+
+```bash
+npm run loop:check
+```
+
 For normal suite installation, use the root CLI:
 
 ```bash

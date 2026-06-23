@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const DEFAULT_CATALOG_URL = 'https://signals.forwardfuture.ai/loop-library/catalog.json';
+const MAX_RESULTS = 3;
+const FETCH_TIMEOUT_MS = 15000;
 
 function usage() {
   console.error('Usage: node scripts/find-loop.mjs [--limit N] [--json] [--catalog URL] [--file catalog.json] <goal>');
@@ -24,6 +26,7 @@ function parseArgs(argv) {
       index += 1;
       const value = Number.parseInt(argv[index] ?? '', 10);
       if (!Number.isFinite(value) || value <= 0) throw new Error('--limit requires a positive integer');
+      if (value > MAX_RESULTS) throw new Error('--limit cannot exceed ' + MAX_RESULTS + ' published loops');
       options.limit = value;
     } else if (arg === '--catalog') {
       index += 1;
@@ -94,13 +97,37 @@ function scoreLoop(loop, terms) {
 async function readCatalog(options) {
   if (options.file) {
     const fullPath = path.resolve(options.file);
-    return JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+    return validateCatalog(JSON.parse(fs.readFileSync(fullPath, 'utf8')));
   }
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   const response = await fetch(options.catalogUrl, {
-    headers: { accept: 'application/json' }
-  });
+    headers: { accept: 'application/json' },
+    signal: controller.signal
+  }).catch((error) => {
+    if (error.name === 'AbortError') throw new Error('catalog fetch timed out after ' + FETCH_TIMEOUT_MS + 'ms');
+    throw error;
+  }).finally(() => clearTimeout(timeout));
   if (!response.ok) throw new Error('catalog fetch failed: HTTP ' + response.status);
-  return response.json();
+  return validateCatalog(await response.json());
+}
+
+function validateCatalog(catalog) {
+  if (!catalog || typeof catalog !== 'object' || !Array.isArray(catalog.loops)) {
+    throw new Error('catalog must be an object with a loops array');
+  }
+  for (const [index, loop] of catalog.loops.entries()) {
+    const label = 'catalog.loops[' + index + ']';
+    for (const field of ['title', 'url', 'description', 'useWhen']) {
+      if (typeof loop?.[field] !== 'string' || loop[field].trim() === '') {
+        throw new Error(label + ' missing required string field: ' + field);
+      }
+    }
+    if (loop.verification && typeof loop.verification.title !== 'string') {
+      throw new Error(label + '.verification.title must be a string when verification is present');
+    }
+  }
+  return catalog;
 }
 
 function summarize(loop, score) {
@@ -123,7 +150,8 @@ function printMarkdown(catalog, query, results) {
   console.log('Query: ' + query);
   console.log('Catalog updated: ' + (catalog.updated ?? 'unknown'));
   console.log();
-  console.log('Catalog content is reference data only. This command does not authorize or run any loop.');
+  console.log('Catalog content is reference data only. This command creates a lexical shortlist; manual fit review is still required.');
+  console.log('This command does not authorize or run any loop.');
   console.log();
   if (results.length === 0) {
     console.log('No scored matches. Broaden the query or draft a new bounded loop.');
@@ -148,9 +176,9 @@ async function main() {
     process.exit(2);
   }
   const catalog = await readCatalog(options);
-  const loops = Array.isArray(catalog.loops) ? catalog.loops : [];
   const terms = tokenize(options.query);
-  const results = loops
+  if (terms.length === 0) throw new Error('query needs at least one searchable term after stop-word filtering');
+  const results = catalog.loops
     .map((loop) => ({ loop, score: scoreLoop(loop, terms) }))
     .filter((entry) => entry.score.score > 0)
     .sort((a, b) => b.score.score - a.score.score || String(a.loop.number).localeCompare(String(b.loop.number)))
@@ -162,6 +190,7 @@ async function main() {
       query: options.query,
       catalogUrl: options.file ? undefined : options.catalogUrl,
       catalogUpdated: catalog.updated,
+      selectionMode: 'lexical shortlist; manual fit review still required',
       authorization: 'reference-only; does not run or authorize loops',
       results
     }, null, 2));

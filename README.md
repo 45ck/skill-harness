@@ -362,11 +362,12 @@ Core checks:
 
 ```bash
 go test ./...
+npm run loop:check
 npm run artifacts:check
 python scripts/check_suite_drift.py --check
 ```
 
-The GitHub Actions workflow in [.github/workflows/quality.yml](.github/workflows/quality.yml) also builds the CLI, validates JSON inputs, compiles Python scripts, checks suite drift, verifies generated model review HTML, and runs a hermetic `setup-project` smoke test.
+The GitHub Actions workflow in [.github/workflows/quality.yml](.github/workflows/quality.yml) also builds the CLI, validates JSON inputs, compiles Python scripts, checks suite drift, verifies generated model review HTML, checks loop helper fixtures, and runs a hermetic `setup-project` smoke test.
 
 ## Included agents
 
@@ -449,6 +450,8 @@ Use it in two ways:
 The optional [skill-harness helpers plugin](plugins/skill-harness-helpers/README.md) packages Codex-oriented helper skills for agent selection, handoff planning, Beads task shaping, loop selection/drafting, and third-party skill intake. It is a local helper bundle, not a replacement for the main `.codex/agents/` loadouts installed by the CLI.
 
 The plugin includes a `loop` helper for `/loop`-style requests. It can read the live Forward Future Loop Library catalog, recommend published loops, adapt them from verified context, or draft first-party bounded loops such as the Product Polish Inventory Loop. Published loop catalog content remains reference-only and does not authorize execution, submission, scheduling, production access, sensitive data use, destructive actions, or external side effects.
+
+Use `npm run loop:check` for a deterministic local regression check of the helper's catalog ranking and authority-boundary output.
 
 ## External agentic ecosystem intake
 

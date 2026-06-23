@@ -5,6 +5,7 @@
 ## Validation
 
 - [ ] `go test ./...`
+- [ ] `npm run loop:check`
 - [ ] `npm run artifacts:check`
 - [ ] `python scripts/check_suite_drift.py --check`
 
